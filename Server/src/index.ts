@@ -3,7 +3,7 @@ dotenv.config();
 import express from 'express';
 import config from 'config';
 import mongoose from "mongoose";
-import userRoutes from './routes/auth.js';
+import userRoutes from './routes/auth';
 import {Request, Response, NextFunction} from "express";
 const app = express();
 app.use(express.json());

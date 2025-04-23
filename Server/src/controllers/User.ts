@@ -1,12 +1,12 @@
 import {Request, Response, NextFunction} from 'express';
 import  jwt from 'jsonwebtoken';
 import  bcrypt from 'bcryptjs';
-import User, {validateUser, validateLogin} from '../models/User.js';
+import User, {validateUser, validateLogin} from '../models/User';
 import config from "config";
 
 // Secret for JWT (should be in .env)
-const JWT_SECRET = (config.get('secret') as string) || 'your_jwt_secret';
-const expiresIn = (config.get('expiresIn') as string) || '1h';
+const JWT_SECRET = config.get("jwt.secret") as string;
+const expiresIn = (config.get("jwt.expiresIn") as string) ;
 // api/login
 export const loginUser = async (req: Request, res: Response) => {
     const result = validateLogin(req.body);
@@ -26,7 +26,7 @@ export const loginUser = async (req: Request, res: Response) => {
         if (!isMatch) return res.status(401).json({errors: result.error, message: 'Invalid credentials'});
 
 
-        const token = jwt.sign({id: user._id}, JWT_SECRET, {expiresIn: "1h" });
+        const token = jwt.sign({id: user._id}, JWT_SECRET, {expiresIn: "3h" });
 
         res.status(200).json({
             token,
