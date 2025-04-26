@@ -1,15 +1,18 @@
 import {Request, Response, NextFunction} from 'express';
-import  jwt from 'jsonwebtoken';
-import  bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import User, {validateUser, validateLogin} from '../models/User';
 import config from "config";
 
 // Secret for JWT (should be in .env)
-const JWT_SECRET = config.get("jwt.secret") as string;
-const expiresIn = (config.get("jwt.expiresIn") as string) ;
+const JWT_SECRET = config.get<string>("jwt.secret");
+const expiresIn = config.get<string>("jwt.expiresIn");
+
 // api/login
 export const loginUser = async (req: Request, res: Response) => {
     const result = validateLogin(req.body);
+    console.log(expiresIn, expiresIn);
+
     if (!result.success) {
         return res.status(400).json({errors: result.error.errors});
     }
@@ -17,18 +20,21 @@ export const loginUser = async (req: Request, res: Response) => {
     try {
         const user = await User.findOne({email});
         if (!user) {
-            return res.status(401).json({
-                errors: result.error,
-                message: 'Invalid Credentials',
-            })
+            return res.status(404).json({
+                success: false,
+                message: 'account  doesn\'t exsist',
+            });
         }
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(401).json({errors: result.error, message: 'Invalid credentials'});
 
 
-        const token = jwt.sign({id: user._id}, JWT_SECRET, {expiresIn: "3h" });
-
-        res.status(200).json({
+        const token = jwt.sign(
+            { id: user._id ,username:user.username,avatar:user.avatar,email:user.email},
+            JWT_SECRET,
+            { expiresIn: "3h" } // Ensure expiresIn is a string
+        );
+        res.status(200).cookie("auth-token",token).json({
             token,
             success: true,
             message: 'Successfully logged in',

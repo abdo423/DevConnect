@@ -4,10 +4,13 @@ import express from 'express';
 import config from 'config';
 import mongoose from "mongoose";
 import userRoutes from './routes/auth';
+import cookieParser from "cookie-parser";
+import cors from "cors";
 import {Request, Response, NextFunction} from "express";
 const app = express();
 app.use(express.json());
-
+app.use(cookieParser());
+app.use(cors())
 const dbURI = config.get('db.connectionString') as string;
 console.log('Connecting to:', dbURI); // for debug
 

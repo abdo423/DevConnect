@@ -9,13 +9,7 @@ router.use((req, res, next) => {
     next();
 });
 
-// Timeout middleware
-router.use((req, res, next) => {
-    res.setTimeout(5000, () => {
-        res.status(503).json({message: 'Request timeout'});
-    });
-    next();
-});
+
 
 // Routes
 router.post("/login", (req: Request, res: Response) => {
@@ -30,15 +24,7 @@ router.get('/healthcheck', (req: Request, res: Response) => {
     res.status(200).json({status: 'OK'});
 });
 
-// 404 handler
-router.use((req, res) => {
-    res.status(404).json({message: 'Not Found'});
-});
 
-// Error handler
-router.use((err: Error, req: Request, res: Response) => {
-    console.error(err.stack);
-    res.status(500).json({message: 'Internal Server Error'});
-});
+
 
 export default router;
