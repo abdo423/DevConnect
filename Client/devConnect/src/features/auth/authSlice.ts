@@ -4,11 +4,12 @@ import {loginUser} from "@/features/auth/authApi.ts";
 //import type { PayloadAction } from '@reduxjs/toolkit'
 
 export const login = createAsyncThunk('auth/login', async (credentials: {
-    username: string,
+    email: string,
     password: string
 }, thunkAPI) => {
     try {
         const response = await loginUser(credentials)
+
         return response
     } catch (error: any) {
         return thunkAPI.rejectWithValue(error.response.data.message || "Something went wrong")

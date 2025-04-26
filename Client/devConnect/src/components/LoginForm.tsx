@@ -25,7 +25,7 @@ import {Link} from "react-router-dom";
 import {User, Lock} from "lucide-react"; // 👈 Add this
 
 const formSchema = z.object({
-    username: z.string().min(2).max(50),
+    email: z.string().min(2).max(50),
     password: z.string().min(8).max(50),
 });
 
@@ -36,14 +36,15 @@ const LoginForm = () => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            username: "",
+            email: "",
             password: "",
         },
     });
 
     const handleLogin = (data: z.infer<typeof formSchema>) => {
-        console.log("Login attempted with:", data);
-        dispatch(login({username: data.username, password: data.password}));
+        dispatch(login({email: data.email, password: data.password}));
+        form.reset();
+
         console.log("User:", user);
     };
 
@@ -65,15 +66,15 @@ const LoginForm = () => {
                         <FormField
                             disabled={loading}
                             control={form.control}
-                            name="username"
+                            name="email"
                             render={({field}) => (
                                 <FormItem>
-                                    <FormLabel className="text-white">Username</FormLabel>
+                                    <FormLabel className="text-white">Email</FormLabel>
                                     <FormControl>
                                         <div className="relative">
                                             <Input
                                                 className="pl-10 text-white placeholder-white/60 bg-white/10 border border-white/30 focus:border-white focus:ring-white"
-                                                placeholder="Enter your username"
+                                                placeholder="Enter your Email"
                                                 {...field}
                                             />
                                             <User className="absolute left-3 top-1/2 -translate-y-1/2 text-white/70"
