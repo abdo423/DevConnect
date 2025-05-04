@@ -46,6 +46,6 @@ export const checkLogin = async () => {
 };
 
 export const logoutUser = async () => {
-    const response = await axios.get(`${BASE_URL}/logout`, {withCredentials: true});
+    const response = await axios.post(`${BASE_URL}/logout`, {withCredentials: true});
     return response.data;
 }
