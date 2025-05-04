@@ -18,22 +18,22 @@ import {
 import {zodResolver} from "@hookform/resolvers/zod";
 import {useForm} from "react-hook-form";
 import * as z from "zod";
-import {login} from "@/features/Auth/authSlice";
+import {register} from "@/features/Auth/authSlice";
 import {useSelector, useDispatch} from "react-redux";
 import type {AppDispatch, RootState} from "../app/store";
-import {Link,useNavigate} from "react-router-dom";
-import {User, Lock} from "lucide-react";
-import {useState} from "react"; // 👈 Add this
+import {User, Lock, AtSign} from "lucide-react";
+import {useState} from "react";
 //import axios from 'axios';
 import FormSuccess from "./form-success.tsx";
 import FormError from "./form-error.tsx";
 
 const formSchema = z.object({
-    email: z.string().min(8).max(50).email(),
+    email: z.string().min(2).max(50),
     password: z.string().min(8).max(50),
+    username: z.string().min(8).max(50),
 });
 
-const LoginForm = () => {
+const RegisterForm = () => {
     const { loading} = useSelector((state: RootState) => state.auth);
     const [status, setStatus] = useState<{ success: string; error: string }>({
         success: '',
@@ -41,27 +41,28 @@ const LoginForm = () => {
     });
 
     const dispatch = useDispatch<AppDispatch>();
-    const navigate = useNavigate();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             email: "",
             password: "",
+            username: ""
         },
     });
 
-    const handleLogin = (data: z.infer<typeof formSchema>) => {
-        dispatch(login({email: data.email, password: data.password}))
+    const handleRegister = (data: z.infer<typeof formSchema>) => {
+        dispatch(register({email: data.email, password: data.password, username: data.username}))
             .unwrap()
             .then((result) => {
+                console.log(result);
                 setStatus({error: "", success: result.message || "Login successful"})
-                navigate("/");
+                window.location.href = "/login";
                 form.reset();
 
             })
             .catch((error) => {
                 console.error("Login error:", error);
-                setStatus({success: "", error: error || "Authentication failed"})
+                setStatus({success: "", error: error || "Registeration failed"})
             });
 
     };
@@ -72,15 +73,42 @@ const LoginForm = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-white/10 pointer-events-none"/>
 
             <CardHeader className="relative text-white">
-                <CardTitle className="text-3xl drop-shadow-sm">Login</CardTitle>
+                <CardTitle className="text-3xl drop-shadow-sm">Register</CardTitle>
                 <CardDescription className="text-white/80 drop-shadow-sm">
-                    Log in to your account.
+                    create a new  account.
                 </CardDescription>
             </CardHeader>
 
             <CardContent>
                 <Form {...form}>
-                    <form className="space-y-6" onSubmit={form.handleSubmit(handleLogin)}>
+                    <form className="space-y-6" onSubmit={form.handleSubmit(handleRegister)}>
+                        <FormField
+                            disabled={loading}
+
+                            control={form.control}
+                            name="username"
+                            render={({field}) => (
+                                <FormItem>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <FormLabel className="text-white">Username</FormLabel>
+
+                                    </div>
+                                    <FormControl>
+                                        <div className="relative">
+                                            <Input
+                                                type="text"
+                                                className="pl-10 text-white placeholder-white/60 bg-white/10 border border-white/30 focus:border-white focus:ring-white"
+                                                placeholder="Enter your username"
+                                                {...field}
+                                            />
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-white/70"
+                                                  size={18}/>
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage/>
+                                </FormItem>
+                            )}
+                        />
                         <FormField
                             disabled={loading}
                             control={form.control}
@@ -95,8 +123,8 @@ const LoginForm = () => {
                                                 placeholder="Enter your Email"
                                                 {...field}
                                             />
-                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-white/70"
-                                                  size={18}/>
+                                            <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-white/70"
+                                                    size={18}/>
                                         </div>
                                     </FormControl>
                                     <FormMessage/>
@@ -113,12 +141,7 @@ const LoginForm = () => {
                                 <FormItem>
                                     <div className="flex items-center justify-between mb-2">
                                         <FormLabel className="text-white">Password</FormLabel>
-                                        <Link
-                                            to="/forgot-password"
-                                            className="text-sm text-white/80 hover:text-white underline underline-offset-4"
-                                        >
-                                            Forgot your password?
-                                        </Link>
+
                                     </div>
                                     <FormControl>
                                         <div className="relative">
@@ -136,8 +159,8 @@ const LoginForm = () => {
                                 </FormItem>
                             )}
                         />
-                        <FormSuccess message={status.success} />
-                        <FormError message={status.error } />
+                        <FormSuccess message={status.success}/>
+                        <FormError message={status.error}/>
                         <Button
                             disabled={loading}
                             type="submit"
@@ -146,15 +169,7 @@ const LoginForm = () => {
                             Login
                         </Button>
 
-                        <div className="text-center text-sm text-white">
-                            Don't have an account?{" "}
-                            <Link
-                                to="/register"
-                                className="text-white underline underline-offset-4 hover:text-white/90"
-                            >
-                                Sign up
-                            </Link>
-                        </div>
+
                     </form>
                 </Form>
             </CardContent>
@@ -162,4 +177,4 @@ const LoginForm = () => {
     );
 };
 
-export default LoginForm;
+export default RegisterForm;

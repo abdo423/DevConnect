@@ -1,3 +1,8 @@
+import {Menu, Search} from "lucide-react"
+import {Link} from "react-router-dom"
+
+import {Button} from "@/components/ui/button"
+import {Input} from "@/components/ui/input"
 import {
     Sheet,
     SheetClose,
@@ -6,58 +11,108 @@ import {
     SheetFooter,
     SheetHeader,
     SheetTrigger,
-} from "../components/ui/sheet"
-import {Menu, Search} from "lucide-react"
-import {Button} from "@/components/ui/button.tsx";
-import logo from '../assets/DevConnect.png';
-import {Input} from "@/components/ui/input.tsx";
+} from "@/components/ui/sheet"
+import logo from "../assets/DevConnect.png"
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar.tsx"
+import {DialogTitle} from "@radix-ui/react-dialog";
 
-const MobileNavbar = () => {
+interface MobileNavbarProps {
+    isLoggedIn: boolean;
+    user?: {
+        username: string;
+        email: string;
+        image?: string;
+    };
+}
+
+const MobileNavbar = ({isLoggedIn, user}: MobileNavbarProps) => {
+    console.log(user)
     return (
-        <Sheet >
-            <SheetTrigger>
-                <Button variant="ghost" size="icon" className="md:hidden">
-                    <Menu className="h-5 w-5"/>
-                    <span className="sr-only">Toggle menu</span>
-                </Button>
-            </SheetTrigger>
+        <Sheet>
+
+            <DialogTitle>
+                <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" className="md:hidden">
+                        <Menu className="h-5 w-5"/>
+                        <span className="sr-only">Toggle menu</span>
+                    </Button>
+                </SheetTrigger>
+            </DialogTitle>
             <SheetContent>
                 <SheetHeader>
-                    <div className="flex items-center justify-between border-b pb-4  ">
+                    <div className="flex items-center justify-between border-b pb-4">
                         <div className="flex items-center gap-2 font-bold text-xl">
-                            <img src={logo} alt="logo" className="w-25 h-25"/>
+                            <img src={logo || "/placeholder.svg"} alt="logo" className="w-25 h-25"/>
                         </div>
                     </div>
                     <SheetClose/>
                 </SheetHeader>
-                <SheetDescription>
-
-                    <div className="mt-6 w-[90%] mx-auto">
-                        <form className="relative">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"/>
-                            <Input
-                                type="search"
-                                placeholder="Search posts..."
-                                className="w-full pl-9"
-                            />
-                            <Button type="submit" className="w-full mt-2">
-                                Search
-                            </Button>
-                        </form>
+                <SheetDescription asChild>
+                    <div>
+                        <div className="mt-6 w-[90%] mx-auto">
+                            <form className="relative">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"/>
+                                <Input type="search" placeholder="Search posts..." className="w-full pl-9"/>
+                                <Button type="submit" className="w-full mt-2">
+                                    Search
+                                </Button>
+                            </form>
+                        </div>
+                        {isLoggedIn && (
+                            <div className="mt-6 w-[90%] mx-auto">
+                                <div className="flex flex-col space-y-2">
+                                    <Button variant="ghost" asChild className="justify-start">
+                                        <Link to="/profile" className="flex items-center">
+                                            Profile
+                                        </Link>
+                                    </Button>
+                                    <Button variant="ghost" asChild className="justify-start">
+                                        <Link to="/settings" className="flex items-center">
+                                            Settings
+                                        </Link>
+                                    </Button>
+                                    <Button variant="ghost" asChild
+                                            className="justify-start text-red-500 hover:text-red-600 hover:bg-red-50">
+                                        <Link to="/logout" className="flex items-center">
+                                            Logout
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </SheetDescription>
-                <SheetFooter className=" w-[90%] mx-auto">
-                    <div className="mt-auto flex flex-col gap-2 pt-4">
-                        <Button variant="outline">
-                            Log in
-                        </Button>
-                        <Button>Sign up</Button>
-                    </div>
-                </SheetFooter>
+                {isLoggedIn && user ? (
+                    <SheetFooter className="w-[90%] mx-auto border-t">
+                        <div className="mt-auto w-full pt-4">
+                            <div className="flex items-center gap-3">
+                                <Avatar className="h-10 w-10">
+                                    <AvatarImage src={user.image || "/placeholder.svg?height=40&width=40"}
+                                                 alt={user.username}/>
+                                    <AvatarFallback>{user.username?.charAt(0) || "U"}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                    <p className="font-medium text-black">{user.username}</p>
+                                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </SheetFooter>
+                ) : (
+                    <SheetFooter className="w-[90%] mx-auto">
+                        <div className="mt-auto flex flex-col gap-2 pt-4">
+                            <Button variant="outline" asChild>
+                                <Link to="/login">Log in</Link>
+                            </Button>
+                            <Button asChild>
+                                <Link to="/register">Sign up</Link>
+                            </Button>
+                        </div>
+                    </SheetFooter>
+                )}
             </SheetContent>
-
         </Sheet>
     )
 }
 
-export default MobileNavbar;
+export default MobileNavbar
