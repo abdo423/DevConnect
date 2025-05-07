@@ -1,4 +1,4 @@
-import {registerUser, loginUser} from '../controllers/User';
+import {registerUser, loginUser, logoutUser, loginUserCheck, getUser} from '../controllers/User';
 import {Request, Response, Router} from 'express';
 
 const router = Router();
@@ -18,12 +18,20 @@ router.post("/login", (req: Request, res: Response) => {
 router.post("/register", (req: Request, res: Response) => {
     registerUser(req, res);
 });
-
+router.post("/logout", (req: Request, res: Response) => {
+    logoutUser(req, res);
+})
+router.get("/check", (req: Request, res: Response) => {
+    loginUserCheck(req, res);
+})
 // Test route
 router.get('/healthcheck', (req: Request, res: Response) => {
     res.status(200).json({status: 'OK'});
 });
 
+router.get("/user/:id", (req: Request, res: Response) => {
+    getUser(req, res);
+});
 
 
 

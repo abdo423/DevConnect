@@ -1,5 +1,6 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document,Types } from 'mongoose';
 import * as z  from 'zod';
+import Post from "./Post";
 
 
 const userValidationSchema = z.object({
@@ -22,6 +23,8 @@ export interface UserDocument extends Document {
     avatar?: string;
     createdAt: Date;
     updatedAt: Date;
+    posts?: Types.ObjectId[];
+
 
 }
 
@@ -54,8 +57,18 @@ const userSchema = new Schema({
         type: String,
         default: '',
 
-    }
+    },posts: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Post',
+    }]
+
 })
+
+userSchema.pre<UserDocument>('deleteOne', async function (next) {
+    const user = this;
+    await Post.deleteMany({author_id: user._id});
+    next();
+});
 
 export  const validateUser = (user: UserDocument) => {
     return userValidationSchema.safeParse(user);
