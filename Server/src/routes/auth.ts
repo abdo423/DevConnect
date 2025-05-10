@@ -1,4 +1,4 @@
-import {registerUser, loginUser, logoutUser, loginUserCheck, getUser} from '../controllers/User';
+import {registerUser, loginUser,deleteUser, logoutUser, loginUserCheck, getUser} from '../controllers/User';
 import {Request, Response, Router} from 'express';
 
 const router = Router();
@@ -33,6 +33,9 @@ router.get("/user/:id", (req: Request, res: Response) => {
     getUser(req, res);
 });
 
+router.delete("/user/:id", (req: Request, res: Response) => {
+    deleteUser(req, res);
+})
 
 
 export default router;

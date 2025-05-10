@@ -1,7 +1,6 @@
-import mongoose, { Schema, Document,Types } from 'mongoose';
-import * as z  from 'zod';
+import mongoose, { Schema, Document, Types, Query } from 'mongoose';
+import * as z from 'zod';
 import Post from "./Post";
-
 
 const userValidationSchema = z.object({
     username: z.string().min(3).max(30),
@@ -10,11 +9,12 @@ const userValidationSchema = z.object({
     bio: z.string().max(500).optional(),
     avatar: z.string().url().optional(),
 });
+
 const loginSchema = z.object({
     email: z.string().min(3).max(30),
     password: z.string().min(6).max(20),
+});
 
-})
 export interface UserDocument extends Document {
     username: string;
     email: string;
@@ -24,8 +24,6 @@ export interface UserDocument extends Document {
     createdAt: Date;
     updatedAt: Date;
     posts?: Types.ObjectId[];
-
-
 }
 
 const userSchema = new Schema({
@@ -40,7 +38,6 @@ const userSchema = new Schema({
         type: String,
         required: true,
         unique: true,
-
     },
     password: {
         type: String,
@@ -51,32 +48,63 @@ const userSchema = new Schema({
     avatar: {
         type: String,
         default: './assets/avatar.png',
-
     },
-    bio:{
+    bio: {
         type: String,
         default: '',
-
-    },posts: [{
+    },
+    posts: [{
         type: Schema.Types.ObjectId,
         ref: 'Post',
     }]
-
-})
-
-userSchema.pre<UserDocument>('deleteOne', async function (next) {
-    const user = this;
-    await Post.deleteMany({author_id: user._id});
-    next();
+}, {
+    timestamps: true,
 });
 
-export  const validateUser = (user: UserDocument) => {
+// Primary middleware for handling findOneAndDelete operations
+// This covers findByIdAndDelete() as well
+userSchema.pre('findOneAndDelete', async function(next) {
+    try {
+        const filter = this.getFilter();
+        const userToDelete = await mongoose.model('User').findOne(filter);
+
+        if (userToDelete) {
+            console.log('User deletion middleware triggered for user:', userToDelete._id);
+            // Delete all posts associated with this user
+            await Post.deleteMany({ author_id: userToDelete._id });
+        }
+        next();
+    } catch (error: any) {
+        console.error('Error in user deletion middleware:', error);
+        next(error);
+    }
+});
+
+// Add this only if you use User.deleteOne() or userDoc.deleteOne() in your code
+userSchema.pre<Query<any, UserDocument>>('deleteOne', async function(next) {
+    try {
+        const filter = this.getFilter();
+        const userToDelete = await mongoose.model('User').findOne(filter);
+
+        if (userToDelete) {
+            console.log('User deleteOne middleware triggered for user:', userToDelete._id);
+            await Post.deleteMany({ author_id: userToDelete._id });
+        }
+        next();
+    } catch (error: any) {
+        console.error('Error in deleteOne middleware:', error);
+        next(error);
+    }
+});
+
+export const validateUser = (user: UserDocument) => {
     return userValidationSchema.safeParse(user);
 };
-export const validateLogin = (user: any) => {
-    return loginSchema.safeParse(user)
-}
-const User = mongoose.model<UserDocument>('User', userSchema);
-// Exported types for both schemas
 
-export default  User;
+export const validateLogin = (user: any) => {
+    return loginSchema.safeParse(user);
+};
+
+const User = mongoose.model<UserDocument>('User', userSchema);
+
+export default User;

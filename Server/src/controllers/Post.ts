@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import Post, {validatePost} from '../models/Post';
 import config from "config";
 import User from "../models/User";
-
+import {Types} from "mongoose";
 // Secret for JWT (should be in .env)
 const JWT_SECRET = config.get<string>("jwt.secret");
 const expiresIn = config.get<string>("jwt.expiresIn");
@@ -17,7 +17,7 @@ export const createPost = async (req: Request, res: Response) => {
     const postData = {
         ...req.body,
         author_id: req.user.id,
-        likes: 0,
+        likes: [],
         comments: [],
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -76,14 +76,13 @@ export const updatePost = async (req: Request, res: Response) => {
             return res.status(404).json({ message: 'Post not found' });
         }
 
-        // Create update object with only the necessary fields
         const updateData = {
-            ...req.body,  // New data from request
-            author_id: post.author_id.toString(),  // Preserve original author
-            likes: post.likes,          // Preserve original likes
-            comments: post.comments,    // Preserve original comments
-            createdAt: post.createdAt,  // Preserve original creation date
-            updatedAt: new Date()       // Set new update date
+            ...req.body,
+            author_id: post.author_id.toString(),
+            likes: post.likes,
+            comments: post.comments,
+            createdAt: post.createdAt,
+            updatedAt: new Date()
         };
 
         // Validate the combined data
@@ -109,3 +108,30 @@ export const updatePost = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+export const likePost = async (req:Request, res: Response) => {
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+        return res.status(404).json({ message: 'Post not found' });
+    }
+    const userId = new Types.ObjectId(req.user?.id);
+     console.log(req.user);
+    // Check if the user already liked the post
+    const alreadyLiked = post.likes.some((like) => like.user.toString() === userId.toString());
+
+    if (alreadyLiked) {
+        // Unlike: remove the user's like
+        post.likes = post.likes.filter((like) => like.user.toString() !== userId.toString());
+    } else {
+        // Like: add the like with current timestamp
+        post.likes.push({
+            user: userId,
+            createdAt: new Date(),
+        });
+    }
+
+    await post.save();
+
+    return res.status(200).json({ message: alreadyLiked ? 'Post unliked' : 'Post liked', likes: post.likes });
+};

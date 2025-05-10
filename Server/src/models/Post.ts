@@ -1,10 +1,13 @@
-import mongoose, { Schema, Document, Types, isValidObjectId } from 'mongoose';
+// Post.ts
+
+import mongoose, {Schema, Document, Types, isValidObjectId, Query} from 'mongoose';
 import * as z from 'zod';
 import User from "./User";
+import Comment from "./Comment";
 
-export interface Comment {
+export interface likes {
+
     user: Types.ObjectId;
-    content: string;
     createdAt: Date;
 }
 
@@ -15,23 +18,22 @@ export interface PostDocument extends Document {
     createdAt: Date;
     updatedAt: Date;
     author_id: Types.ObjectId;
-    likes: number;
+    likes: likes[];
     comments: Comment[];
 }
 
-const commentSchema = new Schema<Comment>({
-    user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    content: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now },
-});
 
+const likesSchema = new Schema<likes>({
+    user: {type: Schema.Types.ObjectId, ref: 'User', required: true},
+    createdAt: {type: Date, default: Date.now},
+}, {_id: false});
 const postSchema = new Schema<PostDocument>(
     {
         title: {
             type: String,
             required: true,
-            minlength: 3,
-            maxlength: 30,
+            minlength: 10,
+            maxlength: 50,
         },
         content: {
             type: String,
@@ -47,25 +49,57 @@ const postSchema = new Schema<PostDocument>(
             required: true,
         },
         likes: {
-            type: Number,
-            default: 0,
+            type: [likesSchema],
         },
-        comments: [commentSchema],
+        comments: [{type: Schema.Types.ObjectId, ref: 'Comment'}],
     },
     {
         timestamps: true,
     }
 );
+
+// Fix: Use only the supported findOneAndDelete hook
 postSchema.pre('findOneAndDelete', async function (next) {
-    const post: any = await this.model.findOne(this.getQuery()); // Get the post document
+    try {
+        const filter = this.getFilter();
+        const postToDelete = await mongoose.model('Post').findOne(filter);
 
-    if (post) {
-        await User.findByIdAndUpdate(post.author_id, {
-            $pull: { posts: post.id }
-        });
+        if (postToDelete) {
+            console.log('Pre findOneAndDelete middleware triggered for post:', postToDelete._id);
+            // Update the User document to remove the post reference
+            await User.findByIdAndUpdate(
+                postToDelete.author_id,
+                {$pull: {posts: postToDelete._id}}
+            );
+        }
+        next();
+    } catch (error: any) {
+        console.error('Error in findOneAndDelete middleware:', error);
+        next(error);
     }
+});
 
-    next();
+// Add a pre-deleteOne hook for direct document deletions
+// TypeScript-compliant hook
+postSchema.pre<Query<any, PostDocument>>('deleteOne', async function (next) {
+    try {
+        // For query middleware, 'this' refers to the query
+        const filter = this.getFilter();
+        const postToDelete = await mongoose.model('Post').findOne(filter);
+
+        if (postToDelete) {
+            console.log('Pre deleteOne middleware triggered for post:', postToDelete._id);
+            // Update the User document to remove the post reference
+            await User.findByIdAndUpdate(
+                postToDelete.author_id,
+                {$pull: {posts: postToDelete._id}}
+            );
+        }
+        next();
+    } catch (error: any) {
+        console.error('Error in deleteOne middleware:', error);
+        next(error);
+    }
 });
 
 const objectId = z.string().refine((val) => isValidObjectId(val), {
@@ -78,12 +112,18 @@ const commentValidation = z.object({
     createdAt: z.date(),
 });
 
+const likesValidation = z.object({
+    user: objectId,
+    createdAt: z.date(),
+
+})
+
 const PostValidationSchema = z.object({
-    title: z.string().min(3).max(30),
+    title: z.string().min(10).max(50),
     content: z.string().min(30),
     image: z.string().url().optional(),
     author_id: objectId,
-    likes: z.number().min(0),
+    likes: z.array(likesValidation).optional(),
     comments: z.array(commentValidation),
     createdAt: z.date(),
     updatedAt: z.date(),
@@ -95,3 +135,4 @@ export const validatePost = (post: PostDocument) => {
 
 const Post = mongoose.model<PostDocument>('Post', postSchema);
 export default Post;
+
