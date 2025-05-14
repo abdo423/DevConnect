@@ -71,6 +71,7 @@ postSchema.pre('findOneAndDelete', async function (next) {
                 postToDelete.author_id,
                 {$pull: {posts: postToDelete._id}}
             );
+            await Comment.deleteMany({post_id: postToDelete._id});
         }
         next();
     } catch (error: any) {

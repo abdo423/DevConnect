@@ -34,10 +34,10 @@ export const loginUser = async (req: Request, res: Response) => {
             {expiresIn: "3h"} // Ensure expiresIn is a string
         );
         res.status(200).cookie("auth-token", token, {
-            httpOnly: true,
+            httpOnly: false,
             secure: false,
-            sameSite: "lax", // protect against CSRF
-            maxAge: 3 * 60 * 60 * 1000, // 1 day in milliseconds
+            sameSite: "lax",
+            maxAge: 3 * 60 * 60 * 1000,
         }).json({
             token,
             success: true,

@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import Post, {validatePost} from '../models/Post';
 import config from "config";
 import User from "../models/User";
+import Comment from "../models/Comment";
 import {Types} from "mongoose";
 // Secret for JWT (should be in .env)
 const JWT_SECRET = config.get<string>("jwt.secret");
@@ -33,6 +34,7 @@ export const createPost = async (req: Request, res: Response) => {
 
         const post = new Post(postData);
         await post.save();
+        const populatedPost = await Post.findById(post._id).populate('author_id', 'name email avatar').populate('comments', 'content createdAt ');
         const user = await User.findById(req.user.id);
         console.log(user);
         if (!user) {
@@ -46,7 +48,7 @@ export const createPost = async (req: Request, res: Response) => {
             {$push: {posts: post.id}}, // Add post id to the posts array
             {new: true} // Return the updated document (optional)
         );
-        res.status(201).json({message: 'Post created successfully', post: postData});
+        res.status(201).json({message: 'Post created successfully', post: populatedPost});
     } catch (err) {
         res.status(500).json({message: 'Server error', error: err});
     }
@@ -54,8 +56,8 @@ export const createPost = async (req: Request, res: Response) => {
 
 export const getPosts = async (req: Request, res: Response) => {
     try {
-        const posts = await Post.find();
-        res.status(200).json({posts});
+        const posts = await Post.find().populate('author_id', 'name email avatar').populate('comments', 'content createdAt ');
+        res.status(200).json(posts);
     } catch (err) {
         res.status(500).json({message: 'Server error', error: err});
     }
@@ -134,4 +136,21 @@ export const likePost = async (req:Request, res: Response) => {
     await post.save();
 
     return res.status(200).json({ message: alreadyLiked ? 'Post unliked' : 'Post liked', likes: post.likes });
+};
+
+export const getCommentsByPostIdArray = async (req: Request, res: Response) => {
+    const postId = req.params.id;
+
+    try {
+        const post = await Post.findById(postId);
+        if (!post) return res.status(404).json({ message: 'Post not found' });
+
+        const comments = await Comment.find({ _id: { $in: post.comments } })
+            .populate('user', 'name email') // optional: populate user
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({ comments });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
 };
