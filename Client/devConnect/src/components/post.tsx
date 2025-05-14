@@ -28,31 +28,45 @@ type PostProps = {
             email: string;
             avatar?: string;
         };
-        likes: Array<{
+        likes?: Array<{
             user: string;
             createdAt: string;
             _id: string;
         }>;
-        comments: string[];
+        comments?: string[];
         createdAt: string | Date;
-        updatedAt: string;
-        __v: number;
+        updatedAt?: string;
+        __v?: number;
     };
-
 };
 
 const Post = ({post}: PostProps) => {
-    const [comments] = useState(post.comments || []);
+    // Early return if post is undefined
+    if (!post) {
+        return <div className="p-4 border rounded-md">Post data is loading...</div>;
+    }
+
+    // Provide safe defaults
+    const safePost = {
+        ...post,
+        author_id: post.author_id || { _id: '', email: 'unknown@example.com' },
+        likes: post.likes || [],
+        comments: post.comments || [],
+        content: post.content || '',
+        title: post.title || '',
+        createdAt: post.createdAt || new Date().toISOString()
+    };
+
+    const [comments] = useState(safePost.comments);
     const dispatch = useDispatch<AppDispatch>();
-    const [likeCount, setLikeCount] = useState((post.likes || []).length);
+    const [likeCount, setLikeCount] = useState(safePost.likes.length);
     const [isLiked, setIsLiked] = useState(() => {
-        if (!post?.author_id?._id || !post?.likes) return false;
-        return post.likes.some(like => like.user === post.author_id._id);
+        return safePost.likes.some(like => like.user === safePost.author_id._id);
     });
-     const{loading, error} = useSelector((state: RootState) => state.post)
+
+    const {loading, error} = useSelector((state: RootState) => state.post);
     const [commentOpen, setCommentOpen] = useState(false);
     const [expandedText, setExpandedText] = useState(false);
-
     const handleLike = () => {
         setIsLiked((prev) => !prev);
         setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));

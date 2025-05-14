@@ -7,7 +7,7 @@ export const createPostThunk = createAsyncThunk(
     async (post: { title: string; content: string; image?: string }, thunkAPI) => {
         try {
             const response = await createPost(post)
-            return response
+            return response.post
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error.response?.data?.message || 'Something went wrong')
         }
