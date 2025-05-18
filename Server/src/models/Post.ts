@@ -119,6 +119,11 @@ const likesValidation = z.object({
 
 })
 
+const postUpdateSchema = z.object({
+    title: z.string().min(10).max(50),
+    content: z.string().min(30),
+    image: z.string().optional(),
+})
 const PostValidationSchema = z.object({
     title: z.string().min(10).max(50),
     content: z.string().min(30),
@@ -130,10 +135,13 @@ const PostValidationSchema = z.object({
     updatedAt: z.date(),
 });
 
+
 export const validatePost = (post: PostDocument) => {
     return PostValidationSchema.safeParse(post);
 };
-
+export const validateUpdatePost = (post: any) => {
+    return postUpdateSchema.safeParse(post);
+}
 const Post = mongoose.model<PostDocument>('Post', postSchema);
 export default Post;
 

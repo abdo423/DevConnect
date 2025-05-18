@@ -1,6 +1,6 @@
 import {Request, Response, NextFunction} from 'express';
 import jwt from 'jsonwebtoken';
-import Post, {validatePost} from '../models/Post';
+import Post, {validatePost, validateUpdatePost} from '../models/Post';
 import config from "config";
 import User from "../models/User";
 import Comment from "../models/Comment";
@@ -56,7 +56,7 @@ export const createPost = async (req: Request, res: Response) => {
 
 export const getPosts = async (req: Request, res: Response) => {
     try {
-        const posts = await Post.find().populate('author_id', 'name email avatar').populate('comments', 'content createdAt ');
+        const posts = await Post.find().populate('author_id', 'name email avatar username').populate('comments', 'content createdAt  ');
         res.status(200).json(posts);
     } catch (err) {
         res.status(500).json({message: 'Server error', error: err});
@@ -69,7 +69,7 @@ export const deletePost = async (req: Request, res: Response) => {
         return res.status(404).json({message: 'Post not found'});
     }
     await Post.deleteOne({_id: req.params.id});
-    res.status(200).json({message: 'Post deleted successfully'});
+    res.status(200).json({message: 'Post deleted successfully',post: post});
 }
 export const updatePost = async (req: Request, res: Response) => {
     try {
@@ -78,8 +78,13 @@ export const updatePost = async (req: Request, res: Response) => {
             return res.status(404).json({ message: 'Post not found' });
         }
 
+        // Extract only the fields we want to allow updating
+
+
         const updateData = {
-            ...req.body,
+            title: req.body.title ?? post.title,
+            content: req.body.content ?? post.content,
+            image: req.body.image ?? post.image,
             author_id: post.author_id.toString(),
             likes: post.likes,
             comments: post.comments,
@@ -88,28 +93,45 @@ export const updatePost = async (req: Request, res: Response) => {
         };
 
         // Validate the combined data
-        const result = validatePost(updateData);
+        const result = validateUpdatePost(updateData);
         if (!result.success) {
-            return res.status(400).json({ errors: result.error.errors });
+            console.error('Validation failed:', result.error.errors);
+            return res.status(400).json({
+                message: 'Validation failed',
+                errors: result.error.errors,
+                receivedData: req.body // Include received data for debugging
+            });
         }
 
-        // Update the post
         const updatedPost = await Post.findByIdAndUpdate(
             req.params.id,
             { $set: updateData },
-            { new: true }
+            {
+                new: true,
+                populate: {
+                    path: 'author_id',
+                    select: 'name email avatar ' // Include any fields you need
+                }
+            }
         );
+
+        if (!updatedPost) {
+            return res.status(404).json({ message: 'Post not found after update' });
+        }
 
         res.status(200).json({
             message: 'Post updated successfully',
             post: updatedPost
         });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error updating post:', error);
-        res.status(500).json({ message: 'Internal server error' });
+        res.status(500).json({
+            message: 'Internal server error',
+            error: error.message
+        });
     }
-}
+};
 
 export const likePost = async (req:Request, res: Response) => {
     const post = await Post.findById(req.params.id);

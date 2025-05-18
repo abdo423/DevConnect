@@ -6,11 +6,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button.tsx";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
-import {ChevronDown, LogOut, Settings, User} from "lucide-react";
-import {Link, useNavigate} from "react-router-dom";
+import {ChevronDown, LogOut} from "lucide-react";
+import {Link, useNavigate, } from "react-router-dom";
 import {AppDispatch} from "@/app/store.ts";
 import {useDispatch} from "react-redux";
 import {logout} from "@/features/Auth/authSlice";
+
+interface Route {
+    path: string;
+    label: string;
+    icon: React.ReactNode;
+}
 
 interface UserMenuProps {
     user: {
@@ -20,15 +26,20 @@ interface UserMenuProps {
         avatar: string;
         bio: string;
     };
+    filteredRoutes: Route[];
 }
 
-const UserMenu = ({user}: UserMenuProps) => {
+
+const UserMenu = ({user,filteredRoutes}: UserMenuProps) => {
+
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
+    if (!user) return null; // 👈 Prevent crash if user is undefined
+
     const handleLogout = async () => {
         try {
             await dispatch(logout()).unwrap();
-            navigate("/"); // Navigate after successful logout
+            navigate("/");
         } catch (error) {
             console.error("Logout failed:", error);
         }
@@ -47,18 +58,17 @@ const UserMenu = ({user}: UserMenuProps) => {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                    <DropdownMenuItem asChild>
-                        <Link to="/profile" className="flex cursor-pointer items-center">
-                            <User className="mr-2 h-4 w-4"/>
-                            <span>Profile</span>
-                        </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                        <Link to="/settings" className="flex cursor-pointer items-center">
-                            <Settings className="mr-2 h-4 w-4"/>
-                            <span>Settings</span>
-                        </Link>
-                    </DropdownMenuItem>
+
+                    {filteredRoutes.map((route) => (
+                        <DropdownMenuItem asChild key={route.path}>
+                            <Link to={route.path} className="flex cursor-pointer items-center">
+                                {route.icon}
+                                <span>{route.label}</span>
+                            </Link>
+                        </DropdownMenuItem>
+                    ))}
+
+
                     <DropdownMenuItem onClick={handleLogout}>
                         <div className="flex cursor-pointer items-center">
                             <LogOut className="mr-2 h-4 w-4"/>

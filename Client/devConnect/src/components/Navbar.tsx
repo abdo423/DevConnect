@@ -6,8 +6,16 @@ import {Link} from "react-router-dom"; // Ensure correct import for React Router
 import {useSelector} from 'react-redux';
 import {RootState} from "../app/store";
 import UserMenu from "@/components/user-menu.tsx";
-
+import {House, MessageCircle, User} from "lucide-react";
+import {useLocation} from "react-router-dom";
 const Navbar = () => {
+    const routes = [
+        {path: "/", label: "Home", icon: <House className="mr-2 h-4 w-4"/> }, // Not in your menu, but you might want to add it
+        {path: "/profile", label: "Profile", icon: <User className="mr-2 h-4 w-4"/>},
+        {path: "/messages", label: "Messages", icon: <MessageCircle className="mr-2 h-4 w-4"/> }, // Add if needed
+    ];
+    const location = useLocation();
+    const filteredRoutes = routes.filter((route) => route.path !== location.pathname);
     const {user, isLoggedIn } = useSelector((state: RootState) => state.auth);
     return (
         <header className="mx-auto sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -20,7 +28,7 @@ const Navbar = () => {
                 </div>
 
                 {isLoggedIn ? (
-                    <UserMenu user={user} />
+                    <UserMenu user={user} filteredRoutes={filteredRoutes} />
                 ) : (
                     <div className="flex items-center gap-2">
                         <Button variant="ghost" size="sm" className="hidden md:flex">
@@ -32,7 +40,7 @@ const Navbar = () => {
                     </div>
                 )}
 
-                <MobileNav isLoggedIn={isLoggedIn} user={user}/>
+                <MobileNav isLoggedIn={isLoggedIn} user={user} filteredRoutes={filteredRoutes} />
             </div>
         </header>
     );

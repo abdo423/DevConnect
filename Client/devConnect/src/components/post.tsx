@@ -1,4 +1,5 @@
 import {useState} from "react";
+import {useNavigate} from "react-router-dom";
 import {formatDistanceToNow} from "date-fns";
 import {Heart, MessageCircle, MoreHorizontal} from "lucide-react";
 import {erasePost, likesPost} from "@/features/Posts/postsSlice";
@@ -6,8 +7,9 @@ import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardFooter, CardHeader} from "@/components/ui/card";
 import {Separator} from "@/components/ui/separator";
-import {useDispatch,useSelector} from "react-redux";
-import {AppDispatch,RootState} from "../app/store";
+import {useDispatch, useSelector} from "react-redux";
+import {AppDispatch, RootState} from "../app/store";
+import UpdatePostModal from "./update-post-form.tsx";
 
 import {
     DropdownMenu,
@@ -27,6 +29,7 @@ type PostProps = {
             _id: string;
             email: string;
             avatar?: string;
+            username: string;
         };
         likes?: Array<{
             user: string;
@@ -38,18 +41,23 @@ type PostProps = {
         updatedAt?: string;
         __v?: number;
     };
+    user?: {
+        username: string;
+        email: string;
+        avatar?: string;
+        bio?: string;
+    };
 };
 
-const Post = ({post}: PostProps) => {
-    // Early return if post is undefined
-    if (!post) {
-        return <div className="p-4 border rounded-md">Post data is loading...</div>;
-    }
 
-    // Provide safe defaults
+const Post = ({post,user}: PostProps) => {
+    const {isLoggedIn} = useSelector((state: RootState) => state.auth);
+    const navigate = useNavigate();
+
+
     const safePost = {
         ...post,
-        author_id: post.author_id || { _id: '', email: 'unknown@example.com' },
+        author_id: post.author_id || {_id: '', email: 'unknown@example.com'},
         likes: post.likes || [],
         comments: post.comments || [],
         content: post.content || '',
@@ -64,46 +72,67 @@ const Post = ({post}: PostProps) => {
         return safePost.likes.some(like => like.user === safePost.author_id._id);
     });
 
-    const {loading, error} = useSelector((state: RootState) => state.post);
+    const {loading} = useSelector((state: RootState) => state.post);
     const [commentOpen, setCommentOpen] = useState(false);
     const [expandedText, setExpandedText] = useState(false);
+
     const handleLike = () => {
-        setIsLiked((prev) => !prev);
-        setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
+        if (!isLoggedIn) return navigate("/login");
+
+        setIsLiked(prev => !prev);
+        setLikeCount(prev => (isLiked ? prev - 1 : prev + 1));
         dispatch(likesPost(post._id));
     };
-    console.log(post.author_id);
-    // Extract username from email (everything before @)
+
+    const baseUsername = post.author_id?.email?.split('@')[0] || user?.email.split('@')[0] || 'Unknown';
+
     const generate3DigitCode = (input: string): number => {
         let hash = 0;
         for (let i = 0; i < input.length; i++) {
             hash = input.charCodeAt(i) + ((hash << 5) - hash);
         }
-        const code = Math.abs(hash % 900) + 100; // Ensures value between 100–999
-        return code;
+        return Math.abs(hash % 900) + 100;
     };
-
-    const baseUsername = post.author_id?.email?.split('@')[0] || 'Unknown';
-    const uniqueCode = generate3DigitCode(post.author_id?.email || post.author_id?._id || 'user');
-    const username = `${baseUsername}${uniqueCode}`;
-    console.log(post);
-    if (loading) {
-        return <PostSkeleton />;
+    const profileNavigate = () => {
+        if (!isLoggedIn) return navigate("/login");
+        navigate(`/profile/${post.author_id._id}`);
+        //dispatch(getProfileByIdThunk(post.author_id._id));
     }
+
+    const uniqueCode = generate3DigitCode(post.author_id?.email || post.author_id?._id || user?.email || 'user');
+    const username = `${baseUsername}${uniqueCode}`;
+
+    if (loading) return <PostSkeleton/>;
+
     return (
         <Card className="max-w-xl mx-auto overflow-hidden">
-            <CardHeader className="flex flex-row items-center space-y-0 gap-3">
+            <CardHeader onClick={profileNavigate}
+                        className="  flex flex-row items-center justify-around space-y-0 gap-3">
                 <Avatar>
-                    <AvatarImage src={post.author_id.avatar || "/placeholder.svg"} alt={username} />
-                    <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
+                    <AvatarImage src={post.author_id.avatar || user?.avatar || "/placeholder.svg"} alt={username}/>
+                    <AvatarFallback>{user?.username ? user.username.charAt(0).toUpperCase() : post.author_id.username.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
+
                 <div className="flex-1">
-                    <div className="font-semibold">{username}</div>
+                    <div className="font-semibold">{user?.username ? user?.username : post.author_id.username}</div>
                     <div className="text-xs text-muted-foreground">@{username}</div>
                 </div>
+
+                {/* Show edit modal only if logged in */}
+                {isLoggedIn && (
+                    <UpdatePostModal
+                        post={{
+                            id: post._id,
+                            title: post.title,
+                            content: post.content,
+                            image: post.image || ""
+                        }}
+                    />
+                )}
+
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 ml-4">
                             <MoreHorizontal className="w-4 h-4"/>
                             <span className="sr-only">More options</span>
                         </Button>
@@ -111,13 +140,15 @@ const Post = ({post}: PostProps) => {
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem>Save post</DropdownMenuItem>
 
-
-                        <DropdownMenuItem>Edit post</DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-400 focus:text-red-500 " onClick={()=>{
-                            dispatch(erasePost(post._id));
-                        }}>Delete post</DropdownMenuItem>
-
-
+                        {/* Only show delete option if logged in */}
+                        {isLoggedIn && (
+                            <DropdownMenuItem
+                                onClick={() => dispatch(erasePost(post._id))}
+                                className="text-red-400 focus:text-red-500"
+                            >
+                                Delete post
+                            </DropdownMenuItem>
+                        )}
                     </DropdownMenuContent>
                 </DropdownMenu>
             </CardHeader>
@@ -128,6 +159,7 @@ const Post = ({post}: PostProps) => {
                         <h2 className="text-xl font-bold">{post.title}</h2>
                     </div>
                 )}
+
                 {post.content && post.content.length > 150 && !expandedText ? (
                     <div className="px-4 py-2 text-sm">
                         <p>{post.content.substring(0, 150)}...</p>
@@ -165,13 +197,12 @@ const Post = ({post}: PostProps) => {
                 {post.image && (
                     <div
                         className="relative aspect-[3/2] w-full cursor-pointer"
-                        onClick={() => setCommentOpen(true)}
+                        onClick={() => {
+                            if (!isLoggedIn) return navigate("/login");
+                            setCommentOpen(true);
+                        }}
                     >
-                        <img
-                            src={post.image}
-                            alt="Post"
-                            className="w-full h-full object-cover"
-                        />
+                        <img src={post.image} alt="Post" className="w-full h-full object-cover"/>
                     </div>
                 )}
             </CardContent>
@@ -192,7 +223,10 @@ const Post = ({post}: PostProps) => {
                             variant="ghost"
                             size="sm"
                             className="flex items-center gap-1 px-2"
-                            onClick={() => setCommentOpen(true)}
+                            onClick={() => {
+                                if (!isLoggedIn) return navigate("/login");
+                                setCommentOpen(true);
+                            }}
                         >
                             <MessageCircle className="h-5 w-5"/>
                             <span>{comments.length}</span>
@@ -213,7 +247,10 @@ const Post = ({post}: PostProps) => {
                             variant="link"
                             size="sm"
                             className="px-0 h-auto mt-1 text-xs text-muted-foreground"
-                            onClick={() => setCommentOpen(true)}
+                            onClick={() => {
+                                if (!isLoggedIn) return navigate("/login");
+                                setCommentOpen(true);
+                            }}
                         >
                             View all comments
                         </Button>

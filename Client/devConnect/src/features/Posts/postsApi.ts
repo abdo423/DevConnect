@@ -26,34 +26,38 @@ export const createPost = async (post: { title: string; content: string; image?:
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            throw error;
-        } else {
-            throw error;
+            console.error('Axios error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                headers: error.response?.headers
+            });
+            throw error.response?.data || error;
         }
+        console.error('Non-Axios error:', error);
+        throw error;
     }
 }
 
 export const getPosts = async () => {
     try {
-        const token = Cookies.get("auth-token");
-        if (!token) {
-            throw new Error("Not authenticated");
-        }
+
         const response = await axios.get(
             `${BASE_URL}/all`, {
                 withCredentials: true,
-                headers: {
-                    Authorization: `Bearer ${token}`,
 
-                },
             });
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            throw error;
-        } else {
-            throw error;
+            console.error('Axios error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                headers: error.response?.headers
+            });
+            throw error.response?.data || error;
         }
+        console.error('Non-Axios error:', error);
+        throw error;
     }
 }
 
@@ -69,10 +73,15 @@ export const deletePost = async (id: string) => {
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            throw error;
-        } else {
-            throw error;
+            console.error('Axios error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                headers: error.response?.headers
+            });
+            throw error.response?.data || error;
         }
+        console.error('Non-Axios error:', error);
+        throw error;
     }
 }
 export const likePost = async (id: string) => {
@@ -82,16 +91,51 @@ export const likePost = async (id: string) => {
             throw new Error("Not authenticated");
         }
         const response = await axios.post(
-            `${BASE_URL}/like/${id}`,{}, {withCredentials: true, headers: {Authorization: `Bearer ${token}`}}
+            `${BASE_URL}/like/${id}`, {}, {withCredentials: true, headers: {Authorization: `Bearer ${token}`}}
         )
         return response.data;
-    } catch (
-        error
-        ) {
+    } catch (error) {
         if (axios.isAxiosError(error)) {
-            throw error;
-        } else {
-            throw error;
+            console.error('Axios error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                headers: error.response?.headers
+            });
+            throw error.response?.data || error;
         }
+        console.error('Non-Axios error:', error);
+        throw error;
     }
 }
+
+export const updatePost = async (id: string, post: { title: string; content: string; image?: string }) => {
+    try {
+        const token = Cookies.get("auth-token");
+        if (!token) {
+            throw new Error("Not authenticated");
+        }
+        const response = await axios.patch(
+            `${BASE_URL}/update/${id}`,
+            post,
+            {
+                withCredentials: true,
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json '
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error('Axios error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                headers: error.response?.headers
+            });
+            throw error.response?.data || error;
+        }
+        console.error('Non-Axios error:', error);
+        throw error;
+    }
+};

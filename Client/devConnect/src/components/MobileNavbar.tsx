@@ -1,6 +1,8 @@
 import {Menu, Search} from "lucide-react"
 import {Link} from "react-router-dom"
-
+import {useDispatch} from "react-redux"
+import {useNavigate} from "react-router-dom"
+import {AppDispatch} from "@/app/store.ts"
 import {Button} from "@/components/ui/button"
 import {Input} from "@/components/ui/input"
 import {
@@ -15,6 +17,13 @@ import {
 import logo from "../assets/DevConnect.png"
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar.tsx"
 import {DialogTitle} from "@radix-ui/react-dialog";
+import {logout} from "@/features/Auth/authSlice.ts";
+
+interface Route {
+    path: string;
+    label: string;
+    icon: React.ReactNode;
+}
 
 interface MobileNavbarProps {
     isLoggedIn: boolean;
@@ -22,11 +31,18 @@ interface MobileNavbarProps {
         username: string;
         email: string;
         image?: string;
-    };
+    },
+    filteredRoutes: Route[];
 }
 
-const MobileNavbar = ({isLoggedIn, user}: MobileNavbarProps) => {
+const MobileNavbar = ({isLoggedIn, user, filteredRoutes}: MobileNavbarProps) => {
     console.log(user)
+    const dispatch = useDispatch<AppDispatch>();
+    const navigate = useNavigate();
+    const handleLogout = async () => {
+        dispatch(logout());
+        navigate("/");
+    }
     return (
         <Sheet>
 
@@ -61,21 +77,17 @@ const MobileNavbar = ({isLoggedIn, user}: MobileNavbarProps) => {
                         {isLoggedIn && (
                             <div className="mt-6 w-[90%] mx-auto">
                                 <div className="flex flex-col space-y-2">
-                                    <Button variant="ghost" asChild className="justify-start">
-                                        <Link to="/profile" className="flex items-center">
-                                            Profile
-                                        </Link>
-                                    </Button>
-                                    <Button variant="ghost" asChild className="justify-start">
-                                        <Link to="/settings" className="flex items-center">
-                                            Settings
-                                        </Link>
-                                    </Button>
-                                    <Button variant="ghost" asChild
+                                    {filteredRoutes.map((route) => (
+                                        <Button key={route.path} variant="ghost" asChild className="justify-start">
+                                            <Link to={route.path} className="flex items-center">
+                                                <span>{route.icon}</span><span className="text-muted-foreground">{route.label}</span>
+                                            </Link>
+                                        </Button>
+                                    ))}
+
+                                    <Button onClick={handleLogout} variant="ghost" asChild
                                             className="justify-start text-red-500 hover:text-red-600 hover:bg-red-50">
-                                        <Link to="/logout" className="flex items-center">
                                             Logout
-                                        </Link>
                                     </Button>
                                 </div>
                             </div>

@@ -24,6 +24,8 @@ export interface UserDocument extends Document {
     createdAt: Date;
     updatedAt: Date;
     posts?: Types.ObjectId[];
+    followers?: Types.ObjectId[];
+    following?: Types.ObjectId[];
 }
 
 const userSchema = new Schema({
@@ -53,11 +55,19 @@ const userSchema = new Schema({
         type: String,
         default: '',
     },
+    followers: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+    }],
+    following: [{
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+    }],
     posts: [{
         type: Schema.Types.ObjectId,
         ref: 'Post',
     }]
-}, {
+},  {
     timestamps: true,
 });
 

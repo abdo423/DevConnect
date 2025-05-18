@@ -32,6 +32,7 @@ export const register = createAsyncThunk('Auth/register', async (credentials: {
 export const logout = createAsyncThunk('Auth/logout', async (_, thunkAPI) => {
     try {
         const response = await logoutUser();
+
         return response;
     } catch (error: any) {
         return thunkAPI.rejectWithValue(error.response.data);

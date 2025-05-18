@@ -1,16 +1,19 @@
-import { useState, useRef } from "react"
-import { ImagePlus, X, Smile, Send } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
-import * as z from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { AppDispatch } from "../app/store"
-import { createPostThunk } from "@/features/Posts/postsSlice"
-import {  useDispatch } from "react-redux"
+import { useState, useRef } from "react";
+import { ImagePlus, X, Smile, Send } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import * as z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../app/store";
+import { createPostThunk } from "@/features/Posts/postsSlice";
+import { useNavigate } from "react-router-dom";
+
+// Schema
 const createPostSchema = z.object({
     title: z.string()
         .min(2, { message: "Title must be at least 2 characters long." })
@@ -18,12 +21,16 @@ const createPostSchema = z.object({
     content: z.string()
         .min(2, { message: "Content must be at least 2 characters long." })
         .max(280, { message: "Content must be at most 280 characters long." }),
-    image: z.string()
-        .startsWith("data:image/", { message: "Invalid image format." })
+    image: z
+        .string()
+        .refine((val) => val === "" || val.startsWith("data:image/"), {
+            message: "Invalid image format.",
+        })
         .optional(),
-})
+});
 
-type CreatePostSchema = z.infer<typeof createPostSchema>
+
+type CreatePostSchema = z.infer<typeof createPostSchema>;
 
 const CreatePost = () => {
     const {
@@ -40,49 +47,62 @@ const CreatePost = () => {
             content: "",
             image: "",
         },
-    })
+    });
 
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const fileInputRef = useRef<HTMLInputElement>(null)
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const dispatch = useDispatch<AppDispatch>();
-    const selectedImage = watch("image")
-    const postText = watch("content")
+    const navigate = useNavigate();
 
+    const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+
+    const selectedImage = watch("image");
+    const postText = watch("content");
+
+    // Handle image upload
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-        if (file) {
-            if (file.size > 5 * 1024 * 1024) { // 2MB limit
-                alert("Image too large! Please choose an image under 5MB.");
-                return;
-            }
-            const reader = new FileReader()
-            reader.onload = (e) => {
-                const base64 = e.target?.result as string
-                setValue("image", base64)
-            }
-            reader.readAsDataURL(file)
+        if (file.size > 5 * 1024 * 1024) {
+            alert("Image too large! Please choose an image under 5MB.");
+            return;
         }
-    }
 
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const base64 = event.target?.result as string;
+            setValue("image", base64);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    // Remove selected image
     const removeImage = () => {
-        setValue("image", "")
+        setValue("image", "");
         if (fileInputRef.current) {
-            fileInputRef.current.value = ""
+            fileInputRef.current.value = "";
         }
-    }
+    };
 
-
+    // Submit form
     const onSubmit = (data: CreatePostSchema) => {
-        setIsSubmitting(true)
-        // simulate posting
-        console.log("Submitted post:", data);
-        dispatch(createPostThunk(data));
-        // reset form
+        if (!isLoggedIn) {
+            navigate("/login");
+            return;
+        }
 
-        reset()
-        setTimeout(() => setIsSubmitting(false), 1000)
-    }
+        // Remove image field if it's an empty string
+        const payload = {
+            ...data,
+            image: data.image?.trim() === "" ? undefined : data.image,
+        };
+
+        setIsSubmitting(true);
+        dispatch(createPostThunk(payload));
+        reset();
+        setTimeout(() => setIsSubmitting(false), 1000);
+    };
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -90,9 +110,10 @@ const CreatePost = () => {
                 <CardContent className="p-4">
                     <div className="flex gap-3">
                         <Avatar className="h-10 w-10">
-                            <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Your profile" />
+                            <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Profile" />
                             <AvatarFallback>ME</AvatarFallback>
                         </Avatar>
+
                         <div className="flex-1">
                             <Input
                                 placeholder="Post title"
@@ -108,7 +129,7 @@ const CreatePost = () => {
                                 placeholder="What's on your mind?"
                                 {...register("content")}
                             />
-                            {errors.content && !fileInputRef.current &&(
+                            {errors.content && (
                                 <p className="text-red-500 text-xs mt-1">{errors.content.message}</p>
                             )}
 
@@ -128,16 +149,19 @@ const CreatePost = () => {
                                     </button>
                                 </div>
                             )}
-                            {/*{errors.image && (*/}
-                            {/*    <p className="text-red-500 text-xs mt-1">{errors.image.message}</p>*/}
-                            {/*)}*/}
                         </div>
                     </div>
                 </CardContent>
 
                 <CardFooter className="px-4 py-3 border-t flex justify-between">
                     <div className="flex gap-2">
-                        <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageSelect} />
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            ref={fileInputRef}
+                            onChange={handleImageSelect}
+                        />
                         <Button
                             variant="ghost"
                             size="sm"
@@ -148,7 +172,12 @@ const CreatePost = () => {
                             <ImagePlus className="h-5 w-5 mr-1" />
                             <span className="hidden sm:inline">Photo</span>
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-muted-foreground" type="button">
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-muted-foreground"
+                            type="button"
+                        >
                             <Smile className="h-5 w-5 mr-1" />
                             <span className="hidden sm:inline">Emoji</span>
                         </Button>
@@ -156,14 +185,22 @@ const CreatePost = () => {
 
                     <div className="flex items-center gap-2">
                         {postText.length > 0 && (
-                            <span className={`text-xs ${postText.length > 280 ? "text-red-500" : "text-muted-foreground"}`}>
-                {postText.length}/280
-              </span>
+                            <span
+                                className={`text-xs ${
+                                    postText.length > 280 ? "text-red-500" : "text-muted-foreground"
+                                }`}
+                            >
+                                {postText.length}/280
+                            </span>
                         )}
                         <Button
                             size="sm"
                             type="submit"
-                            disabled={isSubmitting || (!postText.trim() && !selectedImage) || postText.length > 280}
+                            disabled={
+                                isSubmitting ||
+                                (!postText.trim() && !selectedImage) ||
+                                postText.length > 280
+                            }
                         >
                             <Send className="h-4 w-4 mr-1" />
                             Post
@@ -172,7 +209,7 @@ const CreatePost = () => {
                 </CardFooter>
             </Card>
         </form>
-    )
-}
+    );
+};
 
-export default CreatePost
+export default CreatePost;
