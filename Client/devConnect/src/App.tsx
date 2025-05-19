@@ -8,6 +8,7 @@ import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/app/store.ts";
 import {fetchCurrentUser} from "@/features/Auth/authSlice.ts";
 import Profile from "@/Pages/Profile.tsx";
+import EditProfile from "@/Pages/EditProfile.tsx";
 function App() {
     const dispatch = useDispatch<AppDispatch>();
     useEffect(() => {
@@ -22,6 +23,7 @@ function App() {
                 <Route path="/login" element={<LoginPage/>}/>
                 <Route path="/profile" element={<Profile/>}/>
                 <Route path="/profile/:id" element={<Profile/>}/>
+                <Route path="/profile/edit" element={<EditProfile/>}/>
                 <Route path="*" element={<h1>404</h1>}/>
             </Routes>
         </>

@@ -1,6 +1,6 @@
-import {useEffect, useState} from "react";
+import {useEffect} from "react";
 import {useSelector,useDispatch} from "react-redux";
-import { fetchProfile } from "@/features/Profile/profileSlice.ts";
+import {fetchProfile, followUserThunk} from "@/features/Profile/profileSlice.ts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -10,12 +10,13 @@ import { Separator } from "@/components/ui/separator";
 import Post from "@/components/post";
 import {AppDispatch, RootState} from "@/app/store.ts";
 import {getProfileByIdThunk} from "@/features/Profile/profileSlice.ts";
-import {useParams} from "react-router-dom";
+import {useParams,Link} from "react-router-dom";
 const ProfileComponent = () => {
     const dispatch = useDispatch<AppDispatch>();
     const {profile,loading,error} = useSelector((state:RootState) => (state.profile));
-    const [isFollowing, setIsFollowing] = useState(false);
+
     const {user} = useSelector((state:RootState) => (state.auth));
+    const isFollowing = profile?.followers?.some(followerId => followerId === user.id);
     const userData = {
         id: profile?._id,
         username: profile?.username,
@@ -63,12 +64,19 @@ const ProfileComponent = () => {
     }
 
     const handleFollow = () => {
-        setIsFollowing(!isFollowing);
+
         // TODO: Add follow/unfollow API call
+        dispatch(followUserThunk(profile._id)).unwrap().then(
+            () => {
+                console.log("followed");
+            },
+            (error) => {
+                console.log("error",error);
+            }
+        )
     };
 
-    const isCurrentUser = profile._id === user.id ? true :false; // You should determine this based on auth state
-
+    const isCurrentUser = profile._id === user.id ? true :false;
     return (
         <div className="container max-w-4xl mx-auto px-4 py-6">
             <div className="flex flex-col md:flex-row gap-6 mb-6">
@@ -94,7 +102,8 @@ const ProfileComponent = () => {
                             {isCurrentUser ? (
                                 <Button variant="outline">
                                     <Settings className="h-4 w-4 mr-2" />
-                                    Edit Profile
+                                    <Link to="/profile/edit">   Edit Profile</Link>
+
                                 </Button>
                             ) : (
                                 <Button

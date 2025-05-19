@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express';
-import {getProfile, getProfileById} from "../controllers/Profile";
+import {FollowUser, getProfile, getProfileById} from "../controllers/Profile";
 
 const router = Router();
 
@@ -9,4 +9,7 @@ router.get("/", (req: Request, res: Response) => {
 router.get("/:id", (req: Request, res: Response) => {
     getProfileById(req,res);
 });
+router.post("/follow/:id", (req: Request, res: Response) => {
+    FollowUser(req,res);
+})
 export default router;
