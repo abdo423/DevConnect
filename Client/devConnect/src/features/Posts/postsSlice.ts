@@ -83,7 +83,6 @@ interface PostsState {
     posts: Post[];
     loading: boolean;
     error: string | null;
-    isLoggedIn: boolean;
     postCreated: boolean;
     postDeleted: boolean;
     postUpdated: boolean;
@@ -95,7 +94,6 @@ const initialState: PostsState = {
     posts: [],
     loading: false,
     error: null,
-    isLoggedIn: false,
     postCreated: false,
     postDeleted: false,
     postUpdated: false,

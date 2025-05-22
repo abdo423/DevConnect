@@ -54,7 +54,7 @@ const CreatePost = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
 
-    const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+    const {user,isLoggedIn} = useSelector((state: RootState) => state.auth);
 
     const selectedImage = watch("image");
     const postText = watch("content");
@@ -110,7 +110,7 @@ const CreatePost = () => {
                 <CardContent className="p-4">
                     <div className="flex gap-3">
                         <Avatar className="h-10 w-10">
-                            <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Profile" />
+                            <AvatarImage src={user.avatar} alt="Profile" />
                             <AvatarFallback>ME</AvatarFallback>
                         </Avatar>
 

@@ -17,6 +17,7 @@ const Navbar = () => {
     const location = useLocation();
     const filteredRoutes = routes.filter((route) => route.path !== location.pathname);
     const {user, isLoggedIn } = useSelector((state: RootState) => state.auth);
+    console.log(user);
     return (
         <header className="mx-auto sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="mx-auto max-w-[1400px] flex flex-row justify-between items-center h-20 px-5">
@@ -35,7 +36,7 @@ const Navbar = () => {
                             <Link to="/login">Log in</Link>
                         </Button>
                         <Button size="sm" className="hidden md:flex">
-                            Sign up
+                          <Link to="/register">Sign up</Link>
                         </Button>
                     </div>
                 )}

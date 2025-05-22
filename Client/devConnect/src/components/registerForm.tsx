@@ -166,7 +166,7 @@ const RegisterForm = () => {
                             type="submit"
                             className="w-full  text-white font-semibold cursor-pointer"
                         >
-                            Login
+                            Register
                         </Button>
 
 

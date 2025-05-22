@@ -30,7 +30,7 @@ interface MobileNavbarProps {
     user?: {
         username: string;
         email: string;
-        image?: string;
+        avatar?: string;
     },
     filteredRoutes: Route[];
 }
@@ -99,7 +99,7 @@ const MobileNavbar = ({isLoggedIn, user, filteredRoutes}: MobileNavbarProps) => 
                         <div className="mt-auto w-full pt-4">
                             <div className="flex items-center gap-3">
                                 <Avatar className="h-10 w-10">
-                                    <AvatarImage src={user.image || "/placeholder.svg?height=40&width=40"}
+                                    <AvatarImage src={user.avatar || "/placeholder.svg?height=40&width=40"}
                                                  alt={user.username}/>
                                     <AvatarFallback>{user.username?.charAt(0) || "U"}</AvatarFallback>
                                 </Avatar>

@@ -16,7 +16,7 @@ const ProfileComponent = () => {
     const {profile,loading,error} = useSelector((state:RootState) => (state.profile));
 
     const {user} = useSelector((state:RootState) => (state.auth));
-    const isFollowing = profile?.followers?.some(followerId => followerId === user.id);
+    const isFollowing = profile?.followers?.some(followerId => followerId === user._id);
     const userData = {
         id: profile?._id,
         username: profile?.username,
@@ -76,7 +76,9 @@ const ProfileComponent = () => {
         )
     };
 
-    const isCurrentUser = profile._id === user.id ? true :false;
+    const isCurrentUser = user && profile && profile._id === user._id;
+    console.log("isCurrentUser",isCurrentUser);
+
     return (
         <div className="container max-w-4xl mx-auto px-4 py-6">
             <div className="flex flex-col md:flex-row gap-6 mb-6">

@@ -27,6 +27,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../app/store";
 import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
+import {updateProfileThunk} from "@/features/Profile/profileSlice.ts";
+import {updateUser} from "@/features/Auth/authSlice.ts";
 
 // Step 1: Define schema
 const formSchema = z.object({
@@ -41,10 +43,8 @@ type ProfileFormValues = z.infer<typeof formSchema>;
 const EditProfile = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const user = useSelector((state: RootState) => state.auth.user);
-
+    const {user,loading} = useSelector((state: RootState) => state.auth);
     const [isLoading, setIsLoading] = useState(false);
-
     // Step 3: Initialize form
     const form = useForm<ProfileFormValues>({
         resolver: zodResolver(formSchema),
@@ -72,8 +72,10 @@ const EditProfile = () => {
         setIsLoading(true);
         try {
             console.log("Submitted:", data);
-            // dispatch update action here
-            // await dispatch(updateUserProfile(data));
+            console.log("user",user.id);
+            await dispatch(updateProfileThunk({ id: user.id, profile: data })).unwrap().then((result)=>{
+                dispatch(updateUser(result.user));
+            })
         } catch (error) {
             console.error("Failed to update profile:", error);
         } finally {
@@ -162,6 +164,7 @@ const EditProfile = () => {
                                             <FormControl>
                                                 <Textarea
                                                     {...field}
+
                                                     id="bio"
                                                     placeholder="Write a short bio about yourself"
                                                     rows={4}

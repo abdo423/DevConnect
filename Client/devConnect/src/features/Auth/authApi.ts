@@ -46,6 +46,22 @@ export const checkLogin = async () => {
 };
 
 export const logoutUser = async () => {
-    const response = await axios.post(`${BASE_URL}/logout`, {withCredentials: true});
-    return response.data;
+  try {
+      const response = await axios.post("http://localhost:3000/auth/logout", {}, {
+          withCredentials: true
+      });
+      return response;
+  } catch (error) {
+      if (axios.isAxiosError(error)) {
+          console.error('Axios error details:', {
+              status: error.response?.status,
+              data: error.response?.data,
+              headers: error.response?.headers
+          });
+          throw error.response?.data || error;
+      }
+      console.error('Non-Axios error:', error);
+      throw error;
+  }
+
 }

@@ -1,5 +1,6 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
 import {loginUser, registerUser, logoutUser, checkLogin} from "@/features/Auth/authApi.ts";
+import {updateProfileThunk} from "@/features/Profile/profileSlice.ts";
 
 
 export const login = createAsyncThunk('Auth/login', async (credentials: {
@@ -73,6 +74,8 @@ const authSlice = createSlice({
             logout(state) {
                 state.user = null;
                 state.isLoggedIn = false;  // Ensuring the loggedIn state is updated
+            }, updateUser: (state, action) => {
+                state.user = action.payload;
             },
         },
         extraReducers: (builder) => {
@@ -124,6 +127,18 @@ const authSlice = createSlice({
                     state.user = null;
                     state.isLoggedIn = false;
                     state.loading = false;
+
+                }).addCase(updateProfileThunk.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+                .addCase(updateProfileThunk.fulfilled, (state, action) => {
+                    // Update user data when profile is updated
+                    if (action.payload.user) {
+                        state.user = action.payload.user;
+                        state.loading = false;
+                        state.error = null;
+                    }
                 });
 
 
@@ -132,6 +147,6 @@ const authSlice = createSlice({
 ;
 
 
-export const {} = authSlice.actions
+export const {updateUser} = authSlice.actions
 // Mark as logged in
 export default authSlice.reducer

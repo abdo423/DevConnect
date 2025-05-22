@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import {followUser, getProfile, getProfileById} from '@/features/Profile/profileApi.ts'; // Your API service
+import {followUser, getProfile, getProfileById, updateProfile} from '@/features/Profile/profileApi.ts'; // Your API service
 
 // Define the profile state type
 interface ProfileState {
@@ -75,6 +75,18 @@ export const followUserThunk = createAsyncThunk(
         }
     }
 )
+export const updateProfileThunk = createAsyncThunk(
+    'profile/updateProfile',
+    async ({id,profile}:{id:string;profile:{username:string,bio:string,avatar?:string,}}, { rejectWithValue }) => {
+        try {
+            const response = await updateProfile(id,profile);
+            console.log(response);
+            return response;
+        }catch (error: any) {
+            return rejectWithValue(error.message || 'Failed to fetch profile');
+        }
+    }
+)
 // Create the slice
 const profileSlice = createSlice({
     name: 'profile',
@@ -117,6 +129,16 @@ const profileSlice = createSlice({
             state.profile = action.payload.user;
             console.log(action.payload);
         }).addCase(followUserThunk.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.payload as string;
+        }).addCase(updateProfileThunk.pending, (state) => {
+            state.loading = true;
+            state.error = null;
+        }).addCase(updateProfileThunk.fulfilled, (state, action) => {
+            state.loading = false;
+            state.profile = action.payload.user;
+            console.log(action.payload);
+        }).addCase(updateProfileThunk.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload as string;
         })
