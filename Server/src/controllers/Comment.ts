@@ -24,7 +24,8 @@ export const createComment = async (req: Request, res: Response) => {
     if(!result.success) return res.status(400).json({errors: result.error.errors});
     const comment = new Comment(commentData);
     await comment.save();
-    res.status(201).json({message: 'Comment created successfully'});
+    await comment.populate('user', 'username avatar')
+    res.status(201).json({message: 'Comment created successfully',comment: comment});
 }
 
 export const deleteComment = async (req: Request, res: Response) => {
@@ -56,11 +57,11 @@ export const updateComment = async (req: Request, res: Response) => {
 }
 
 export const getCommentsByPost = async (req: Request, res: Response) => {
-    const postId = req.params.postId;
+    const postId = req.params.id;
 
     try {
         const comments = await Comment.find({ post: postId })
-            .populate('user', 'name email') // Populate user fields (optional)
+            .populate('user', 'username avatar') // Populate user fields (optional)
             .sort({ createdAt: -1 }); // Optional: sort by newest first
 
         res.status(200).json({ comments });

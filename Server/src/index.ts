@@ -1,17 +1,17 @@
 import dotenv from 'dotenv';
-
 dotenv.config();
 import express from 'express';
 import config from 'config';
 import mongoose from "mongoose";
 import userRoutes from './routes/auth';
-import cookieParser from "cookie-parser";
+import cookieParser from 'cookie-parser';
 import cors from "cors";
 import {Request, Response, NextFunction} from "express";
 import commentRoutes from "./routes/comment";
 import authCheck, {authMiddleware, checkTokenExpiration} from "./middlewares/auth";
 import postRoutes from "./routes/Post";
 import profileRoutes from "./routes/Profile";
+import messageRoutes from "./routes/Message";
 const app = express();
 app.use(express.json({limit: '10mb'}));
 app.use(cookieParser());
@@ -36,11 +36,11 @@ app.get("/", (req: Request, res: Response) => {
 app.use(express.urlencoded({extended: true, limit: '10mb'}));
 
 //routes
-app.use("/Auth", userRoutes);
+userRoutes(app, authMiddleware);
 postRoutes(app, authMiddleware);
 app.use("/Comment", authMiddleware, commentRoutes);
 app.use("/Profile", authMiddleware, profileRoutes);
-
+app.use("/Message", authMiddleware, messageRoutes);
 const port = config.get('app.port');
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);

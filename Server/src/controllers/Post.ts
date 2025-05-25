@@ -14,7 +14,6 @@ export const createPost = async (req: Request, res: Response) => {
     if (!req.user) {
         return res.status(401).json({message: 'Unauthorized: User not authenticated'});
     }
-    console.log(req.user.id);
     const postData = {
         ...req.body,
         author_id: req.user.id,
@@ -34,9 +33,8 @@ export const createPost = async (req: Request, res: Response) => {
 
         const post = new Post(postData);
         await post.save();
-        const populatedPost = await Post.findById(post._id).populate('author_id', 'name email avatar').populate('comments', 'content createdAt ');
+        const populatedPost = await Post.findById(post._id).populate('author_id', 'username email avatar ').populate('comments', 'content createdAt ');
         const user = await User.findById(req.user.id);
-        console.log(user);
         if (!user) {
             return res.status(404).json({
                 success: false,
@@ -110,7 +108,7 @@ export const updatePost = async (req: Request, res: Response) => {
                 new: true,
                 populate: {
                     path: 'author_id',
-                    select: 'name email avatar ' // Include any fields you need
+                    select: 'username email avatar ' // Include any fields you need
                 }
             }
         );
@@ -140,7 +138,6 @@ export const likePost = async (req:Request, res: Response) => {
         return res.status(404).json({ message: 'Post not found' });
     }
     const userId = new Types.ObjectId(req.user?.id);
-     console.log(req.user);
     // Check if the user already liked the post
     const alreadyLiked = post.likes.some((like) => like.user.toString() === userId.toString());
 

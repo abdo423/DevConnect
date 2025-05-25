@@ -1,8 +1,17 @@
-import {registerUser, loginUser,deleteUser, logoutUser, loginUserCheck, getUser} from '../controllers/User';
+import {
+    registerUser,
+    loginUser,
+    deleteUser,
+    logoutUser,
+    loginUserCheck,
+    getUser,
+    getSendersForCurrentUser
+} from '../controllers/User';
 import {Request, Response, Router} from 'express';
+import {getAllFollowings} from "../controllers/User";
 
 const router = Router();
-
+const protectedRoute = Router();
 // Logging middleware
 router.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
@@ -37,5 +46,14 @@ router.delete("/user/:id", (req: Request, res: Response) => {
     deleteUser(req, res);
 })
 
+protectedRoute.get("/following/:id", (req: Request, res: Response) => {
+    getAllFollowings(req,res);
+})
+protectedRoute.get("/sentMessages", (req: Request, res: Response) => {
+ getSendersForCurrentUser(req,res);
 
-export default router;
+})
+export default (app: any, authMiddleware: any) => {
+    app.use('/Auth', router);
+    app.use('/Auth', authMiddleware, protectedRoute);
+};

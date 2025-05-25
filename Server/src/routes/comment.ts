@@ -18,6 +18,8 @@ router.delete("/delete/:id", (req: Request, res: Response) => {
 router.patch("/update/:id", (req: Request, res: Response) => {
   updateComment(req,res);
 })
-
+router.get("/post/:id", (req: Request, res: Response) => {
+    getCommentsByPost(req,res);
+})
 
 export default router;

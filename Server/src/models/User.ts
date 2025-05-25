@@ -16,6 +16,7 @@ const loginSchema = z.object({
 });
 
 export interface UserDocument extends Document {
+    _id: Types.ObjectId;
     username: string;
     email: string;
     password: string;
@@ -29,6 +30,7 @@ export interface UserDocument extends Document {
 }
 
 const userSchema = new Schema({
+    _id: Schema.Types.ObjectId,
     username: {
         type: String,
         required: true,
@@ -58,10 +60,14 @@ const userSchema = new Schema({
     followers: [{
         type: Schema.Types.ObjectId,
         ref: 'User',
+        default: [],
+        required: true,
     }],
     following: [{
         type: Schema.Types.ObjectId,
         ref: 'User',
+        default: [],
+        required: true,
     }],
     posts: [{
         type: Schema.Types.ObjectId,
