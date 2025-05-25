@@ -16,7 +16,7 @@ const ProfileComponent = () => {
     const {profile,loading,error} = useSelector((state:RootState) => (state.profile));
 
     const {user} = useSelector((state:RootState) => (state.auth));
-    const isFollowing = profile?.followers?.some(followerId => followerId === user._id);
+    const isFollowing = profile?.followers?.some(followerId => followerId === user?._id);
     const userData = {
         id: profile?._id,
         username: profile?.username,
@@ -25,15 +25,12 @@ const ProfileComponent = () => {
         avatar: profile?.avatar,
     }
     const { id } = useParams();
-
     useEffect(() => {
         if (id) {
             dispatch(getProfileByIdThunk(id));
           //  console.log("id",id);
-            console.log("user",profile);
         }else{
             dispatch(fetchProfile());
-            console.log("no id");
         }
     }, [dispatch, id]);
 ;
@@ -64,19 +61,23 @@ const ProfileComponent = () => {
     }
 
     const handleFollow = () => {
-
-        // TODO: Add follow/unfollow API call
         dispatch(followUserThunk(profile._id)).unwrap().then(
             () => {
-                console.log("followed");
+                // Refresh the profile data to get updated followers
+                if (id) {
+                    dispatch(getProfileByIdThunk(id));
+                } else {
+                    dispatch(fetchProfile());
+                }
             },
             (error) => {
-                console.log("error",error);
+                console.log("error", error);
             }
-        )
+        );
     };
-
-    const isCurrentUser = user && profile && profile._id === user._id;
+    console.log("profile",profile._id);
+    console.log("user",user?._id);
+    const isCurrentUser = user && profile && user._id === profile._id;
     console.log("isCurrentUser",isCurrentUser);
 
     return (

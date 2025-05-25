@@ -41,9 +41,12 @@ const formSchema = z.object({
 type ProfileFormValues = z.infer<typeof formSchema>;
 
 const EditProfile = () => {
+
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const {user,loading} = useSelector((state: RootState) => state.auth);
+    const {user} = useSelector((state: RootState) => state.auth);
+    const {profile} = useSelector((state: RootState) => state.profile);
+
     const [isLoading, setIsLoading] = useState(false);
     // Step 3: Initialize form
     const form = useForm<ProfileFormValues>({
@@ -54,7 +57,14 @@ const EditProfile = () => {
             bio: user?.bio || "",
         },
     });
-
+    if(!user) return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-background">
+            <div className="flex flex-col items-center space-y-4">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-lg font-medium text-muted-foreground">Redirecting to profile...</p>
+            </div>
+        </div>
+    )
     const { control, handleSubmit, setValue } = form;
 
     const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,11 +81,10 @@ const EditProfile = () => {
     const onSubmit = async (data: ProfileFormValues) => {
         setIsLoading(true);
         try {
-            console.log("Submitted:", data);
-            console.log("user",user.id);
-            await dispatch(updateProfileThunk({ id: user.id, profile: data })).unwrap().then((result)=>{
+            await dispatch(updateProfileThunk({ id: user?._id, profile: data })).unwrap().then((result)=>{
                 dispatch(updateUser(result.user));
             })
+            navigate(-1);
         } catch (error) {
             console.error("Failed to update profile:", error);
         } finally {

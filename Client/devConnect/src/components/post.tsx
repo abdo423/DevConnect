@@ -1,12 +1,11 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
 import {formatDistanceToNow} from "date-fns";
-import {Heart, MessageCircle, MoreHorizontal} from "lucide-react";
+import {Heart, MoreHorizontal} from "lucide-react";
 import {erasePost, likesPost} from "@/features/Posts/postsSlice";
 import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardFooter, CardHeader} from "@/components/ui/card";
-import {Separator} from "@/components/ui/separator";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "../app/store";
 import UpdatePostModal from "./update-post-form.tsx";
@@ -18,6 +17,8 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import PostSkeleton from "@/components/post-skeleton.tsx";
+import CommentsPopUp from "@/components/comments-pop-up.tsx";
+import {fetchComments} from "@/features/Commments/commetSlice.ts";
 
 type PostProps = {
     post: {
@@ -42,6 +43,7 @@ type PostProps = {
         __v?: number;
     };
     user?: {
+        id?: string; // Add this to pass current user ID
         username: string;
         email: string;
         avatar?: string;
@@ -49,11 +51,10 @@ type PostProps = {
     };
 };
 
-
-const Post = ({post,user}: PostProps) => {
-    const {isLoggedIn} = useSelector((state: RootState) => state.auth);
+const Post = ({post, user}: PostProps) => {
+    const {isLoggedIn, user: currentUser} = useSelector((state: RootState) => state.auth);
+    const {comments} = useSelector((state: RootState) => state.comments);
     const navigate = useNavigate();
-
 
     const safePost = {
         ...post,
@@ -65,23 +66,56 @@ const Post = ({post,user}: PostProps) => {
         createdAt: post.createdAt || new Date().toISOString()
     };
 
-    const [comments] = useState(safePost.comments);
     const dispatch = useDispatch<AppDispatch>();
+    useEffect(() => {
+        if (post?._id) {
+            dispatch(fetchComments(post._id));
+            //  console.log(postData._id);
+            console.log(comments);
+        }
+    }, [dispatch, post?._id]);
+    // Get current user ID - try multiple sources
+    const currentUserId = currentUser?._id || currentUser?._id || user?.id;
+
+    // Fix: Check if current logged-in user has liked this post
+    const initialIsLiked = currentUserId ?
+        safePost.likes.some(like => like.user === currentUserId) : false;
+
     const [likeCount, setLikeCount] = useState(safePost.likes.length);
-    const [isLiked, setIsLiked] = useState(() => {
-        return safePost.likes.some(like => like.user === safePost.author_id._id);
-    });
+    const [isLiked, setIsLiked] = useState(initialIsLiked);
 
     const {loading} = useSelector((state: RootState) => state.post);
-    const [commentOpen, setCommentOpen] = useState(false);
     const [expandedText, setExpandedText] = useState(false);
 
     const handleLike = () => {
         if (!isLoggedIn) return navigate("/login");
 
-        setIsLiked(prev => !prev);
-        setLikeCount(prev => (isLiked ? prev - 1 : prev + 1));
-        dispatch(likesPost(post._id));
+        // Don't proceed if we don't have current user ID
+        if (!currentUserId) {
+            console.error("Current user ID not available");
+            return;
+        }
+
+        // Optimistically update UI
+        const newIsLiked = !isLiked;
+        setIsLiked(newIsLiked);
+        setLikeCount(prev => newIsLiked ? prev + 1 : prev - 1);
+
+        // Dispatch the like action
+        dispatch(likesPost(post._id)).unwrap().then(
+            (response) => {
+                console.log("Like action successful", response);
+                // If your API returns updated like count, you can use it here
+                // setLikeCount(response.likeCount);
+                // setIsLiked(response.isLiked);
+            },
+            (error) => {
+                console.error("Like action failed", error);
+                // Revert optimistic update on error
+                setIsLiked(!newIsLiked);
+                setLikeCount(prev => newIsLiked ? prev - 1 : prev + 1);
+            }
+        );
     };
 
     const baseUsername = post.author_id?.email?.split('@')[0] || user?.email.split('@')[0] || 'Unknown';
@@ -93,10 +127,10 @@ const Post = ({post,user}: PostProps) => {
         }
         return Math.abs(hash % 900) + 100;
     };
+
     const profileNavigate = () => {
         if (!isLoggedIn) return navigate("/login");
         navigate(`/profile/${post.author_id._id}`);
-        //dispatch(getProfileByIdThunk(post.author_id._id));
     }
 
     const uniqueCode = generate3DigitCode(post.author_id?.email || post.author_id?._id || user?.email || 'user');
@@ -106,20 +140,21 @@ const Post = ({post,user}: PostProps) => {
 
     return (
         <Card className="max-w-xl mx-auto overflow-hidden">
-            <CardHeader onClick={profileNavigate}
-                        className="  flex flex-row items-center justify-around space-y-0 gap-3">
-                <Avatar>
+            <CardHeader className="flex flex-row items-center justify-around space-y-0 gap-3">
+                <Avatar onClick={profileNavigate}>
                     <AvatarImage src={post.author_id.avatar || user?.avatar || "/placeholder.svg"} alt={username}/>
-                    <AvatarFallback>{user?.username ? user.username.charAt(0).toUpperCase() : post.author_id.username.charAt(0).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>
+                        {(user?.username || post.author_id?.username || 'U').charAt(0).toUpperCase()}
+                    </AvatarFallback>
                 </Avatar>
 
-                <div className="flex-1">
+                <div className="flex-1" onClick={profileNavigate}>
                     <div className="font-semibold">{user?.username ? user?.username : post.author_id.username}</div>
                     <div className="text-xs text-muted-foreground">@{username}</div>
                 </div>
 
-                {/* Show edit modal only if logged in */}
-                {isLoggedIn && (
+                {/* Show edit modal only if logged in and user owns the post */}
+                {isLoggedIn && currentUserId === post.author_id._id && (
                     <UpdatePostModal
                         post={{
                             id: post._id,
@@ -140,8 +175,8 @@ const Post = ({post,user}: PostProps) => {
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem>Save post</DropdownMenuItem>
 
-                        {/* Only show delete option if logged in */}
-                        {isLoggedIn && (
+                        {/* Only show delete option if logged in and user owns the post */}
+                        {isLoggedIn && currentUserId === post.author_id._id && (
                             <DropdownMenuItem
                                 onClick={() => dispatch(erasePost(post._id))}
                                 className="text-red-400 focus:text-red-500"
@@ -199,7 +234,6 @@ const Post = ({post,user}: PostProps) => {
                         className="relative aspect-[3/2] w-full cursor-pointer"
                         onClick={() => {
                             if (!isLoggedIn) return navigate("/login");
-                            setCommentOpen(true);
                         }}
                     >
                         <img src={post.image} alt="Post" className="w-full h-full object-cover"/>
@@ -219,43 +253,29 @@ const Post = ({post,user}: PostProps) => {
                             <Heart className={`h-5 w-5 ${isLiked ? "fill-red-500 text-red-500" : ""}`}/>
                             <span>{likeCount}</span>
                         </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="flex items-center gap-1 px-2"
-                            onClick={() => {
-                                if (!isLoggedIn) return navigate("/login");
-                                setCommentOpen(true);
+                        <CommentsPopUp
+                        //    initialComments={comments}
+                            isLoggedIn={isLoggedIn}
+                            onNavigateToLogin={() => navigate("/login")}
+                            postData={{
+                                _id: post._id,
+                                title: post.title,
+                                author: post.author_id.username,
+                                authorAvatar: post.author_id.avatar,
+                                image: post.image,
+                                date: post.createdAt,
+                                likes: likeCount,
                             }}
-                        >
-                            <MessageCircle className="h-5 w-5"/>
-                            <span>{comments.length}</span>
-                        </Button>
+                        />
                     </div>
                     <div className="text-xs text-muted-foreground">
                         {formatDistanceToNow(new Date(post.createdAt), {addSuffix: true})}
                     </div>
                 </div>
 
-                {comments.length > 0 && (
-                    <div className="mt-3 w-full">
-                        <Separator className="my-2"/>
-                        <div className="text-xs text-muted-foreground">
-                            {comments.length} comment{comments.length !== 1 ? 's' : ''}
-                        </div>
-                        <Button
-                            variant="link"
-                            size="sm"
-                            className="px-0 h-auto mt-1 text-xs text-muted-foreground"
-                            onClick={() => {
-                                if (!isLoggedIn) return navigate("/login");
-                                setCommentOpen(true);
-                            }}
-                        >
-                            View all comments
-                        </Button>
-                    </div>
-                )}
+
+
+
             </CardFooter>
         </Card>
     );

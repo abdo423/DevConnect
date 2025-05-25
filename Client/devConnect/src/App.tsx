@@ -10,7 +10,7 @@ import {fetchCurrentUser} from "@/features/Auth/authSlice.ts";
 import Profile from "@/Pages/Profile.tsx";
 import EditProfile from "@/Pages/EditProfile.tsx";
 import PrivateRoutes from "@/components/private-routes.tsx";
-
+import MessagePage from "@/Pages/Messeages.tsx";
 function App() {
     const dispatch = useDispatch<AppDispatch>();
     useEffect(() => {
@@ -25,6 +25,7 @@ function App() {
                     <Route path="/profile" element={<Profile/>}/>
                     <Route path="/profile/:id" element={<Profile/>}/>
                     <Route path="/profile/edit" element={<EditProfile/>}/>
+                    <Route path="/messages" element={<MessagePage/>}/>
                 </Route>
                 <Route path="/" element={<HomePage/>}/>
                 <Route path="/login" element={<LoginPage/>}/>

@@ -9,26 +9,34 @@ export const loginUser = async (credentials: { email: string; password: string }
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            throw error;
-        } else {
-            console.error('Unexpected error logging in:', error);
-            throw error;
+            console.error('Axios error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                headers: error.response?.headers
+            });
+            throw error.response?.data || error;
         }
+        console.error('Non-Axios error:', error);
+        throw error;
     }
 };
 
-export const registerUser = async (credentials: { email: string; password: string }) => {
+export const registerUser = async (credentials: { email: string; password: string ,username:string}) => {
     try {
         const response = await axios.post(`${BASE_URL}/register`, credentials, {withCredentials: true});
 
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            throw error;
-        } else {
-            console.error('Unexpected error logging in:', error);
-            throw error;
+            console.error('Axios error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                headers: error.response?.headers
+            });
+            throw error.response?.data || error;
         }
+        console.error('Non-Axios error:', error);
+        throw error;
     }
 };
 export const checkLogin = async () => {
@@ -37,10 +45,16 @@ export const checkLogin = async () => {
             withCredentials: true, // very important to send cookie
         });
         return response.data.user;
-    } catch (error) {
+    }catch (error) {
         if (axios.isAxiosError(error)) {
-            throw error.response?.data?.message || 'Not authenticated';
+            console.error('Axios error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                headers: error.response?.headers
+            });
+            throw error.response?.data || error;
         }
+        console.error('Non-Axios error:', error);
         throw error;
     }
 };
@@ -65,3 +79,4 @@ export const logoutUser = async () => {
   }
 
 }
+

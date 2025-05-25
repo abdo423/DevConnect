@@ -59,10 +59,17 @@ const LoginForm = () => {
                 form.reset();
 
             })
-            .catch((error) => {
+            .catch((error: any) => {
                 console.error("Login error:", error);
-                setStatus({success: "", error: error || "Authentication failed"})
+
+                // Extract error message safely:
+                const errorMessage = typeof error === 'string'
+                    ? error
+                    : error?.message || "Authentication failed";
+
+                setStatus({success: "", error: errorMessage});
             });
+
 
     };
 

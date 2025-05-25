@@ -110,7 +110,7 @@ const CreatePost = () => {
                 <CardContent className="p-4">
                     <div className="flex gap-3">
                         <Avatar className="h-10 w-10">
-                            <AvatarImage src={user.avatar} alt="Profile" />
+                            <AvatarImage src={user?.avatar || " "} alt="Profile" />
                             <AvatarFallback>ME</AvatarFallback>
                         </Avatar>
 

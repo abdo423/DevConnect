@@ -2,12 +2,17 @@ import {configureStore} from '@reduxjs/toolkit'
 import authSlice from '@/features/Auth/authSlice.ts'
 import postsSlice from "@/features/Posts/postsSlice.ts";
 import ProfileSlice from "@/features/Profile/profileSlice.ts";
-
+import messageSlice from "@/features/Message/messageSlice.ts";
+import followingSlice from "@/features/Following/followingSlice.ts";
+import commentsSlice from "@/features/Commments/commetSlice.ts";
 export const store = configureStore({
     reducer: {
         auth: authSlice,
         post: postsSlice,
         profile:ProfileSlice,
+        message:messageSlice,
+        following:followingSlice,
+        comments: commentsSlice,
     },
 })
 

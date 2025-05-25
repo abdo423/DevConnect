@@ -1,8 +1,36 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
 import {loginUser, registerUser, logoutUser, checkLogin} from "@/features/Auth/authApi.ts";
 import {updateProfileThunk} from "@/features/Profile/profileSlice.ts";
-
-
+interface User {
+    user: {
+        _id: string;
+        username: string;
+        email: string;
+        avatar: string;
+        bio: string;
+        posts: Array<{
+            _id: string;
+            title: string;
+            content: string;
+            author_id: string;
+            image: string;
+            likes: Array<{
+                user: string;
+                createdAt: string;
+            }>;
+            comments: Array<any>;
+            createdAt: string;
+            updatedAt: string;
+        }>;
+        followers: string[];
+        following: string[];
+        createdAt: string;
+        updatedAt: string;
+    } | null;
+    loading: boolean;
+    error: string | null;
+    isLoggedIn: boolean;
+}
 export const login = createAsyncThunk('Auth/login', async (credentials: {
     email: string,
     password: string
@@ -53,14 +81,9 @@ export const fetchCurrentUser = createAsyncThunk(
 );
 
 
-interface AuthState {
-    user: any;
-    loading: boolean;
-    error: string | null;
-    isLoggedIn: boolean;
-}
 
-const initialState: AuthState = {
+
+const initialState: User = {
     user: null,
     loading: false,
     error: null,
@@ -84,6 +107,7 @@ const authSlice = createSlice({
                 state.error = null;
             }).addCase(login.fulfilled, (state, action) => {
                 state.user = action.payload.user;
+                console.log(action.payload);
                 state.loading = false;
                 state.error = null;
                 state.isLoggedIn = true;

@@ -10,13 +10,10 @@ import {fetchPosts} from "@/features/Posts/postsSlice"
 const HomePage = () => {
     const dispatch = useDispatch<AppDispatch>()
     const { posts, loading } = useSelector((state: RootState) => state.post)
-
     useEffect(() => {
         dispatch(fetchPosts())
     }, [dispatch])
 
-
-  console.log(posts);
     return (
         <div>
             <Navbar />

@@ -36,7 +36,6 @@ interface MobileNavbarProps {
 }
 
 const MobileNavbar = ({isLoggedIn, user, filteredRoutes}: MobileNavbarProps) => {
-    console.log(user)
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const handleLogout = async () => {
