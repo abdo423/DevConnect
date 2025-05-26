@@ -51,21 +51,35 @@ const RegisterForm = () => {
     });
 
     const handleRegister = (data: z.infer<typeof formSchema>) => {
-        dispatch(register({email: data.email, password: data.password, username: data.username}))
+        dispatch(register({
+            email: data.email,
+            password: data.password,
+            username: data.username
+        }))
             .unwrap()
             .then((result) => {
                 console.log(result);
-                setStatus({error: "", success: result.message || "Login successful"})
-                window.location.href = "/login";
+                setStatus({
+                    error: "",
+                    success: result.message || "Registration successful"
+                });
                 form.reset();
-
+                window.location.href = "/login";
             })
             .catch((error) => {
-                console.error("Login error:", error);
-                setStatus({success: "", error: error || "Registeration failed"})
-            });
+                console.error("Registration error:", error);
 
+                // Extract the error message from backend response
+                const errorMessage =
+                error || "Registration failed";
+                setStatus({
+                    success: "",
+                    error: errorMessage
+                });
+            });
     };
+
+
 
     return (
         <Card

@@ -40,7 +40,7 @@ export const login = createAsyncThunk('Auth/login', async (credentials: {
 
         return response
     } catch (error: any) {
-        return thunkAPI.rejectWithValue(error.response.data.message || "Something went wrong")
+        return thunkAPI.rejectWithValue(error.message  || "Something went wrong")
     }
 })
 export const register = createAsyncThunk('Auth/register', async (credentials: {
@@ -54,7 +54,8 @@ export const register = createAsyncThunk('Auth/register', async (credentials: {
         const response = await registerUser(credentials);
         return response;
     } catch (error: any) {
-        return thunkAPI.rejectWithValue(error.response.data.message || "Something went wrong")
+        console.log(error);
+        return thunkAPI.rejectWithValue(error.message|| "Something went wrong")
     }
 })
 //logout
@@ -64,7 +65,7 @@ export const logout = createAsyncThunk('Auth/logout', async (_, thunkAPI) => {
 
         return response;
     } catch (error: any) {
-        return thunkAPI.rejectWithValue(error.response.data);
+        return thunkAPI.rejectWithValue(error.message || "Something went wrong");
     }
 })
 
@@ -113,7 +114,8 @@ const authSlice = createSlice({
                 state.isLoggedIn = true;
             }).addCase(login.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload as string;
+                    state.error =  action.error?.message || "Something went wrong";
+
                 state.isLoggedIn = false;
             }).addCase(register.pending, (state) => {
                 state.loading = true;

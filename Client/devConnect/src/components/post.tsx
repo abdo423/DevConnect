@@ -265,6 +265,7 @@ const Post = ({post, user}: PostProps) => {
                                 image: post.image,
                                 date: post.createdAt,
                                 likes: likeCount,
+                                commentCount:post.comments?.length
                             }}
                         />
                     </div>

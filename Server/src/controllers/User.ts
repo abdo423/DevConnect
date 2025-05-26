@@ -75,6 +75,10 @@ export const registerUser = async (req: Request, res: Response) => {
         if (existingUser) {
             return res.status(409).json({message: 'Email already in use'});
         }
+        const existingUsername = await User.findOne({ username });
+        if (existingUsername) {
+            return res.status(409).json({ message: 'Username already taken' });
+        }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         console.log('Hashed password:', hashedPassword);

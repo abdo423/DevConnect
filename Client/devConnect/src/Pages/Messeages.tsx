@@ -1,13 +1,14 @@
-import { Input } from "@/components/ui/input";
-import { Paperclip, Search, Send, Smile, MoreVertical, Phone, Video } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { useSelector, useDispatch } from "react-redux";
-import { AppDispatch, RootState } from "@/app/store";
-import { createMessage, getMessagesBetweenUsers } from "@/features/Message/messageSlice.ts";
-import { fetchFollowings, fetchUnfollowedMessageSenders } from "@/features/Following/followingSlice.ts";
-import { formatDistanceToNow } from "date-fns";
+import {Input} from "@/components/ui/input";
+import {Paperclip, Search, Send, Smile, MoreVertical, Phone, Video} from "lucide-react";
+import {useEffect, useMemo, useState} from "react";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import {Button} from "@/components/ui/button";
+import {useSelector, useDispatch} from "react-redux";
+import {AppDispatch, RootState} from "@/app/store";
+import {createMessage, getMessagesBetweenUsers} from "@/features/Message/messageSlice.ts";
+import {useNavigate} from "react-router-dom";
+import {fetchFollowings, fetchUnfollowedMessageSenders} from "@/features/Following/followingSlice.ts";
+import {formatDistanceToNow} from "date-fns";
 import NavBar from "@/components/Navbar";
 
 const MessagePage = () => {
@@ -15,11 +16,11 @@ const MessagePage = () => {
     const [newMessage, setNewMessage] = useState("");
     const dispatch = useDispatch<AppDispatch>();
     const [selectedUser, setSelectedUser] = useState<any>(null);
-    const { messages } = useSelector((state: RootState) => state.message);
-    const { user } = useSelector((state: RootState) => state.auth);
-    const { following, unfollowedMessageSenders } = useSelector((state: RootState) => state.following);
+    const {messages} = useSelector((state: RootState) => state.message);
+    const {user, isLoggedIn} = useSelector((state: RootState) => state.auth);
+    const {following, unfollowedMessageSenders} = useSelector((state: RootState) => state.following);
     const userId = useMemo(() => user?._id, [user?._id]);
-
+    const navigate = useNavigate();
     useEffect(() => {
         if (userId) {
             dispatch(fetchFollowings(userId));
@@ -60,20 +61,25 @@ const MessagePage = () => {
         // Clear the input when switching conversations
         setNewMessage("");
     };
-
+    const profileNavigate = (id: string) => {
+        if (!isLoggedIn) return navigate("/login");
+        navigate(`/profile/${id}`);
+    };
     return (
         <>
-            <NavBar />
+            <NavBar/>
             <div className="flex h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
                 {/* Sidebar */}
-                <div className="hidden md:flex w-80 flex-shrink-0 border-r border-slate-200/70 bg-white/60 backdrop-blur-sm flex-col h-screen shadow-lg">
+                <div
+                    className="hidden md:flex w-80 flex-shrink-0 border-r border-slate-200/70 bg-white/60 backdrop-blur-sm flex-col h-screen shadow-lg">
                     {/* Sidebar Header */}
                     <div className="p-6 border-b border-slate-200/70 bg-white/80 backdrop-blur-sm">
                         <h1 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                             Messages
                         </h1>
                         <div className="relative group">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4 group-hover:text-blue-500 transition-colors duration-200" />
+                            <Search
+                                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4 group-hover:text-blue-500 transition-colors duration-200"/>
                             <Input
                                 placeholder="Search conversations..."
                                 value={searchQuery}
@@ -104,11 +110,13 @@ const MessagePage = () => {
                                                     src={person.avatar || "/placeholder.svg"}
                                                     alt="profile"
                                                 />
-                                                <AvatarFallback className="bg-gradient-to-br from-blue-400 to-purple-500 text-white font-semibold">
+                                                <AvatarFallback
+                                                    className="bg-gradient-to-br from-blue-400 to-purple-500 text-white font-semibold">
                                                     {person.username?.charAt(0) || "U"}
                                                 </AvatarFallback>
                                             </Avatar>
-                                            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
+                                            <div
+                                                className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center justify-between gap-2">
@@ -145,11 +153,13 @@ const MessagePage = () => {
                                                 src={person.avatar || "/placeholder.svg"}
                                                 alt="profile"
                                             />
-                                            <AvatarFallback className="bg-gradient-to-br from-blue-400 to-purple-500 text-white font-semibold">
+                                            <AvatarFallback
+                                                className="bg-gradient-to-br from-blue-400 to-purple-500 text-white font-semibold">
                                                 {person.username?.charAt(0) || "U"}
                                             </AvatarFallback>
                                         </Avatar>
-                                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
+                                        <div
+                                            className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-400 border-2 border-white rounded-full"></div>
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between gap-2">
@@ -176,10 +186,11 @@ const MessagePage = () => {
                     <div className="p-4 border-b border-slate-200/70 bg-white/80 backdrop-blur-sm shadow-sm">
                         <div className="flex items-center justify-between">
                             {selectedUser ? (
-                                <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-3 cursor-pointer" onClick={() => profileNavigate(selectedUser._id)}>
                                     <Avatar className="h-10 w-10 ring-2 ring-white shadow-sm">
-                                        <AvatarImage src={selectedUser.avatar || "/placeholder.svg"} />
-                                        <AvatarFallback className="bg-gradient-to-br from-blue-400 to-purple-500 text-white font-semibold">
+                                        <AvatarImage src={selectedUser.avatar || "/placeholder.svg"}/>
+                                        <AvatarFallback
+                                            className="bg-gradient-to-br from-blue-400 to-purple-500 text-white font-semibold">
                                             {selectedUser.username?.charAt(0) || "U"}
                                         </AvatarFallback>
                                     </Avatar>
@@ -193,7 +204,8 @@ const MessagePage = () => {
                             ) : (
                                 <div className="flex items-center gap-3">
                                     <Avatar className="h-10 w-10 ring-2 ring-white shadow-sm">
-                                        <AvatarFallback className="bg-gradient-to-br from-blue-400 to-purple-500 text-white font-semibold">
+                                        <AvatarFallback
+                                            className="bg-gradient-to-br from-blue-400 to-purple-500 text-white font-semibold">
                                             ?
                                         </AvatarFallback>
                                     </Avatar>
@@ -208,21 +220,21 @@ const MessagePage = () => {
                                     size="icon"
                                     className="h-9 w-9 hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-all duration-200"
                                 >
-                                    <Phone className="h-4 w-4" />
+                                    <Phone className="h-4 w-4"/>
                                 </Button>
                                 <Button
                                     variant="ghost"
                                     size="icon"
                                     className="h-9 w-9 hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-all duration-200"
                                 >
-                                    <Video className="h-4 w-4" />
+                                    <Video className="h-4 w-4"/>
                                 </Button>
                                 <Button
                                     variant="ghost"
                                     size="icon"
                                     className="h-9 w-9 hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-all duration-200"
                                 >
-                                    <MoreVertical className="h-4 w-4" />
+                                    <MoreVertical className="h-4 w-4"/>
                                 </Button>
                             </div>
                         </div>
@@ -237,8 +249,8 @@ const MessagePage = () => {
                                         key={message._id}
                                         className={`flex ${message.senderId === userId ? "justify-end" : "justify-start"} group`}
                                     >
-                                        <div
-                                            className={`flex items-end gap-2 max-w-[75%] ${message.senderId === userId ? "flex-row-reverse" : "flex-row"}`}
+                                        <div onClick={() => profileNavigate(message.senderId)}
+                                             className={`flex items-end gap-2 max-w-[75%] cursor-pointer ${message.senderId === userId ? "flex-row-reverse" : "flex-row"}`}
                                         >
                                             <Avatar className="h-8 w-8 ring-2 ring-white shadow-sm">
                                                 <AvatarImage
@@ -248,7 +260,8 @@ const MessagePage = () => {
                                                             : selectedUser?.avatar || "/placeholder.svg"
                                                     }
                                                 />
-                                                <AvatarFallback className="bg-gradient-to-br from-blue-400 to-purple-500 text-white text-xs font-semibold">
+                                                <AvatarFallback
+                                                    className="bg-gradient-to-br from-blue-400 to-purple-500 text-white text-xs font-semibold">
                                                     {message.senderId === userId
                                                         ? user?.username?.charAt(0) || "U"
                                                         : selectedUser?.username?.charAt(0) || "U"
@@ -266,7 +279,7 @@ const MessagePage = () => {
                                                 <p className={`text-xs mt-2 ${
                                                     message.senderId === userId ? "text-blue-100" : "text-slate-500"
                                                 }`}>
-                                                    {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
+                                                    {formatDistanceToNow(new Date(message.createdAt), {addSuffix: true})}
                                                 </p>
                                             </div>
                                         </div>
@@ -292,7 +305,7 @@ const MessagePage = () => {
                                 size="icon"
                                 className="h-10 w-10 flex-shrink-0 hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-all duration-200"
                             >
-                                <Paperclip className="h-4 w-4" />
+                                <Paperclip className="h-4 w-4"/>
                             </Button>
 
                             <div className="flex-1 relative">
@@ -316,7 +329,7 @@ const MessagePage = () => {
                                     disabled={!selectedUser}
                                     className="absolute right-2 top-1/2 transform -translate-y-1/2 h-7 w-7 hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition-all duration-200 disabled:opacity-50"
                                 >
-                                    <Smile className="h-4 w-4" />
+                                    <Smile className="h-4 w-4"/>
                                 </Button>
                             </div>
 
@@ -326,7 +339,7 @@ const MessagePage = () => {
                                 className="h-10 w-10 flex-shrink-0 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg shadow-blue-200/50 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                                 disabled={!newMessage.trim() || !selectedUser}
                             >
-                                <Send className="h-4 w-4" />
+                                <Send className="h-4 w-4"/>
                             </Button>
                         </form>
                     </div>

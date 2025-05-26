@@ -29,7 +29,7 @@ interface CommentsPopUpProps {
         image?: string;
         date?: Date;
         likes?: number;
-        comments?: string[];
+        commentCount?: number;
     };
 }
 
@@ -96,7 +96,7 @@ export default function CommentsPopUp({
                     onClick={handleTriggerClick}
                 >
                     <MessageCircle className="h-5 w-5" />
-                    <span>{commentsArray.length}</span>
+                    <span>{postData?.commentCount}</span>
                 </Button>
             </DialogTrigger>
             <DialogDescription>
