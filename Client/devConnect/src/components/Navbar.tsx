@@ -5,7 +5,7 @@ import MobileNav from "@/components/MobileNavbar.tsx";
 import {Link} from "react-router-dom"; // Ensure correct import for React Router V6+
 import {useSelector} from 'react-redux';
 import {RootState} from "../app/store";
-import UserMenu from "@/components/user-menu.tsx";
+import UserMenu from "@/components/UserMenu.tsx";
 import {House, MessageCircle, User} from "lucide-react";
 import {useLocation} from "react-router-dom";
 const Navbar = () => {

@@ -25,8 +25,8 @@ import {Link,useNavigate} from "react-router-dom";
 import {User, Lock} from "lucide-react";
 import {useState} from "react"; // 👈 Add this
 //import axios from 'axios';
-import FormSuccess from "./form-success.tsx";
-import FormError from "./form-error.tsx";
+import FormSuccess from "./FormSuccess.tsx";
+import FormError from "./FormError.tsx";
 
 const formSchema = z.object({
     email: z.string().min(8).max(50).email(),

@@ -9,7 +9,7 @@ import {AppDispatch} from "@/app/store.ts";
 import {fetchCurrentUser} from "@/features/Auth/authSlice.ts";
 import Profile from "@/Pages/Profile.tsx";
 import EditProfile from "@/Pages/EditProfile.tsx";
-import PrivateRoutes from "@/components/private-routes.tsx";
+import PrivateRoutes from "@/components/PrivateRoutes.tsx";
 import MessagePage from "@/Pages/Messeages.tsx";
 function App() {
     const dispatch = useDispatch<AppDispatch>();

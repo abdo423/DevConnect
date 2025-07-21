@@ -24,8 +24,8 @@ import type {AppDispatch, RootState} from "../app/store";
 import {User, Lock, AtSign} from "lucide-react";
 import {useState} from "react";
 //import axios from 'axios';
-import FormSuccess from "./form-success.tsx";
-import FormError from "./form-error.tsx";
+import FormSuccess from "./FormSuccess.tsx";
+import FormError from "./FormError.tsx";
 
 const formSchema = z.object({
     email: z.string().min(2).max(50),

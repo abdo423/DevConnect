@@ -8,7 +8,7 @@ import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardFooter, CardHeader} from "@/components/ui/card";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "../app/store";
-import UpdatePostModal from "./update-post-form.tsx";
+import UpdatePostModal from "./UpdatePostForm.tsx";
 
 import {
     DropdownMenu,
@@ -16,8 +16,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import PostSkeleton from "@/components/post-skeleton.tsx";
-import CommentsPopUp from "@/components/comments-pop-up.tsx";
+import PostSkeletonLoad from "@/components/PostSkeletonLoad.tsx";
+import CommentsPopUp from "@/components/CommentsPopUp.tsx";
 import {fetchComments} from "@/features/Commments/commetSlice.ts";
 
 type PostProps = {
@@ -133,7 +133,7 @@ const Post = ({post, user}: PostProps) => {
     const uniqueCode = generate3DigitCode(post.author_id?.email || post.author_id?._id || user?.email || 'user');
     const username = `${baseUsername}${uniqueCode}`;
 
-    if (loading) return <PostSkeleton/>;
+    if (loading) return <PostSkeletonLoad/>;
 
     return (
         <Card className="max-w-xl mx-auto overflow-hidden">

@@ -1,7 +1,7 @@
 
 import Navbar from "../components/Navbar.tsx"
-import CreatePost from "@/components/create-post.tsx"
-import Post from "@/components/post.tsx"
+import CreatePost from "@/components/CreatePost.tsx"
+import Post from "@/components/Post.tsx"
 import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch, RootState } from "../app/store"

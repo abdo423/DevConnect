@@ -1,4 +1,4 @@
-import ProfileComponent from "@/components/profile-component.tsx";
+import ProfileComponent from "@/components/ProfileComponent.tsx";
 import {RootState} from "@/app/store.ts";
 import {useSelector} from "react-redux";
 import Navbar from "@/components/Navbar.tsx";

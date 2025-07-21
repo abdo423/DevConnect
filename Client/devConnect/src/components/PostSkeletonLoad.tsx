@@ -1,7 +1,7 @@
 import {Card, CardContent, CardFooter, CardHeader} from "./ui/card";
 import {Avatar} from "@radix-ui/react-avatar";
 
-const PostSkeleton = () => {
+const PostSkeletonLoad = () => {
     return (
         <Card className="max-w-xl mx-auto overflow-hidden animate-pulse">
             <CardHeader className="flex flex-row items-center space-y-0 gap-3">
@@ -30,4 +30,4 @@ const PostSkeleton = () => {
     );
 };
 
-export default PostSkeleton;
+export default PostSkeletonLoad;

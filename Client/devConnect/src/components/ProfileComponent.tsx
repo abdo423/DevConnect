@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Grid, Heart, SquarePen, Settings, UserCheck, UserPlus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import Post from "@/components/post";
+import Post from "@/components/Post.tsx";
 import {AppDispatch, RootState} from "@/app/store.ts";
 import {getProfileByIdThunk} from "@/features/Profile/profileSlice.ts";
 import {useParams,Link} from "react-router-dom";

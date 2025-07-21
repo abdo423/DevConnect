@@ -1,4 +1,4 @@
-import RegisterForm from "@/components/registerForm.tsx";
+import RegisterForm from "@/components/RegisterForm.tsx";
 import loginBackground from "@/assets/LoginBackground.png";
 
 
