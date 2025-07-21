@@ -70,8 +70,7 @@ const Post = ({post, user}: PostProps) => {
     useEffect(() => {
         if (post?._id) {
             dispatch(fetchComments(post._id));
-            //  console.log(postData._id);
-            console.log(comments);
+
         }
     }, [dispatch, post?._id]);
     // Get current user ID - try multiple sources
@@ -105,9 +104,7 @@ const Post = ({post, user}: PostProps) => {
         dispatch(likesPost(post._id)).unwrap().then(
             (response) => {
                 console.log("Like action successful", response);
-                // If your API returns updated like count, you can use it here
-                // setLikeCount(response.likeCount);
-                // setIsLiked(response.isLiked);
+
             },
             (error) => {
                 console.error("Like action failed", error);
@@ -265,7 +262,7 @@ const Post = ({post, user}: PostProps) => {
                                 image: post.image,
                                 date: post.createdAt,
                                 likes: likeCount,
-                                commentCount:post.comments?.length
+                                commentCount: post?.comments.length || 0,
                             }}
                         />
                     </div>

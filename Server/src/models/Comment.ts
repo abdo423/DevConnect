@@ -2,11 +2,21 @@ import mongoose, {Schema, Document, Types, isValidObjectId, Query} from 'mongoos
 import * as z from 'zod';
 import Post from "./Post";
 
+export interface likes {
+
+    user: Types.ObjectId;
+    createdAt: Date;
+}
+const likesSchema = new Schema<likes>({
+    user: {type: Schema.Types.ObjectId, ref: 'User', required: true},
+    createdAt: {type: Date, default: Date.now},
+}, {_id: false});
 
 export interface Comment {
     user: Types.ObjectId;
     post: Types.ObjectId;
     content: string;
+    likes:likes[] ;
     createdAt: Date;
 }
 
@@ -28,6 +38,7 @@ export const validateComment = (comment: Comment) => {
 const commentSchema = new Schema<Comment>({
     user: {type: Schema.Types.ObjectId, ref: 'User', required: true},
     post: {type: Schema.Types.ObjectId, ref: 'Post', required: true},
+    likes: [likesSchema],
     content: {type: String, required: true},
     createdAt: {type: Date, default: Date.now},
 });

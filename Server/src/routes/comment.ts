@@ -1,5 +1,5 @@
 import {Request, Response, Router} from 'express';
-import {createComment, deleteComment, getCommentsByPost, updateComment} from "../controllers/Comment";
+import {createComment, deleteComment, getCommentsByPost, likeComment, updateComment} from "../controllers/Comment";
 
 const router = Router();
 
@@ -21,5 +21,7 @@ router.patch("/update/:id", (req: Request, res: Response) => {
 router.get("/post/:id", (req: Request, res: Response) => {
     getCommentsByPost(req,res);
 })
-
+router.post("/like/:id", (req: Request, res: Response) => {
+    likeComment(req,res);
+})
 export default router;

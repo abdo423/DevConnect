@@ -58,7 +58,7 @@ const RegisterForm = () => {
         }))
             .unwrap()
             .then((result) => {
-                console.log(result);
+
                 setStatus({
                     error: "",
                     success: result.message || "Registration successful"

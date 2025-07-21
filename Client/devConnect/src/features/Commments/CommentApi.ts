@@ -67,3 +67,27 @@ export const createComment = async (commentData: { post: string; content: string
         throw error;
     }
 }
+
+export const likeComment = async (id: string) => {
+    try {
+        const token = Cookies.get("auth-token");
+        if (!token) {
+            throw new Error("Not authenticated");
+        }
+        const response = await axios.post(
+            `${BASE_URL}/like/${id}`, {}, {withCredentials: true, headers: {Authorization: `Bearer ${token}`}}
+        )
+        return response.data;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error('Axios error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                headers: error.response?.headers
+            });
+            throw error.response?.data || error;
+        }
+        console.error('Non-Axios error:', error);
+        throw error;
+    }
+}

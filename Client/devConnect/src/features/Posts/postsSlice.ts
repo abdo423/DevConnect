@@ -74,6 +74,7 @@ interface Post {
     content: string;
     image: string;
     likes: string[];
+    comments: string[];
     author_id: string;
     createdAt: Date;
     updatedAt: Date;
@@ -157,7 +158,7 @@ const postsSlice = createSlice({
                 state.error = null;
             })
             .addCase(erasePost.fulfilled, (state, action) => {
-                console.log(action.payload);
+
                 const deletedId = action.payload.post._id;
                 state.posts = state.posts.filter(post => post._id !== deletedId);
                 state.loading = false;

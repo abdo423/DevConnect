@@ -80,7 +80,7 @@ export const updateProfileThunk = createAsyncThunk(
     async ({id,profile}:{id:string;profile:{username:string,bio:string,avatar?:string,}}, { rejectWithValue }) => {
         try {
             const response = await updateProfile(id,profile);
-            console.log(response);
+
             return response;
         }catch (error: any) {
             return rejectWithValue(error.message || 'Failed to fetch profile');
@@ -117,7 +117,7 @@ const profileSlice = createSlice({
         }).addCase(getProfileByIdThunk.fulfilled, (state, action) => {
             state.loading = false;
             state.profile = action.payload;
-           // console.log(action.payload);
+
         }).addCase(getProfileByIdThunk.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload as string;
@@ -127,7 +127,7 @@ const profileSlice = createSlice({
         }).addCase(followUserThunk.fulfilled, (state, action) => {
             state.loading = false;
             state.profile = action.payload.user;
-            console.log(action.payload);
+
         }).addCase(followUserThunk.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload as string;
@@ -137,7 +137,7 @@ const profileSlice = createSlice({
         }).addCase(updateProfileThunk.fulfilled, (state, action) => {
             state.loading = false;
             state.profile = action.payload.user;
-            console.log(action.payload);
+
         }).addCase(updateProfileThunk.rejected, (state, action) => {
             state.loading = false;
             state.error = action.payload as string;

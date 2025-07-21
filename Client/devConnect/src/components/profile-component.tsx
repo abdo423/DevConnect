@@ -28,7 +28,7 @@ const ProfileComponent = () => {
     useEffect(() => {
         if (id) {
             dispatch(getProfileByIdThunk(id));
-          //  console.log("id",id);
+
         }else{
             dispatch(fetchProfile());
         }
@@ -75,10 +75,9 @@ const ProfileComponent = () => {
             }
         );
     };
-    console.log("profile",profile._id);
-    console.log("user",user?._id);
+
     const isCurrentUser = user && profile && user._id === profile._id;
-    console.log("isCurrentUser",isCurrentUser);
+
 
     return (
         <div className="container max-w-4xl mx-auto px-4 py-6">

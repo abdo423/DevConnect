@@ -19,7 +19,7 @@ const createPostSchema = z.object({
         .min(2, { message: "Title must be at least 2 characters long." })
         .max(50, { message: "Title must be at most 50 characters long." }),
     content: z.string()
-        .min(2, { message: "Content must be at least 2 characters long." })
+        .min(30, { message: "Content must be at least 30 characters long." })
         .max(280, { message: "Content must be at most 280 characters long." }),
     image: z
         .string()

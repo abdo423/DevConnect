@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import {createComment, getComments} from "@/features/Commments/CommentApi.ts";
+import {createComment, getComments,likeComment as likeCommentApi} from "@/features/Commments/CommentApi.ts";
 
 
 
@@ -42,10 +42,7 @@ export const fetchComments = createAsyncThunk(
                 throw new Error('Not authenticated');
             }
             const response = getComments(postId);
-            console.log(
-                'response',
-                response
-            )
+
             return response;
         } catch (error) {
             if (axios.isAxiosError(error)) {
@@ -74,6 +71,24 @@ export const addComment = createAsyncThunk(
         }
     }
 );
+export const likeComment = createAsyncThunk(
+    'comments/likeComment',
+    async (commentId: string, { rejectWithValue }) => {
+        try {
+            const token = Cookies.get('auth-token');
+            if (!token) {
+                throw new Error('Not authenticated');
+            }
+            const response =  likeCommentApi(commentId);
+            return response;
+        }catch (error) {
+            if (axios.isAxiosError(error)) {
+                return rejectWithValue(error?.message || error.message);
+            }
+            return rejectWithValue('An unknown error occurred');
+        }
+    }
+)
 
 const commentsSlice = createSlice({
     name: 'comments',

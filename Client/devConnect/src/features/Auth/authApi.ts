@@ -5,7 +5,6 @@ const BASE_URL = 'http://localhost:3000/auth'; // change this to your backend UR
 export const loginUser = async (credentials: { email: string; password: string }) => {
     try {
         const response = await axios.post(`${BASE_URL}/login`, credentials, {withCredentials: true});
-        console.log(response.data);
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {

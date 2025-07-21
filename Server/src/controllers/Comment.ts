@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import config from "config";
 import {Types} from "mongoose";
 import Comment, { validateComment } from "../models/Comment";
+import Post from "../models/Post";
 
 // Secret for JWT (should be in .env)
 const JWT_SECRET = config.get<string>("jwt.secret");
@@ -11,13 +12,12 @@ const expiresIn = config.get<string>("jwt.expiresIn");
 
 export const createComment = async (req: Request, res: Response) => {
     if(!req.user) return res.status(401).json({message: 'Unauthorized: User not authenticated'});
-    console.log(
-        req.user.id
-    )
+
     const commentData = {
         user: new Types.ObjectId(req.user.id),
         post: req.body.post,
         content: req.body.content,
+        likes: [],
         createdAt: new Date()
     }
     const result = validateComment(commentData);
@@ -68,4 +68,39 @@ export const getCommentsByPost = async (req: Request, res: Response) => {
     } catch (error) {
         res.status(500).json({ message: 'Server Error', error });
     }
+};
+export const likeComment = async (req: Request, res: Response) => {
+    const comment = await Comment.findById(req.params.id);
+
+    if (!comment) {
+        return res.status(404).json({ message: 'Comment not found' });
+    }
+
+    const userId = new Types.ObjectId(req.user?.id);
+
+    const alreadyLiked = comment.likes.some(
+        (like) => like.user.toString() === userId.toString()
+    );
+
+    if (alreadyLiked) {
+        comment.likes = comment.likes.filter(
+            (like) => like.user.toString() !== userId.toString()
+        );
+    } else {
+        // before pushing, remove any accidental duplicate first
+        comment.likes = comment.likes.filter(
+            (like) => like.user.toString() !== userId.toString()
+        );
+        comment.likes.push({
+            user: userId,
+            createdAt: new Date(),
+        });
+    }
+
+    await comment.save();
+
+    return res.status(200).json({
+        message: alreadyLiked ? 'Comment unliked' : 'Comment liked',
+        likes: comment.likes,
+    });
 };

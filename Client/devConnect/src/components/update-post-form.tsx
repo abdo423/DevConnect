@@ -40,7 +40,7 @@ interface UpdatePostModalProps {
 }
 
 const UpdatePostModal = ({post}: UpdatePostModalProps) => {
-    console.log(post);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [open, setOpen] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -67,9 +67,9 @@ const UpdatePostModal = ({post}: UpdatePostModalProps) => {
                 image: data.image || post.image,
             };
 
-            console.log("Submitting:", postData); // Debug log
 
-            console.log(postData);
+
+
             await dispatch(
                 PostUpdateThunk({
                     id: post.id,

@@ -58,28 +58,28 @@ const postSchema = new Schema<PostDocument>(
     }
 );
 
-// Fix: Use only the supported findOneAndDelete hook
-postSchema.pre('findOneAndDelete', async function (next) {
+postSchema.post('findOneAndDelete', async function (doc, next) {
     try {
-        const filter = this.getFilter();
-        const postToDelete = await mongoose.model('Post').findOne(filter);
+        if (!doc) return next();
 
-        if (postToDelete) {
-            console.log('Pre findOneAndDelete middleware triggered for post:', postToDelete._id);
-            // Update the User document to remove the post reference
-            await User.findByIdAndUpdate(
-                postToDelete.author_id,
-                {$pull: {posts: postToDelete._id}}
-            );
-            await Comment.deleteMany({post_id: postToDelete._id});
-        }
+
+
+        // 1. Remove the post from the author's list
+        await User.findByIdAndUpdate(doc.author_id, {
+            $pull: { posts: doc._id }
+        });
+
+        // 2. Delete all related comments (MATCHING `post`)
+        const deleteResult = await Comment.deleteMany({ post: doc._id });
+
+        console.log(`- Deleted ${deleteResult.deletedCount} related comments.`);
+
         next();
     } catch (error: any) {
-        console.error('Error in findOneAndDelete middleware:', error);
+        console.error('Error in post delete middleware:', error);
         next(error);
     }
 });
-
 // Add a pre-deleteOne hook for direct document deletions
 // TypeScript-compliant hook
 postSchema.pre<Query<any, PostDocument>>('deleteOne', async function (next) {
