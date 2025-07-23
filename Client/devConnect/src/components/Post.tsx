@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import PostSkeletonLoad from "@/components/PostSkeletonLoad.tsx";
 import CommentsPopUp from "@/components/CommentsPopUp.tsx";
-import {fetchComments} from "@/features/Commments/commetSlice.ts";
+import {fetchComments} from "@/features/Commments/commentsSlice.ts";
 
 type PostProps = {
     post: {

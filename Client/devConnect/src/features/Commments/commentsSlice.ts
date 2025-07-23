@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import {createComment, getComments,likeComment as likeCommentApi} from "@/features/Commments/CommentApi.ts";
+import {createComment, getComments,likeComment as likeCommentApi} from "@/features/Commments/CommentsApi.ts";
 
 
 
