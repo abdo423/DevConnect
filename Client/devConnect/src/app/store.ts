@@ -4,7 +4,7 @@ import postsSlice from "@/features/Posts/postsSlice.ts";
 import ProfileSlice from "@/features/Profile/profileSlice.ts";
 import messageSlice from "@/features/Message/messageSlice.ts";
 import followingSlice from "@/features/Following/followingSlice.ts";
-import commentsSlice from "@/features/Commments/commetSlice.ts";
+import commentsSlice from "@/features/Commments/commentsSlice.ts";
 export const store = configureStore({
     reducer: {
         auth: authSlice,
