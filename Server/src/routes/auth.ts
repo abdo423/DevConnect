@@ -11,7 +11,6 @@ import {Request, Response, Router} from 'express';
 import {getAllFollowings} from "../controllers/User";
 
 const router = Router();
-const protectedRoute = Router();
 // Logging middleware
 router.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
@@ -46,14 +45,5 @@ router.delete("/user/:id", (req: Request, res: Response) => {
     deleteUser(req, res);
 })
 
-protectedRoute.get("/following/:id", (req: Request, res: Response) => {
-    getAllFollowings(req,res);
-})
-protectedRoute.get("/sentMessages", (req: Request, res: Response) => {
- getSendersForCurrentUser(req,res);
 
-})
-export default (app: any, authMiddleware: any) => {
-    app.use('/Auth', router);
-    app.use('/Auth', authMiddleware, protectedRoute);
-};
+export default router;
