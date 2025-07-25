@@ -26,7 +26,7 @@ import {
     addComment,
     fetchComments,
     likeComment,
-} from "@/features/Commments/commetSlice";
+} from "@/features/Commments/commentsSlice.ts";
 
 interface CommentsPopUpProps {
     isLoggedIn?: boolean;
