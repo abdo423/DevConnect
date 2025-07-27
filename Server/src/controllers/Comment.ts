@@ -10,97 +10,109 @@ const JWT_SECRET = config.get<string>("jwt.secret");
 const expiresIn = config.get<string>("jwt.expiresIn");
 
 
-export const createComment = async (req: Request, res: Response) => {
-    if(!req.user) return res.status(401).json({message: 'Unauthorized: User not authenticated'});
+// controllers/CommentController.ts
+import * as CommentService from "../services/CommentService";
 
-    const commentData = {
-        user: new Types.ObjectId(req.user.id),
-        post: req.body.post,
-        content: req.body.content,
-        likes: [],
-        createdAt: new Date()
+export const createComment = async (req: Request, res: Response) => {
+    if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized: User not authenticated" });
     }
-    const result = validateComment(commentData);
-    if(!result.success) return res.status(400).json({errors: result.error.errors});
-    const comment = new Comment(commentData);
-    await comment.save();
-    await comment.populate('user', 'username avatar')
-    res.status(201).json({message: 'Comment created successfully',comment: comment});
-}
+
+    try {
+        const comment = await CommentService.createComment(
+            req.user.id,
+            req.body.post,
+            req.body.content
+        );
+
+        return res.status(201).json({
+            message: "Comment created successfully",
+            comment,
+        });
+    } catch (err: any) {
+        if (err.type === 'ValidationError') {
+            return res.status(400).json({ errors: err.errors });
+        }
+        console.error("Error creating comment:", err);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
 
 export const deleteComment = async (req: Request, res: Response) => {
-    const comment = await Comment.findById(req.params.id);
-    if (!comment) return res.status(404).json({ message: 'Comment not found' });
-    await Comment.deleteOne({_id: req.params.id});
-    return res.status(200).json({ message: 'Comment deleted successfully' });
-}
+    try {
+        await CommentService.deleteComment(req.params.id);
+        return res.status(200).json({ message: "Comment deleted successfully" });
+    } catch (err: any) {
+        if (err.type === 'ValidationError') {
+            return res.status(400).json({ errors: err.errors });
+        }
+        if (err.type === 'NotFound') {
+            return res.status(404).json({ message: err.message });
+        }
+        console.error("Error deleting comment:", err);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
 
 export const updateComment = async (req: Request, res: Response) => {
-    const comment = await Comment.findById(req.params.id);
-    if (!comment) return res.status(404).json({ message: 'Comment not found' });
-    const updateData = {
-        ...req.body,
-        user: comment.user.toString(),
-        post: comment.post.toString(),
-        createdAt: comment.createdAt
+    try {
+        const { content } = req.body;
+        const updatedComment = await CommentService.updateComment(req.params.id, { content });
+        return res.status(200).json({
+            message: "Comment updated successfully",
+            comment: updatedComment,
+        });
+    } catch (err: any) {
+        if (err.type === "ValidationError") {
+            return res.status(400).json({ errors: err.errors });
+        }
+        if (err.type === "NotFound") {
+            return res.status(404).json({ message: err.message });
+        }
+        console.error("Error updating comment:", err);
+        return res.status(500).json({ message: "Internal server error" });
     }
-    const result = validateComment(updateData);
-    if (!result.success) return res.status(400).json({ errors: result.error.errors });
-    await Comment.findByIdAndUpdate(
-        req.params.id,
-        { $set: updateData },
-        { new: true }
-    );
-
-
-    return res.status(200).json({ message: 'Comment updated successfully' });
-}
-
+};
 export const getCommentsByPost = async (req: Request, res: Response) => {
     const postId = req.params.id;
 
     try {
-        const comments = await Comment.find({ post: postId })
-            .populate('user', 'username avatar') // Populate user fields (optional)
-            .sort({ createdAt: -1 }); // Optional: sort by newest first
-
+        const comments = await CommentService.getCommentsByPost(postId)
         res.status(200).json({ comments });
-    } catch (error) {
+    } catch (error:any) {
+        if (error.type === "ValidationError") {
+            return res.status(400).json({ message: error.message });
+        }
         res.status(500).json({ message: 'Server Error', error });
     }
 };
+
 export const likeComment = async (req: Request, res: Response) => {
-    const comment = await Comment.findById(req.params.id);
+    try {
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
 
-    if (!comment) {
-        return res.status(404).json({ message: 'Comment not found' });
-    }
-
-    const userId = new Types.ObjectId(req.user?.id);
-
-    const alreadyLiked = comment.likes.some(
-        (like) => like.user.toString() === userId.toString()
-    );
-
-    if (alreadyLiked) {
-        comment.likes = comment.likes.filter(
-            (like) => like.user.toString() !== userId.toString()
+        const { alreadyLiked, likes } = await CommentService.likeComment(
+            req.params.id,
+            userId
         );
-    } else {
-        // before pushing, remove any accidental duplicate first
-        comment.likes = comment.likes.filter(
-            (like) => like.user.toString() !== userId.toString()
-        );
-        comment.likes.push({
-            user: userId,
-            createdAt: new Date(),
+
+        return res.status(200).json({
+            message: alreadyLiked ? "Comment unliked" : "Comment liked",
+            likes,
         });
+    } catch (error: any) {
+        if (error.type === "ValidationError") {
+            return res.status(400).json({ errors: error.errors });
+        }
+        if (error.type === "NotFound") {
+            return res.status(404).json({ message: error.message });
+        }
+        console.error("Error liking comment:", error);
+        return res.status(500).json({ message: "Server Error" });
     }
-
-    await comment.save();
-
-    return res.status(200).json({
-        message: alreadyLiked ? 'Comment unliked' : 'Comment liked',
-        likes: comment.likes,
-    });
 };
