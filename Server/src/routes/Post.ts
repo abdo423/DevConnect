@@ -6,7 +6,7 @@ import {
     updatePost,
     likePost,
     getCommentsByPostIdArray
-} from '../controllers/Post';
+} from '../controllers/post';
 
 const router = Router();
 

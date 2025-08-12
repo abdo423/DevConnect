@@ -1,9 +1,9 @@
-// Post.ts
+// postService.ts
 
 import mongoose, {Schema, Document, Types, isValidObjectId, Query} from 'mongoose';
 import * as z from 'zod';
-import User from "./User";
-import Comment from "./Comment";
+import User from "./user";
+import Comment from "./comment";
 
 export interface likes {
 

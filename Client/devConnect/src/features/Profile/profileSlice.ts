@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import {followUser, getProfile, getProfileById, updateProfile} from '@/features/Profile/profileApi.ts'; // Your API service
 
 // Define the profile state type
@@ -13,9 +13,15 @@ interface ProfileState {
             _id: string;
             title: string;
             content: string;
-            author_id: string;
+            author_id:   {
+                _id: string;
+                email: string;
+                username: string;
+                avatar?: string;
+            };
             image: string;
             likes: Array<{
+                _id: string;
                 user: string;
                 createdAt: string;
             }>;

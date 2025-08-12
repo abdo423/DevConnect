@@ -1,6 +1,6 @@
-import mongoose, {Schema, Document, Types, isValidObjectId, Query} from 'mongoose';
+import mongoose, {isValidObjectId, Schema, Types} from 'mongoose';
 import * as z from 'zod';
-import Post from "./Post";
+import Post from "./post";
 
 export interface likes {
 

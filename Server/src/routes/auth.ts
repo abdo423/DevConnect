@@ -6,9 +6,9 @@ import {
     loginUserCheck,
     getUser,
     getSendersForCurrentUser
-} from '../controllers/User';
+} from '../controllers/user';
 import {Request, Response, Router} from 'express';
-import {getAllFollowings} from "../controllers/User";
+import {getAllFollowings} from "../controllers/user";
 
 const router = Router();
 // Logging middleware

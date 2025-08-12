@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express';
-import {FollowUser, getProfile, getProfileById, updateProfile} from "../controllers/Profile";
+import {FollowUser, getProfile, getProfileById, updateProfile} from "../controllers/profile";
 
 const router = Router();
 // Logging middleware

@@ -1,9 +1,7 @@
-// services/CommentService.ts
+// services/commentService.ts
 import { Types } from "mongoose";
-import Comment, { validateComment } from "../models/Comment";
-import Post from "../models/Post";
-import {CommentUpdateInput} from "../Types/comment";
-import {Request, Response} from "express";
+import Comment, { validateComment } from "../models/comment";
+import { CommentUpdateInput } from "../Types/comment";
 
 export const createComment = async (userId: string, postId: string, content: string) => {
     const commentData = {
@@ -16,7 +14,7 @@ export const createComment = async (userId: string, postId: string, content: str
 
     const result = validateComment(commentData);
     if (!result.success) {
-        throw { type: 'ValidationError', errors: result.error.errors };
+        throw { status: 400, message: "Validation failed", errors: result.error.errors };
     }
 
     const comment = new Comment(commentData);
@@ -27,14 +25,13 @@ export const createComment = async (userId: string, postId: string, content: str
 };
 
 export const deleteComment = async (commentId: string) => {
-    // Validate ObjectId format
     if (!Types.ObjectId.isValid(commentId)) {
-        throw { type: 'ValidationError', errors: { id: 'Invalid comment ID' } };
+        throw { status: 400, message: "Invalid comment ID", errors: { id: 'Invalid comment ID' } };
     }
 
     const comment = await Comment.findById(commentId);
     if (!comment) {
-        throw { type: 'NotFound', message: 'Comment not found' };
+        throw { status: 404, message: "Comment not found" };
     }
 
     await Comment.deleteOne({ _id: commentId });
@@ -43,36 +40,39 @@ export const deleteComment = async (commentId: string) => {
 
 export const updateComment = async (commentId: string, body: CommentUpdateInput) => {
     if (!Types.ObjectId.isValid(commentId)) {
-        throw { type: 'ValidationError', errors: { id: 'Invalid comment ID' } };
-
+        throw { status: 400, message: "Invalid comment ID", errors: { id: 'Invalid comment ID' } };
     }
+
     const comment = await Comment.findById(commentId);
     if (!comment) {
-        throw { type: 'NotFound', message: 'Comment not found' };
+        throw { status: 404, message: "Comment not found" };
     }
+
     const updateData = {
         ...body,
         user: comment.user,
         post: comment.post,
         createdAt: comment.createdAt,
         likes: comment.likes
+    };
 
-    }
     const result = validateComment(updateData);
     if (!result.success) {
-        throw { type: "ValidationError", errors: result.error.errors };
+        throw { status: 400, message: "Validation failed", errors: result.error.errors };
     }
-   await Comment.findByIdAndUpdate(
-       commentId,
-       { $set: updateData },
-       { new: true }
-   ).populate("user", "username avatar");
+
+    await Comment.findByIdAndUpdate(
+        commentId,
+        { $set: updateData },
+        { new: true }
+    ).populate("user", "username avatar");
+
     return updateData;
-}
+};
 
 export const getCommentsByPost = async (postId: string) => {
     if (!Types.ObjectId.isValid(postId)) {
-        throw { type: "ValidationError", message: "Invalid post ID" };
+        throw { status: 400, message: "Invalid post ID" };
     }
 
     return await Comment.find({ post: postId })
@@ -82,16 +82,16 @@ export const getCommentsByPost = async (postId: string) => {
 
 export const likeComment = async (commentId: string, userId: string) => {
     if (!Types.ObjectId.isValid(commentId)) {
-        throw { type: "ValidationError", errors: { id: "Invalid comment ID" } };
+        throw { status: 400, message: "Invalid comment ID", errors: { id: "Invalid comment ID" } };
     }
 
     if (!Types.ObjectId.isValid(userId)) {
-        throw { type: "ValidationError", errors: { id: "Invalid user ID" } };
+        throw { status: 400, message: "Invalid user ID", errors: { id: "Invalid user ID" } };
     }
 
     const comment = await Comment.findById(commentId);
     if (!comment) {
-        throw { type: "NotFound", message: "Comment not found" };
+        throw { status: 404, message: "Comment not found" };
     }
 
     const alreadyLiked = comment.likes.some(

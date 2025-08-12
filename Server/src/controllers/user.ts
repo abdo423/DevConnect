@@ -1,10 +1,10 @@
 import {Request, Response, NextFunction} from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import User, {validateUser, validateLogin} from '../models/User';
+import User, {validateUser, validateLogin} from '../models/user';
 import config from "config";
 import mongoose from "mongoose";
-import Message from "../models/Message";
+import Message from "../models/message";
 
 // Secret for JWT (should be in .env)
 const JWT_SECRET = config.get<string>("jwt.secret");

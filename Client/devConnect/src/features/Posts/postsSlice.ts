@@ -1,5 +1,5 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { createPost, deletePost, getPosts, likePost, updatePost } from './postsApi';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import {createPost, deletePost, getPosts, likePost, updatePost} from './postsApi';
 
 // Thunks
 export const createPostThunk = createAsyncThunk(
@@ -158,7 +158,6 @@ const postsSlice = createSlice({
                 state.error = null;
             })
             .addCase(erasePost.fulfilled, (state, action) => {
-
                 const deletedId = action.payload.post._id;
                 state.posts = state.posts.filter(post => post._id !== deletedId);
                 state.loading = false;

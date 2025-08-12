@@ -1,7 +1,7 @@
 // Protected routes
 
 import {Router,Response,Request} from "express";
-import {createPost, deletePost, getCommentsByPostIdArray, likePost, updatePost} from "../controllers/Post";''
+import {createPost, deletePost, getCommentsByPostIdArray, likePost, updatePost} from "../controllers/post";''
 
 const protectedRoutes = Router();
 

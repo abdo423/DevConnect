@@ -1,6 +1,6 @@
-import mongoose, { Schema, Document, Types, Query } from 'mongoose';
+import mongoose, {Document, Query, Schema, Types} from 'mongoose';
 import * as z from 'zod';
-import Post from "./Post";
+import Post from "./post";
 
 const userValidationSchema = z.object({
     username: z.string().min(3).max(30),

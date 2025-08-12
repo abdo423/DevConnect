@@ -18,12 +18,13 @@ const ProfileComponent = () => {
     const {user} = useSelector((state:RootState) => (state.auth));
     const isFollowing = profile?.followers?.some(followerId => followerId === user?._id);
     const userData = {
-        id: profile?._id,
-        username: profile?.username,
-        email: profile?.email,
-        bio: profile?.bio,
-        avatar: profile?.avatar,
-    }
+        id: profile?._id || "",
+        username: profile?.username || "",
+        email: profile?.email || "",
+        bio: profile?.bio || "",
+        avatar: profile?.avatar || "",
+    };
+
     const { id } = useParams();
     useEffect(() => {
         if (id) {
