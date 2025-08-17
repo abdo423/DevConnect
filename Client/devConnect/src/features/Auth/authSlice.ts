@@ -1,35 +1,12 @@
-import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
-import {loginUser, registerUser, logoutUser, checkLogin} from "@/features/Auth/authApi.ts";
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit'
+import {checkLogin, loginUser, logoutUser, registerUser} from "@/features/Auth/authApi.ts";
 import {updateProfileThunk} from "@/features/Profile/profileSlice.ts";
-interface User {
-    user: {
-        _id: string;
-        username: string;
-        email: string;
-        avatar: string;
-        bio: string;
-        posts: Array<{
-            _id: string;
-            title: string;
-            content: string;
-            author_id: string;
-            image: string;
-            likes: Array<{
-                user: string;
-                createdAt: string;
-            }>;
-            comments: Array<any>;
-            createdAt: string;
-            updatedAt: string;
-        }>;
-        followers: string[];
-        following: string[];
-        createdAt: string;
-        updatedAt: string;
-    } | null;
-    loading: boolean;
-    error: string | null;
-    isLoggedIn: boolean;
+import User from "Types/user.ts"
+
+interface APIError {
+
+        message: string;
+
 }
 export const login = createAsyncThunk('Auth/login', async (credentials: {
     email: string,
@@ -39,7 +16,8 @@ export const login = createAsyncThunk('Auth/login', async (credentials: {
         const response = await loginUser(credentials)
 
         return response
-    } catch (error: any) {
+    } catch (err: unknown) {
+        const error = err as APIError
         return thunkAPI.rejectWithValue(error.message  || "Something went wrong")
     }
 })
@@ -53,9 +31,9 @@ export const register = createAsyncThunk('Auth/register', async (credentials: {
     try {
         const response = await registerUser(credentials);
         return response;
-    } catch (error: any) {
-
-        return thunkAPI.rejectWithValue(error.message|| "Something went wrong")
+    }  catch (err: unknown) {
+        const error = err as APIError
+        return thunkAPI.rejectWithValue(error.message  || "Something went wrong")
     }
 })
 //logout
@@ -64,8 +42,9 @@ export const logout = createAsyncThunk('Auth/logout', async (_, thunkAPI) => {
         const response = await logoutUser();
 
         return response;
-    } catch (error: any) {
-        return thunkAPI.rejectWithValue(error.message || "Something went wrong");
+    }  catch (err: unknown) {
+        const error = err as APIError
+        return thunkAPI.rejectWithValue(error.message  || "Something went wrong")
     }
 })
 

@@ -1,61 +1,42 @@
-import Cookies from "js-cookie";
 import axios from "axios";
 
-const BASE_URL =  'http://localhost:3000/auth';
-export const getFollowings = async (id:string) => {
-    try {
-        const token = Cookies.get("auth-token");
-        if (!token) {
-            throw new Error("Not authenticated");
-        }
-        const response = await axios.get(
-            `${BASE_URL}/following/${id}`,
-            {
-                headers:{
-                    Authorization: `Bearer ${token}`
-                },
-                withCredentials: true
-            }
-        );
-        return response.data;
-    }catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error('Axios error details:', {
-                status: error.response?.status,
-                data: error.response?.data,
-                headers: error.response?.headers
-            });
-            throw error.response?.data || error;
-        }
-        console.error('Non-Axios error:', error);
-    }
+const api = axios.create({
+    baseURL: "http://localhost:3000/auth",
+    withCredentials: true, // always send cookies
+});
 
-}
-export  const getUserMessages = async () => {
+// Example: get followings
+export const getFollowings = async (id: string) => {
     try {
-        const token = Cookies.get("auth-token");
-        if (!token) {
-            throw new Error("Not authenticated");
-        }
-        const response = await axios.get(
-            `${BASE_URL}/sentMessages`,
-            {
-                headers:{
-                    Authorization: `Bearer ${token}`
-                },
-                withCredentials: true
-            }
-        );
+        const response = await api.get(`/following/${id}`);
         return response.data;
-    }catch (error) {
+    } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error('Axios error details:', {
+            console.error("Axios error details:", {
                 status: error.response?.status,
                 data: error.response?.data,
-                headers: error.response?.headers
+                headers: error.response?.headers,
             });
             throw error.response?.data || error;
         }
-        console.error('Non-Axios error:', error);
+        console.error("Non-Axios error:", error);
     }
-}
+};
+
+// Example: get messages
+export const getUserMessages = async () => {
+    try {
+        const response = await api.get("/sentMessages");
+        return response.data;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error("Axios error details:", {
+                status: error.response?.status,
+                data: error.response?.data,
+                headers: error.response?.headers,
+            });
+            throw error.response?.data || error;
+        }
+        console.error("Non-Axios error:", error);
+    }
+};

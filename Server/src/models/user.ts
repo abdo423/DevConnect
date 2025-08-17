@@ -1,4 +1,4 @@
-import mongoose, {Document, Query, Schema, Types} from 'mongoose';
+import mongoose, {Document, Query, Schema, Types,CallbackError} from 'mongoose';
 import * as z from 'zod';
 import Post from "./post";
 
@@ -90,14 +90,14 @@ userSchema.pre('findOneAndDelete', async function(next) {
             await Post.deleteMany({ author_id: userToDelete._id });
         }
         next();
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error in user deletion middleware:', error);
-        next(error);
+        next( error as CallbackError);
     }
 });
 
 // Add this only if you use User.deleteOne() or userDoc.deleteOne() in your code
-userSchema.pre<Query<any, UserDocument>>('deleteOne', async function(next) {
+userSchema.pre<Query<unknown, UserDocument>>('deleteOne', async function(next) {
     try {
         const filter = this.getFilter();
         const userToDelete = await mongoose.model('User').findOne(filter);
@@ -107,9 +107,9 @@ userSchema.pre<Query<any, UserDocument>>('deleteOne', async function(next) {
             await Post.deleteMany({ author_id: userToDelete._id });
         }
         next();
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error in deleteOne middleware:', error);
-        next(error);
+        next(error as CallbackError)
     }
 });
 
@@ -117,7 +117,7 @@ export const validateUser = (user: UserDocument) => {
     return userValidationSchema.safeParse(user);
 };
 
-export const validateLogin = (user: any) => {
+export const validateLogin = (user: unknown) => {
     return loginSchema.safeParse(user);
 };
 

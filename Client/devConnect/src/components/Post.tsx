@@ -1,15 +1,14 @@
-import {useEffect, useState} from "react";
-import {useNavigate} from "react-router-dom";
-import {formatDistanceToNow} from "date-fns";
-import {Heart, MoreHorizontal} from "lucide-react";
-import {erasePost, likesPost} from "@/features/Posts/postsSlice";
-import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
-import {Button} from "@/components/ui/button";
-import {Card, CardContent, CardFooter, CardHeader} from "@/components/ui/card";
-import {useDispatch, useSelector} from "react-redux";
-import {AppDispatch, RootState} from "../app/store";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
+import { Heart, MoreHorizontal } from "lucide-react";
+import { erasePost, likesPost } from "@/features/Posts/postsSlice";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../app/store";
 import UpdatePostModal from "./UpdatePostForm.tsx";
-
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -18,104 +17,59 @@ import {
 } from "@/components/ui/dropdown-menu";
 import PostSkeletonLoad from "@/components/PostSkeletonLoad.tsx";
 import CommentsPopUp from "@/components/CommentsPopUp.tsx";
-import {fetchComments} from "@/features/Comments/commentsSlice.ts";
+import { fetchComments } from "@/features/Comments/commentsSlice.ts";
+import { PostProps } from "../../Types/post.ts";
 
-type PostProps = {
-    post: {
-        _id: string;
-        title: string;
-        content: string;
-        image?: string;
-        author_id: {
-            _id: string;
-            email: string;
-            avatar?: string;
-            username: string;
-        };
-        likes?: Array<{
-            user: string;
-            createdAt: string;
-            _id: string;
-        }>;
-        comments?: string[];
-        createdAt: string | Date;
-        updatedAt?: string;
-        __v?: number;
-    };
-    user?: {
-        id?: string; // Add this to pass current user ID
-        username: string;
-        email: string;
-        avatar?: string;
-        bio?: string;
-    };
-};
-
-const Post = ({post, user}: PostProps) => {
-    const {isLoggedIn, user: currentUser} = useSelector((state: RootState) => state.auth);
-    const {comments} = useSelector((state: RootState) => state.comments);
+const Post = ({ post, user }: PostProps) => {
+    const { isLoggedIn, user: currentUser } = useSelector((state: RootState) => state.auth);
+    const { loading } = useSelector((state: RootState) => state.post);
+    const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
 
-    const safePost = {
-        ...post,
-        author_id: post.author_id || {_id: '', email: 'unknown@example.com'},
-        likes: post.likes || [],
-        comments: post.comments || [],
-        content: post.content || '',
-        title: post.title || '',
-        createdAt: post.createdAt || new Date().toISOString()
-    };
+    // Narrow author_id to object if needed
+    const author =
+        typeof post.author_id === "string"
+            ? { _id: post.author_id, email: "unknown@example.com", username: "Unknown" }
+            : post.author_id;
 
-    const dispatch = useDispatch<AppDispatch>();
-    useEffect(() => {
-        if (post?._id) {
-            dispatch(fetchComments(post._id));
+    const likesArray = post.likes ?? [];
+    const commentsArray = post.comments ?? [];
 
-        }
-    }, [dispatch, post?._id]);
-    // Get current user ID - try multiple sources
-    const currentUserId = currentUser?._id || currentUser?._id || user?.id;
+    // Current user ID
+    const currentUserId = currentUser?._id || user?.id;
 
-    // Fix: Check if current logged-in user has liked this post
-    const initialIsLiked = currentUserId ?
-        safePost.likes.some(like => like.user === currentUserId) : false;
+    // Check if liked
+    const initialIsLiked = currentUserId
+        ? likesArray.some((like) =>
+            typeof like === "string" ? like === currentUserId : like.user === currentUserId
+        )
+        : false;
 
-    const [likeCount, setLikeCount] = useState(safePost.likes.length);
+    const [likeCount, setLikeCount] = useState(likesArray.length);
     const [isLiked, setIsLiked] = useState(initialIsLiked);
-
-    const {loading} = useSelector((state: RootState) => state.post);
     const [expandedText, setExpandedText] = useState(false);
+
+    useEffect(() => {
+        if (post._id) {
+            dispatch(fetchComments(post._id));
+        }
+    }, [dispatch, post._id]);
 
     const handleLike = () => {
         if (!isLoggedIn) return navigate("/login");
+        if (!currentUserId) return;
 
-        // Don't proceed if we don't have current user ID
-        if (!currentUserId) {
-            console.error("Current user ID not available");
-            return;
-        }
-
-        // Optimistically update UI
         const newIsLiked = !isLiked;
         setIsLiked(newIsLiked);
-        setLikeCount(prev => newIsLiked ? prev + 1 : prev - 1);
+        setLikeCount((prev) => (newIsLiked ? prev + 1 : prev - 1));
 
-        // Dispatch the like action
-        dispatch(likesPost(post._id)).unwrap().then(
-            (response) => {
-                console.log("Like action successful", response);
-
-            },
-            (error) => {
-                console.error("Like action failed", error);
-                // Revert optimistic update on error
+        dispatch(likesPost(post._id))
+            .unwrap()
+            .catch(() => {
                 setIsLiked(!newIsLiked);
-                setLikeCount(prev => newIsLiked ? prev - 1 : prev + 1);
-            }
-        );
+                setLikeCount((prev) => (newIsLiked ? prev - 1 : prev + 1));
+            });
     };
-
-    const baseUsername = post.author_id?.email?.split('@')[0] || user?.email.split('@')[0] || 'Unknown';
 
     const generate3DigitCode = (input: string): number => {
         let hash = 0;
@@ -125,39 +79,39 @@ const Post = ({post, user}: PostProps) => {
         return Math.abs(hash % 900) + 100;
     };
 
-    const profileNavigate = () => {
-        if (!isLoggedIn) return navigate("/login");
-        navigate(`/profile/${post.author_id._id}`);
-    }
-
-    const uniqueCode = generate3DigitCode(post.author_id?.email || post.author_id?._id || user?.email || 'user');
+    const baseUsername = author.email.split("@")[0];
+    const uniqueCode = generate3DigitCode(author.email || author._id);
     const username = `${baseUsername}${uniqueCode}`;
 
-    if (loading) return <PostSkeletonLoad/>;
+    const profileNavigate = () => {
+        if (!isLoggedIn) return navigate("/login");
+        navigate(`/profile/${author._id}`);
+    };
+
+    if (loading) return <PostSkeletonLoad />;
 
     return (
         <Card className="max-w-xl mx-auto overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-around space-y-0 gap-3">
                 <Avatar onClick={profileNavigate}>
-                    <AvatarImage src={post.author_id.avatar || user?.avatar || "/placeholder.svg"} alt={username}/>
+                    <AvatarImage src={author.avatar || user?.avatar || "/placeholder.svg"} alt={username} />
                     <AvatarFallback>
-                        {(user?.username || post.author_id?.username || 'U').charAt(0).toUpperCase()}
+                        {(user?.username || author.username || "U").charAt(0).toUpperCase()}
                     </AvatarFallback>
                 </Avatar>
 
                 <div className="flex-1" onClick={profileNavigate}>
-                    <div className="font-semibold">{user?.username ? user?.username : post.author_id.username}</div>
+                    <div className="font-semibold">{user?.username || author.username}</div>
                     <div className="text-xs text-muted-foreground">@{username}</div>
                 </div>
 
-                {/* Show edit modal only if logged in and user owns the post */}
-                {isLoggedIn && currentUserId === post.author_id._id && (
+                {isLoggedIn && currentUserId === author._id && (
                     <UpdatePostModal
                         post={{
                             id: post._id,
                             title: post.title,
                             content: post.content,
-                            image: post.image || ""
+                            image: post.image || "",
                         }}
                     />
                 )}
@@ -165,15 +119,13 @@ const Post = ({post, user}: PostProps) => {
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="h-8 w-8 ml-4">
-                            <MoreHorizontal className="w-4 h-4"/>
+                            <MoreHorizontal className="w-4 h-4" />
                             <span className="sr-only">More options</span>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuItem>Save post</DropdownMenuItem>
-
-                        {/* Only show delete option if logged in and user owns the post */}
-                        {isLoggedIn && currentUserId === post.author_id._id && (
+                        {isLoggedIn && currentUserId === author._id && (
                             <DropdownMenuItem
                                 onClick={() => dispatch(erasePost(post._id))}
                                 className="text-red-400 focus:text-red-500"
@@ -233,7 +185,7 @@ const Post = ({post, user}: PostProps) => {
                             if (!isLoggedIn) return navigate("/login");
                         }}
                     >
-                        <img src={post.image} alt="Post" className="w-full h-full object-cover"/>
+                        <img src={post.image} alt="Post" className="w-full h-full object-cover" />
                     </div>
                 )}
             </CardContent>
@@ -247,33 +199,28 @@ const Post = ({post, user}: PostProps) => {
                             className="flex items-center gap-1 px-2"
                             onClick={handleLike}
                         >
-                            <Heart className={`h-5 w-5 ${isLiked ? "fill-red-500 text-red-500" : ""}`}/>
+                            <Heart className={`h-5 w-5 ${isLiked ? "fill-red-500 text-red-500" : ""}`} />
                             <span>{likeCount}</span>
                         </Button>
                         <CommentsPopUp
-                        //    initialComments={comments}
                             isLoggedIn={isLoggedIn}
                             onNavigateToLogin={() => navigate("/login")}
                             postData={{
                                 _id: post._id,
                                 title: post.title,
-                                author: post.author_id.username,
-                                authorAvatar: post.author_id.avatar,
+                                author: author.username,
+                                authorAvatar: author.avatar,
                                 image: post.image,
                                 date: post.createdAt,
                                 likes: likeCount,
-                                commentCount: post?.comments.length || 0,
+                                commentCount: commentsArray.length,
                             }}
                         />
                     </div>
                     <div className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(post.createdAt), {addSuffix: true})}
+                        {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
                     </div>
                 </div>
-
-
-
-
             </CardFooter>
         </Card>
     );

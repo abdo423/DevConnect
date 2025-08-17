@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { formatDistanceToNow } from "date-fns";
 import {
     Dialog,
@@ -14,12 +14,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-    MessageCircle,
-    Send,
-    Heart,
-    Share2,
     Bookmark,
+    Heart,
+    MessageCircle,
     MoreHorizontal,
+    Send,
+    Share2,
 } from "lucide-react";
 import { AppDispatch, RootState } from "@/app/store";
 import {
@@ -66,8 +66,10 @@ export default function CommentsPopUp({
     const { comments, loading, error } = useSelector(
         (state: RootState) => state.comments
     );
+
     const { user } = useSelector((state: RootState) => state.auth);
     const [newComment, setNewComment] = useState("");
+    const [optimisticLikes, setOptimisticLikes] = useState<Record<string, string[]>>({});
 
     const commentsArray = Array.isArray(comments) ? comments : [];
 
@@ -112,20 +114,54 @@ export default function CommentsPopUp({
         if (!isLoggedIn) return onNavigateToLogin?.();
         if (!user?._id) return;
 
+        // Optimistic UI update
+        setOptimisticLikes((prev) => {
+            const currentLikes = prev[commentId] || [];
+            const alreadyLiked = currentLikes.includes(user._id);
+            return {
+                ...prev,
+                [commentId]: alreadyLiked
+                    ? currentLikes.filter((id) => id !== user._id)
+                    : [...currentLikes, user._id],
+            };
+        });
+
         try {
             await dispatch(likeComment(commentId)).unwrap();
+            // Clear optimistic state after successful update
+            setOptimisticLikes((prev) => {
+                const newState = { ...prev };
+                delete newState[commentId];
+                return newState;
+            });
         } catch (error) {
             console.error("Failed to like comment:", error);
+            // Revert optimistic update on error
+            setOptimisticLikes((prev) => {
+                const newState = { ...prev };
+                delete newState[commentId];
+                return newState;
+            });
         }
     };
+    const checkIfLiked = (comment: Comment) => {
+        const likes = optimisticLikes[comment._id] ?? comment.likes ?? [];
+        return user?._id ? likes.includes(user._id) : false;
+    };
 
-    const checkIfLiked = (comment: Comment) =>
-        user?._id && comment.likes?.includes(user._id);
-
-    const getLikeCount = (comment: Comment) => comment.likes?.length || 0;
+    const getLikeCount = (comment: Comment) => {
+        const likes = optimisticLikes[comment._id] ?? comment.likes ?? [];
+        return likes.length;
+    };
 
     return (
-        <Dialog>
+        <Dialog
+            onOpenChange={(open) => {
+                if (open && isLoggedIn && postData?._id) {
+                    dispatch(fetchComments(postData._id));
+                }
+            }}
+        >
             <DialogTrigger asChild>
                 <Button
                     variant="ghost"
@@ -170,15 +206,27 @@ export default function CommentsPopUp({
                 <div className="px-6 py-4 border-b bg-white">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                            <Button variant="ghost" size="sm" className="gap-2 text-gray-600 hover:text-red-500">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="gap-2 text-gray-600 hover:text-red-500"
+                            >
                                 <Heart className="w-4 h-4" />
                                 {postData?.likes || 0}
                             </Button>
-                            <Button variant="ghost" size="sm" className="gap-2 text-gray-600 hover:text-blue-500">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="gap-2 text-gray-600 hover:text-blue-500"
+                            >
                                 <MessageCircle className="w-4 h-4" />
                                 {commentsArray.length}
                             </Button>
-                            <Button variant="ghost" size="sm" className="gap-2 text-gray-600 hover:text-green-500">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="gap-2 text-gray-600 hover:text-green-500"
+                            >
                                 <Share2 className="w-4 h-4" />
                                 Share
                             </Button>
@@ -285,12 +333,12 @@ export default function CommentsPopUp({
                                                         size="sm"
                                                         className={`text-xs ${
                                                             isCommentLiked
-                                                                ? "text-red-500"
-                                                                : "text-gray-500 hover:text-red-600"
+                                                                ? "!text-red-500"
+                                                                : "text-gray-500 hover:!text-red-600"
                                                         }`}
                                                         onClick={() => handleLikeComment(comment._id)}
                                                     >
-                                                        <Heart className="w-3 h-3 mr-1" />
+                                                        <Heart className="w-3 h-3 mr-1" stroke="currentColor" />
                                                         Like ({getLikeCount(comment)})
                                                     </Button>
                                                     <Button

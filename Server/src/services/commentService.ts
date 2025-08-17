@@ -111,5 +111,11 @@ export const likeComment = async (commentId: string, userId: string) => {
 
     await comment.save();
 
-    return { alreadyLiked, likes: comment.likes };
+
+    const likesUserIds = comment.likes.map(like => like.user.toString());
+
+    return {
+        alreadyLiked,
+        likes: likesUserIds  // ✅ Now returns ["user1", "user2", "currentUser"]
+    };
 };

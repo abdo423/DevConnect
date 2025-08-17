@@ -10,12 +10,18 @@ import {useNavigate} from "react-router-dom";
 import {fetchFollowings, fetchUnfollowedMessageSenders} from "@/features/Following/followingSlice.ts";
 import {formatDistanceToNow} from "date-fns";
 import NavBar from "@/components/Navbar";
+interface User {
+    _id: string;
+    username?: string;
+    email?: string;
+    avatar?: string;
+}
 
 const MessagePage = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [newMessage, setNewMessage] = useState("");
     const dispatch = useDispatch<AppDispatch>();
-    const [selectedUser, setSelectedUser] = useState<any>(null);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const {messages} = useSelector((state: RootState) => state.message);
     const {user, isLoggedIn} = useSelector((state: RootState) => state.auth);
     const {following, unfollowedMessageSenders} = useSelector((state: RootState) => state.following);
@@ -33,7 +39,7 @@ const MessagePage = () => {
     const filteredFollowing = useMemo(() => {
         if (!searchQuery.trim()) return following || [];
 
-        return (following || []).filter((person: any) =>
+        return (following || []).filter((person: User) =>
             person.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             person.email?.toLowerCase().includes(searchQuery.toLowerCase())
         );
@@ -42,7 +48,7 @@ const MessagePage = () => {
     const filteredUnfollowedSenders = useMemo(() => {
         if (!searchQuery.trim()) return unfollowedMessageSenders || [];
 
-        return (unfollowedMessageSenders || []).filter((person: any) =>
+        return (unfollowedMessageSenders || []).filter((person: User) =>
             person.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             person.email?.toLowerCase().includes(searchQuery.toLowerCase())
         );
@@ -79,7 +85,7 @@ const MessagePage = () => {
         }
     };
 
-    const handleSelectUser = (person: any) => {
+    const handleSelectUser = (person: User) => {
         dispatch(getMessagesBetweenUsers(person._id));
         setSelectedUser(person);
         // Clear the input when switching conversations
@@ -160,7 +166,7 @@ const MessagePage = () => {
                                                     Following ({filteredFollowing.length})
                                                 </h2>
                                                 <div className="space-y-2">
-                                                    {filteredFollowing.map((person: any) => (
+                                                    {filteredFollowing.map((person: User) => (
                                                         <div
                                                             key={person._id}
                                                             onClick={() => handleSelectUser(person)}
@@ -211,7 +217,7 @@ const MessagePage = () => {
                                                     Others ({filteredUnfollowedSenders.length})
                                                 </h2>
                                                 <div className="space-y-2">
-                                                    {filteredUnfollowedSenders.map((person: any) => (
+                                                    {filteredUnfollowedSenders.map((person: User) => (
                                                         <div
                                                             key={person._id}
                                                             onClick={() => handleSelectUser(person)}
@@ -262,7 +268,7 @@ const MessagePage = () => {
                                 <div className="p-4">
                                     <h2 className="text-lg font-semibold mb-4 text-slate-700">Followed people</h2>
                                     <div className="space-y-2">
-                                        {following?.map((person: any) => (
+                                        {following?.map((person: User) => (
                                             <div
                                                 key={person._id}
                                                 onClick={() => handleSelectUser(person)}
@@ -306,7 +312,7 @@ const MessagePage = () => {
                                 <div className="p-4">
                                     <h2 className="text-lg font-semibold mb-4 text-slate-700">Others</h2>
                                     <div className="space-y-2">
-                                        {unfollowedMessageSenders?.map((person: any) => (
+                                        {unfollowedMessageSenders?.map((person: User) => (
                                             <div
                                                 key={person._id}
                                                 onClick={() => handleSelectUser(person)}
@@ -490,7 +496,7 @@ const MessagePage = () => {
                                             onKeyDown={(e) => {
                                                 if (e.key === 'Enter' && !e.shiftKey) {
                                                     e.preventDefault();
-                                                    handleSendMessage(e as any);
+                                                    handleSendMessage(e as React.FormEvent);
                                                 }
                                             }}
                                             disabled={!selectedUser}

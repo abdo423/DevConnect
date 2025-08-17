@@ -1,12 +1,14 @@
 import {Request, Response} from 'express';
 import * as profileService from "../services/profileService"
+import {AppError} from "../Types/Error";
 
 
 export const getProfile = async (req: Request, res: Response) => {
     try {
         const user = await profileService.getProfile(req.user!.id);
         res.status(200).json(user);
-    } catch (error: any) {
+    } catch (err: unknown) {
+        const error = err as AppError;
         console.error("Error fetching profile:", error);
         res.status(error.status || 500).json({
             message: error.message || "Server error",
@@ -21,7 +23,8 @@ export const getProfileById = async (req: Request, res: Response) => {
     try {
         const user = await profileService.getProfileById(req.params.id, req.user!.id);
         res.status(200).json(user);
-    } catch (error: any) {
+    } catch (err: unknown) {
+        const error = err as AppError
         console.error("Error fetching profile:", error);
         res.status(error.status || 500).json({
             message: error.message || "Server error",
@@ -44,7 +47,8 @@ export const followUser = async (req: Request, res: Response) => {
                 ? "User unfollowed successfully"
                 : "User followed successfully",
         });
-    } catch (error: any) {
+    } catch (err: unknown) {
+        const error = err as AppError
         res.status(error.status || 500).json({
             message: error.message || "Server error",
             ...(error.errors && { errors: error.errors }),
@@ -64,7 +68,8 @@ export const updateProfile = async (req: Request, res: Response) => {
             message: "Profile updated successfully",
             user: updatedUser,
         });
-    } catch (error: any) {
+    } catch (err: unknown) {
+        const error = err as AppError
         res.status(error.status || 500).json({
             message: error.message || "Server error",
             ...(error.errors && { errors: error.errors }),

@@ -1,29 +1,20 @@
-import {Outlet, Navigate} from 'react-router-dom'
-import {useSelector} from "react-redux";
-import {RootState} from "@/app/store";
-import Cookies from 'js-cookie';
-// interface PrivateRouteProps {
-//     children: React.ReactNode;
-//
-// }
+import { Outlet, Navigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-// const PrivateRoute = ({children, ...rest}: PrivateRouteProps) => {
-//     let auth = {'token': Cookies.get('auth-token')};
-//     return (
-//         <Route {...rest}>
-//             {!auth.token
-//                 ?
-//                 <Navigate to="/login"/>
-//                 :
-//                 children}
-//         </Route>
-//     )
-// }
+import { RootState } from "@/app/store";
+
 const PrivateRoutes = () => {
-    const token = Cookies.get("auth-token") // or use js-cookie
-    const {loading} = useSelector((state: RootState) => state.auth);
+
+
+    const { user, loading, error } = useSelector((state: RootState) => state.auth);
+
+
     if (loading) return <div>Loading...</div>;
-    return token ? <Outlet /> : <Navigate to="/login" />;
+
+    // if fetching fails or user is not authenticated -> redirect
+    if (error || !user) return <Navigate to="/login" replace />;
+
+    return <Outlet />;
 };
 
 export default PrivateRoutes;

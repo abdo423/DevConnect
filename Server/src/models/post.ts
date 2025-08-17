@@ -1,6 +1,6 @@
 // postService.ts
 
-import mongoose, {Schema, Document, Types, isValidObjectId, Query} from 'mongoose';
+import mongoose, {Schema, Document, Types, isValidObjectId, Query,CallbackError} from 'mongoose';
 import * as z from 'zod';
 import User from "./user";
 import Comment from "./comment";
@@ -75,9 +75,9 @@ postSchema.post('findOneAndDelete', async function (doc, next) {
         console.log(`- Deleted ${deleteResult.deletedCount} related comments.`);
 
         next();
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error in post delete middleware:', error);
-        next(error);
+        next(error as CallbackError);
     }
 });
 // Add a pre-deleteOne hook for direct document deletions
@@ -97,9 +97,9 @@ postSchema.pre<Query<any, PostDocument>>('deleteOne', async function (next) {
             );
         }
         next();
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Error in deleteOne middleware:', error);
-        next(error);
+        next(error as CallbackError);
     }
 });
 

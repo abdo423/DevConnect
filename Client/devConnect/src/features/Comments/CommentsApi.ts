@@ -1,93 +1,55 @@
-import axios from 'axios';
-import Cookies from "js-cookie";
+import axios from "axios";
 
-const BASE_URL = 'http://localhost:3000/comment';
+// Axios instance for comment-related requests
+const commentApi = axios.create({
+    baseURL: "http://localhost:3000/comment",
+    withCredentials: true, // always include cookies
+});
 
-
-export const getComments = async (id: string) => {
+// Get all comments for a post
+export const getComments = async (postId: string) => {
     try {
-        const token = Cookies.get("auth-token");
-        if (!token) {
-            throw new Error("Not authenticated");
-        }
-        const response = await axios.get(`${BASE_URL}/post/${id}`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            },
-            withCredentials: true,
-        });
+        const response = await commentApi.get(`/post/${postId}`);
         return response.data;
     } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error('Axios error details:', {
-                status: error.response?.status,
-                data: error.response?.data,
-                headers: error.response?.headers
-            });
-            throw error.response?.data || error;
-        }
-        console.error('Non-Axios error:', error);
-
+        console.error("❌ getComments failed"); // fail
+        handleAxiosError(error);
     }
-}
+};
 
-
+// Create a comment
 export const createComment = async (commentData: { post: string; content: string }) => {
+
     try {
-        const token = Cookies.get("auth-token");
-        if (!token) {
-            throw new Error("Not authenticated");
-        }
-
-        const response = await axios.post(
-            `${BASE_URL}/create`,
-            {
-                content: commentData.content,
-                post: commentData.post,
-            },
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-                withCredentials: true
-            }
-        );
-
+        const response = await commentApi.post("/create", commentData);
         return response.data;
     } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error('Axios error details:', {
-                status: error.response?.status,
-                data: error.response?.data,
-                headers: error.response?.headers
-            });
-            throw error.response?.data || error;
-        }
-        console.error('Non-Axios error:', error);
-        throw error;
+        handleAxiosError(error);
     }
-}
+};
 
+// Like a comment
 export const likeComment = async (id: string) => {
     try {
-        const token = Cookies.get("auth-token");
-        if (!token) {
-            throw new Error("Not authenticated");
-        }
-        const response = await axios.post(
-            `${BASE_URL}/like/${id}`, {}, {withCredentials: true, headers: {Authorization: `Bearer ${token}`}}
-        )
+        const response = await commentApi.post(`/like/${id}`);
         return response.data;
     } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error('Axios error details:', {
-                status: error.response?.status,
-                data: error.response?.data,
-                headers: error.response?.headers
-            });
-            throw error.response?.data || error;
-        }
-        console.error('Non-Axios error:', error);
-        throw error;
+        console.error("❌ likeComment failed");
+        handleAxiosError(error);
     }
-}
+};
+
+// Shared error handler
+const handleAxiosError = (error: unknown) => {
+    if (axios.isAxiosError(error)) {
+        console.error("❌ Axios error details:", {
+            status: error.response?.status,
+            data: error.response?.data,
+            headers: error.response?.headers,
+        });
+        throw error.response?.data || error;
+    }
+    console.error("❌ Non-Axios error:", error);
+    throw error;
+};
+

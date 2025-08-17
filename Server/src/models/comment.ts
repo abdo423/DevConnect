@@ -1,4 +1,4 @@
-import mongoose, {isValidObjectId, Schema, Types} from 'mongoose';
+import mongoose, {isValidObjectId, Schema, Types,CallbackError} from 'mongoose';
 import * as z from 'zod';
 import Post from "./post";
 
@@ -44,20 +44,16 @@ const commentSchema = new Schema<Comment>({
 });
 
 //middleware
-commentSchema.post('save', async function (doc, next) {
-    try {
-        const postId = (doc as any)._doc.post; // adjust if `post` is passed in the comment
-        if (!postId) return next();
+commentSchema.pre('save', async function (next) {
+    if (!this.isNew) return next();
 
-        await Post.findByIdAndUpdate(postId, {
-            $push: {comments: doc._id}
-        });
+    await Post.findByIdAndUpdate(this.post, {
+        $push: { comments: this._id }
+    });
 
-        next();
-    } catch (error) {
-        next(error as Error);
-    }
+    next();
 });
+
 commentSchema.pre("deleteOne", async function (next) {
     try {
         const filter = this.getFilter();
@@ -71,8 +67,8 @@ commentSchema.pre("deleteOne", async function (next) {
             );
         }
         next();
-    } catch (error: any) {
-        next(error);
+    } catch (error: unknown) {
+        next(error as CallbackError);
 
     }
 })

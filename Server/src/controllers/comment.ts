@@ -1,6 +1,7 @@
 // controllers/CommentController.ts
 import { Request, Response } from 'express';
 import * as CommentService from "../services/commentService";
+import { AppError } from '../Types/Error';
 
 export const createComment = async (req: Request, res: Response) => {
     if (!req.user) {
@@ -19,11 +20,12 @@ export const createComment = async (req: Request, res: Response) => {
             comment,
         });
 
-    } catch (error: any) {
-        console.error("Error creating comment:", error);
-        return res.status(error.status || 500).json({
-            message: error.message || "Internal server error",
-            ...(error.errors && { errors: error.errors })
+    } catch (error: unknown) {
+        const err = error as AppError;
+        console.error("Error creating comment:", err);
+        return res.status(err.status || 500).json({
+            message: err.message || "Internal server error",
+            ...(err.errors && { errors: err.errors })
         });
     }
 };
@@ -33,11 +35,12 @@ export const deleteComment = async (req: Request, res: Response) => {
         await CommentService.deleteComment(req.params.id);
         return res.status(200).json({ message: "Comment deleted successfully" });
 
-    } catch (error: any) {
-        console.error("Error deleting comment:", error);
-        return res.status(error.status || 500).json({
-            message: error.message || "Internal server error",
-            ...(error.errors && { errors: error.errors })
+    } catch (error: unknown) {
+        const err = error as AppError;
+        console.error("Error deleting comment:", err);
+        return res.status(err.status || 500).json({
+            message: err.message || "Internal server error",
+            ...(err.errors && { errors: err.errors })
         });
     }
 };
@@ -52,11 +55,12 @@ export const updateComment = async (req: Request, res: Response) => {
             comment: updatedComment,
         });
 
-    } catch (error: any) {
-        console.error("Error updating comment:", error);
-        return res.status(error.status || 500).json({
-            message: error.message || "Internal server error",
-            ...(error.errors && { errors: error.errors })
+    } catch (error: unknown) {
+        const err = error as AppError;
+        console.error("Error updating comment:", err);
+        return res.status(err.status || 500).json({
+            message: err.message || "Internal server error",
+            ...(err.errors && { errors: err.errors })
         });
     }
 };
@@ -64,13 +68,15 @@ export const updateComment = async (req: Request, res: Response) => {
 export const getCommentsByPost = async (req: Request, res: Response) => {
     try {
         const comments = await CommentService.getCommentsByPost(req.params.id);
+
         return res.status(200).json({ comments });
 
-    } catch (error: any) {
-        console.error("Error getting comments:", error);
-        return res.status(error.status || 500).json({
-            message: error.message || "Internal server error",
-            ...(error.errors && { errors: error.errors })
+    } catch (error: unknown) {
+        const err = error as AppError;
+        console.error("Error getting comments:", err);
+        return res.status(err.status || 500).json({
+            message: err.message || "Internal server error",
+            ...(err.errors && { errors: err.errors })
         });
     }
 };
@@ -78,6 +84,7 @@ export const getCommentsByPost = async (req: Request, res: Response) => {
 export const likeComment = async (req: Request, res: Response) => {
     try {
         const userId = req.user?.id;
+
         if (!userId) {
             return res.status(401).json({ message: "Unauthorized" });
         }
@@ -92,11 +99,12 @@ export const likeComment = async (req: Request, res: Response) => {
             likes,
         });
 
-    } catch (error: any) {
-        console.error("Error liking comment:", error);
-        return res.status(error.status || 500).json({
-            message: error.message || "Internal server error",
-            ...(error.errors && { errors: error.errors })
+    } catch (error: unknown) {
+        const err = error as AppError;
+        console.error("Error liking comment:", err);
+        return res.status(err.status || 500).json({
+            message: err.message || "Internal server error",
+            ...(err.errors && { errors: err.errors })
         });
     }
 };

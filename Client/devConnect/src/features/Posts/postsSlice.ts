@@ -1,94 +1,16 @@
-import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {createPost, deletePost, getPosts, likePost, updatePost} from './postsApi';
-
-// Thunks
-export const createPostThunk = createAsyncThunk(
-    'posts/createPost',
-    async (post: { title: string; content: string; image?: string }, thunkAPI) => {
-        try {
-            const response = await createPost(post);
-            return response.post;
-        } catch (error: any) {
-            return thunkAPI.rejectWithValue(error.response?.data?.message || 'Something went wrong');
-        }
-    }
-);
-
-
-
-export const PostUpdateThunk = createAsyncThunk(
-    'posts/updatePost',
-    async (
-        { id, post }: { id: string; post: { title: string; content: string; image?: string } },
-        thunkAPI
-    ) => {
-        try {
-            const response = await updatePost(id, post);
-            return response.post;
-        } catch (error: any) {
-            return thunkAPI.rejectWithValue(error.response?.data?.message || 'Something went wrong');
-        }
-    }
-);
-
-export const fetchPosts = createAsyncThunk(
-    'posts/fetchPosts',
-    async (_, thunkAPI) => {
-        try {
-            const response = await getPosts();
-            return response;
-        } catch (error: any) {
-            return thunkAPI.rejectWithValue(error.response?.data?.message || 'Something went wrong');
-        }
-    }
-);
-
-export const erasePost = createAsyncThunk(
-    'posts/deletePost',
-    async (id: string, thunkAPI) => {
-        try {
-            const response = await deletePost(id);
-            return response;
-        } catch (error: any) {
-            return thunkAPI.rejectWithValue(error.response?.data?.message || 'Something went wrong');
-        }
-    }
-);
-
-export const likesPost = createAsyncThunk(
-    'posts/likesPost',
-    async (id: string, thunkAPI) => {
-        try {
-            const response = await likePost(id);
-            return response;
-        } catch (error: any) {
-            return thunkAPI.rejectWithValue(error.response?.data?.message || 'Something went wrong');
-        }
-    }
-);
-
-// Types
-interface Post {
-    _id: string;
-    title: string;
-    content: string;
-    image: string;
-    likes: string[];
-    comments: string[];
-    author_id: string;
-    createdAt: Date;
-    updatedAt: Date;
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createPost, deletePost, getPosts, likePost, updatePost } from './postsApi';
+import {PostsState} from "Types/post.ts"
+// Error interface
+interface APIError {
+    response?: {
+        data?: {
+            message?: string;
+        };
+    };
+    message?: string;
 }
 
-interface PostsState {
-    posts: Post[];
-    loading: boolean;
-    error: string | null;
-    postCreated: boolean;
-    postDeleted: boolean;
-    postUpdated: boolean;
-    currentPost: Post | null;
-}
 
 // Initial State
 const initialState: PostsState = {
@@ -100,6 +22,75 @@ const initialState: PostsState = {
     postUpdated: false,
     currentPost: null,
 };
+
+// Thunks
+export const createPostThunk = createAsyncThunk(
+    'posts/createPost',
+    async (post: { title: string; content: string; image?: string }, thunkAPI) => {
+        try {
+            const response = await createPost(post);
+            return response.post;
+        } catch (error: unknown) {
+            const err = error as APIError;
+            return thunkAPI.rejectWithValue(err.response?.data?.message || 'Something went wrong');
+        }
+    }
+);
+
+export const PostUpdateThunk = createAsyncThunk(
+    'posts/updatePost',
+    async (
+        { id, post }: { id: string; post: { title: string; content: string; image?: string } },
+        thunkAPI
+    ) => {
+        try {
+            const response = await updatePost(id, post);
+            return response.post;
+        } catch (error: unknown) {
+            const err = error as APIError;
+            return thunkAPI.rejectWithValue(err.response?.data?.message || 'Something went wrong');
+        }
+    }
+);
+
+export const fetchPosts = createAsyncThunk(
+    'posts/fetchPosts',
+    async (_, thunkAPI) => {
+        try {
+            const response = await getPosts();
+            return response;
+        } catch (error: unknown) {
+            const err = error as APIError;
+            return thunkAPI.rejectWithValue(err.response?.data?.message || 'Something went wrong');
+        }
+    }
+);
+
+export const erasePost = createAsyncThunk(
+    'posts/deletePost',
+    async (id: string, thunkAPI) => {
+        try {
+            const response = await deletePost(id);
+            return response;
+        } catch (error: unknown) {
+            const err = error as APIError;
+            return thunkAPI.rejectWithValue(err.response?.data?.message || 'Something went wrong');
+        }
+    }
+);
+
+export const likesPost = createAsyncThunk(
+    'posts/likesPost',
+    async (id: string, thunkAPI) => {
+        try {
+            const response = await likePost(id);
+            return response;
+        } catch (error: unknown) {
+            const err = error as APIError;
+            return thunkAPI.rejectWithValue(err.response?.data?.message || 'Something went wrong');
+        }
+    }
+);
 
 // Slice
 const postsSlice = createSlice({
@@ -129,14 +120,12 @@ const postsSlice = createSlice({
             .addCase(createPostThunk.fulfilled, (state, action) => {
                 state.posts.unshift(action.payload);
                 state.loading = false;
-                state.error = null;
                 state.postCreated = true;
             })
             .addCase(createPostThunk.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
             })
-
             // Fetch Posts
             .addCase(fetchPosts.pending, (state) => {
                 state.loading = true;
@@ -145,13 +134,11 @@ const postsSlice = createSlice({
             .addCase(fetchPosts.fulfilled, (state, action) => {
                 state.posts = action.payload;
                 state.loading = false;
-                state.error = null;
             })
             .addCase(fetchPosts.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
             })
-
             // Delete Post
             .addCase(erasePost.pending, (state) => {
                 state.loading = true;
@@ -161,13 +148,14 @@ const postsSlice = createSlice({
                 const deletedId = action.payload.post._id;
                 state.posts = state.posts.filter(post => post._id !== deletedId);
                 state.loading = false;
-                state.error = null;
                 state.postDeleted = true;
             })
             .addCase(erasePost.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
-            }).addCase(PostUpdateThunk.pending, (state) => {
+            })
+            // Update Post
+            .addCase(PostUpdateThunk.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
@@ -180,22 +168,15 @@ const postsSlice = createSlice({
                     state.currentPost = updatedPost;
                 }
                 state.loading = false;
-                state.error = null;
                 state.postUpdated = true;
             })
-
             .addCase(PostUpdateThunk.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
             });
-    }
+    },
 });
 
 // Export actions and reducer
-export const {
-    resetPostFlags,
-    setCurrentPost,
-    clearCurrentPost
-} = postsSlice.actions;
-
+export const { resetPostFlags, setCurrentPost, clearCurrentPost } = postsSlice.actions;
 export default postsSlice.reducer;

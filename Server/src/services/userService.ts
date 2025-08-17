@@ -4,9 +4,8 @@ import jwt from "jsonwebtoken";
 import config from "config";
 import mongoose from "mongoose";
 import Message from "../models/message";
-
 const JWT_SECRET = config.get<string>("jwt.secret");
-
+import {PopulatedSender} from "../Types/user";
 export const loginUser = async (reqBody: any) => {
     const result = validateLogin(reqBody);
 
@@ -153,13 +152,14 @@ export const getSendersForCurrentUser = async (currentUserId: string) => {
     const followingIds = currentUser.following?.map(id => id.toString()) || [];
 
     const messages = await Message.find({ receiverId: currentUserId })
-        .populate("senderId", "username avatar")
+        .populate<{ senderId: PopulatedSender }>("senderId", "username avatar")
         .select("senderId");
+
 
     const uniqueSendersMap = new Map();
 
     for (const msg of messages) {
-        const sender = msg.senderId as any; // populated user
+        const sender = msg.senderId ; // populated user
         const senderId = sender?._id?.toString();
 
         if (

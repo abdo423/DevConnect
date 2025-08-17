@@ -7,7 +7,9 @@ interface User {
     username: string;  // changed from name to username to match backend?
     avatar?: string;
 }
-
+interface APIError {
+    message: string;
+}
 interface FollowingState {
     following: User[] | null;
     unfollowedMessageSenders: User[]; // NEW FIELD
@@ -38,7 +40,8 @@ export const fetchFollowings = createAsyncThunk<
                 following: response.following,
                 userId,
             };
-        } catch (error: any) {
+        } catch (err: unknown) {
+           const error = err as APIError;
             return rejectWithValue(error.message || 'Failed to fetch followings');
         }
     }
@@ -64,8 +67,9 @@ export const fetchUnfollowedMessageSenders = createAsyncThunk<
             ) || [];
 
             return unfollowedSenders;
-        } catch (error: any) {
-            return rejectWithValue(error.message || 'Failed to fetch unfollowed message senders');
+        } catch (err: unknown) {
+            const error = err as APIError;
+            return rejectWithValue(error.message || 'Failed to fetch followings');
         }
     }
 );

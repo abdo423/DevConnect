@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { createMessage as apiCreateMessage,getMessagesBetweenUsers as getMessagesBetweenUsersApi  } from '../Message/messageApi.ts';
+import ApiError from "../../../Types/apiError.ts";
 
 // ---- Define Types ----
 interface User {
@@ -40,7 +41,8 @@ export const createMessage = createAsyncThunk(
         try {
             const response = await apiCreateMessage(messageData);
             return response; // Should include messages, users, count
-        } catch (error: any) {
+        } catch (err: unknown) {
+            const error = err as ApiError;
             return rejectWithValue(error.message || 'Failed to send message');
         }
     }
@@ -51,7 +53,8 @@ export const getMessagesBetweenUsers = createAsyncThunk(
         try {
             const response = await getMessagesBetweenUsersApi(id);
             return response;
-        } catch (error: any) {
+        } catch (err: unknown) {
+            const error = err as ApiError;
             return rejectWithValue(error.message || 'Failed to fetch messages');
         }
     }

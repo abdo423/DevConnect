@@ -1,141 +1,98 @@
-import axios from 'axios';
-import Cookies from 'js-cookie'; // to access cookies
+import axios from "axios";
 
-const BASE_URL = 'http://localhost:3000/post'; // update with your backend URL
+const BASE_URL = "http://localhost:3000/post"; // update with your backend URL
 
+// axios instance with cookie support
+const api = axios.create({
+    baseURL: BASE_URL,
+    withCredentials: true,
+});
+
+// Create Post
 export const createPost = async (post: { title: string; content: string; image?: string }) => {
     try {
-        const token = Cookies.get("auth-token");
-        if (!token) {
-            throw new Error("Not authenticated");
-        }
-        const response = await axios.post(
-            `${BASE_URL}/create`,
-
-            post,
-            {
-                withCredentials: true,
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    // 'Content-Type': 'multipart/form-data'
-
-                },
-            }
-        );
-
+        const response = await api.post("/create", post);
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error('Axios error details:', {
+            console.error("Axios error details:", {
                 status: error.response?.status,
                 data: error.response?.data,
-                headers: error.response?.headers
             });
             throw error.response?.data || error;
         }
-        console.error('Non-Axios error:', error);
         throw error;
     }
-}
+};
 
+// Get All Posts
 export const getPosts = async () => {
     try {
-
-        const response = await axios.get(
-            `${BASE_URL}/all`, {
-                withCredentials: true,
-
-            });
+        const response = await api.get("/all");
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error('Axios error details:', {
+            console.error("Axios error details:", {
                 status: error.response?.status,
                 data: error.response?.data,
-                headers: error.response?.headers
             });
             throw error.response?.data || error;
         }
-        console.error('Non-Axios error:', error);
         throw error;
     }
-}
+};
 
+// Delete Post
 export const deletePost = async (id: string) => {
     try {
-        const token = Cookies.get("auth-token");
-        if (!token) {
-            throw new Error("Not authenticated");
-        }
-        const response = await axios.delete(
-            `${BASE_URL}/delete/${id}`, {withCredentials: true, headers: {Authorization: `Bearer ${token}`}}
-        )
+        const response = await api.delete(`/delete/${id}`);
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error('Axios error details:', {
+            console.error("Axios error details:", {
                 status: error.response?.status,
                 data: error.response?.data,
-                headers: error.response?.headers
             });
             throw error.response?.data || error;
         }
-        console.error('Non-Axios error:', error);
         throw error;
     }
-}
+};
+
+// Like Post
 export const likePost = async (id: string) => {
     try {
-        const token = Cookies.get("auth-token");
-        if (!token) {
-            throw new Error("Not authenticated");
-        }
-        const response = await axios.post(
-            `${BASE_URL}/like/${id}`, {}, {withCredentials: true, headers: {Authorization: `Bearer ${token}`}}
-        )
+        const response = await api.post(`/like/${id}`);
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error('Axios error details:', {
+            console.error("Axios error details:", {
                 status: error.response?.status,
                 data: error.response?.data,
-                headers: error.response?.headers
             });
             throw error.response?.data || error;
         }
-        console.error('Non-Axios error:', error);
         throw error;
     }
-}
+};
 
+// Update Post
 export const updatePost = async (id: string, post: { title: string; content: string; image?: string }) => {
     try {
-        const token = Cookies.get("auth-token");
-        if (!token) {
-            throw new Error("Not authenticated");
-        }
-        const response = await axios.patch(
-            `${BASE_URL}/update/${id}`,
-            post,
-            {
-                withCredentials: true,
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json '
-                }
-            }
-        );
+        const response = await api.patch(`/update/${id}`, post, {
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error('Axios error details:', {
+            console.error("Axios error details:", {
                 status: error.response?.status,
                 data: error.response?.data,
-                headers: error.response?.headers
             });
             throw error.response?.data || error;
         }
-        console.error('Non-Axios error:', error);
         throw error;
     }
 };

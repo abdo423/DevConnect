@@ -6,6 +6,7 @@ import { useEffect } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch, RootState } from "../app/store"
 import {fetchPosts} from "@/features/Posts/postsSlice"
+import type {Post as postType} from "../../Types/post.ts";
 
 const HomePage = () => {
     const dispatch = useDispatch<AppDispatch>()
@@ -30,7 +31,7 @@ const HomePage = () => {
                 </div>
             ) : (
                 <div className="space-y-6 p-4">
-                    {posts.map((post: any) => (
+                    {posts.map((post: postType) => (
                         <Post key={post._id} post={post} />
                     ))}
                 </div>

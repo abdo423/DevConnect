@@ -1,42 +1,12 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import {followUser, getProfile, getProfileById, updateProfile} from '@/features/Profile/profileApi.ts'; // Your API service
+import ProfileState from "../../../Types/profile.ts";
+interface APIError {
 
-// Define the profile state type
-interface ProfileState {
-    profile: {
-        _id: string;
-        username: string;
-        email: string;
-        avatar: string;
-        bio: string;
-        posts: Array<{
-            _id: string;
-            title: string;
-            content: string;
-            author_id:   {
-                _id: string;
-                email: string;
-                username: string;
-                avatar?: string;
-            };
-            image: string;
-            likes: Array<{
-                _id: string;
-                user: string;
-                createdAt: string;
-            }>;
-            comments: Array<any>;
-            createdAt: string;
-            updatedAt: string;
-        }>;
-        followers: string[];
-        following: string[];
-        createdAt: string;
-        updatedAt: string;
-    } | null;
-    loading: boolean;
-    error: string | null;
+    message: string;
+
 }
+// Define the profile state type
 
 // Initial state
 const initialState: ProfileState = {
@@ -53,7 +23,8 @@ export const fetchProfile = createAsyncThunk(
 
             const response = await getProfile();
             return response;
-        } catch (error: any) {
+        } catch (err: unknown) {
+            const error = err as APIError;
             return rejectWithValue(error.message || 'Failed to fetch profile');
         }
     }
@@ -65,7 +36,8 @@ export const getProfileByIdThunk = createAsyncThunk(
         try {
             const response = await getProfileById(id);
             return response;
-        } catch (error: any) {
+        }catch (err: unknown) {
+            const error = err as APIError;
             return rejectWithValue(error.message || 'Failed to fetch profile');
         }
     }
@@ -76,7 +48,8 @@ export const followUserThunk = createAsyncThunk(
         try {
             const response = await followUser(id);
             return response;
-        } catch (error: any) {
+        } catch (err: unknown) {
+            const error = err as APIError;
             return rejectWithValue(error.message || 'Failed to fetch profile');
         }
     }
@@ -88,7 +61,8 @@ export const updateProfileThunk = createAsyncThunk(
             const response = await updateProfile(id,profile);
 
             return response;
-        }catch (error: any) {
+        }catch (err: unknown) {
+            const error = err as APIError;
             return rejectWithValue(error.message || 'Failed to fetch profile');
         }
     }

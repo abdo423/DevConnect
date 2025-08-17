@@ -27,6 +27,8 @@ import {useState} from "react"; // 👈 Add this
 //import axios from 'axios';
 import FormSuccess from "./FormSuccess.tsx";
 import FormError from "./FormError.tsx";
+import ApiError from "../../Types/apiError.ts";
+
 
 const formSchema = z.object({
     email: z.string().min(8).max(50).email(),
@@ -51,26 +53,27 @@ const LoginForm = () => {
     });
 
     const handleLogin = (data: z.infer<typeof formSchema>) => {
-        dispatch(login({email: data.email, password: data.password}))
+        dispatch(login({ email: data.email, password: data.password }))
             .unwrap()
             .then((result) => {
-                setStatus({error: "", success: result.message || "Login successful"})
+                setStatus({ error: "", success: result.message || "Login successful" });
                 navigate("/");
                 form.reset();
-
             })
-            .catch((error: any) => {
+            .catch((error: unknown) => {
                 console.error("Login error:", error);
 
-                // Extract error message safely:
-                const errorMessage = typeof error === 'string'
-                    ? error
-                    : error?.message || "Authentication failed";
+                let errorMessage = "Authentication failed";
 
-                setStatus({success: "", error: errorMessage});
+                // Narrow type from unknown → ApiError
+                if (typeof error === "string") {
+                    errorMessage = error;
+                } else if (error && typeof error === "object" && "message" in error) {
+                    errorMessage = (error as ApiError).message || errorMessage;
+                }
+
+                setStatus({ success: "", error: errorMessage });
             });
-
-
     };
 
     return (

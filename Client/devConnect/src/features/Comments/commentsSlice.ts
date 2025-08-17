@@ -1,10 +1,10 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import axios from 'axios';
-import Cookies from 'js-cookie';
-import {createComment, getComments,likeComment as likeCommentApi} from "@/features/Comments/CommentsApi.ts";
-
-
-
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import axios from "axios";
+import {
+    createComment,
+    getComments,
+    likeComment as likeCommentApi,
+} from "@/features/Comments/CommentsApi.ts";
 
 interface User {
     _id: string;
@@ -18,7 +18,7 @@ interface Comment {
     post: string;
     content: string;
     createdAt: string;
-    __v: number;
+    likes: string[]; // important for like toggling
 }
 
 interface CommentsState {
@@ -33,66 +33,57 @@ const initialState: CommentsState = {
     error: null,
 };
 
-// Async thunks
+// ✅ Fetch comments
 export const fetchComments = createAsyncThunk(
-    'comments/fetchComments',
+    "comments/fetchComments",
     async (postId: string, { rejectWithValue }) => {
         try {
-            const token = Cookies.get('auth-token');
-            if (!token) {
-                throw new Error('Not authenticated');
-            }
-            const response = getComments(postId);
-
+            const response = await getComments(postId);
             return response;
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 return rejectWithValue(error.response?.data?.message || error.message);
             }
-            return rejectWithValue('An unknown error occurred');
+            return rejectWithValue("An unknown error occurred");
         }
     }
 );
 
+// ✅ Add comment
 export const addComment = createAsyncThunk(
-    'comments/addComment',
+    "comments/addComment",
     async (commentData: { post: string; content: string }, { rejectWithValue }) => {
         try {
-            const token = Cookies.get('auth-token');
-            if (!token) {
-                throw new Error('Not authenticated');
-            }
-            const response =  createComment(commentData);
+            const response = await createComment(commentData);
             return response;
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 return rejectWithValue(error.response?.data?.message || error.message);
             }
-            return rejectWithValue('An unknown error occurred');
+            return rejectWithValue("An unknown error occurred");
         }
     }
 );
+
+// ✅ Like comment
 export const likeComment = createAsyncThunk(
-    'comments/likeComment',
+    "comments/likeComment",
     async (commentId: string, { rejectWithValue }) => {
         try {
-            const token = Cookies.get('auth-token');
-            if (!token) {
-                throw new Error('Not authenticated');
-            }
-            const response =  likeCommentApi(commentId);
-            return response;
-        }catch (error) {
+            const response = await likeCommentApi(commentId);
+            // should return { alreadyLiked: boolean, likes: [...] }
+            return { commentId, ...response };
+        } catch (error) {
             if (axios.isAxiosError(error)) {
-                return rejectWithValue(error?.message || error.message);
+                return rejectWithValue(error.response?.data?.message || error.message);
             }
-            return rejectWithValue('An unknown error occurred');
+            return rejectWithValue("An unknown error occurred");
         }
     }
-)
+);
 
 const commentsSlice = createSlice({
-    name: 'comments',
+    name: "comments",
     initialState,
     reducers: {
         clearComments: (state) => {
@@ -102,7 +93,7 @@ const commentsSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Fetch Comments
+            // Fetch
             .addCase(fetchComments.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -116,7 +107,7 @@ const commentsSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // Add Comment
+            // Add
             .addCase(addComment.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -127,6 +118,24 @@ const commentsSlice = createSlice({
             })
             .addCase(addComment.rejected, (state, action) => {
                 state.loading = false;
+                state.error = action.payload as string;
+            })
+
+            // 🔥 FIXED: Like comment handling
+            .addCase(likeComment.pending, (state) => {
+                // Optional: Add loading state for individual comment likes
+                state.error = null;
+            })
+            .addCase(likeComment.fulfilled, (state, action) => {
+            const { commentId, likes } = action.payload;
+
+            const comment = state.comments.find((c) => c._id === commentId);
+            if (comment) {
+                comment.likes = likes; // ✅ Simple assignment now works!
+            }
+        })
+            .addCase(likeComment.rejected, (state, action) => {
+                // ✅ ADDED: Handle like errors
                 state.error = action.payload as string;
             });
     },
