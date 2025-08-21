@@ -4,14 +4,16 @@ import jwt from "jsonwebtoken";
 import config from "config";
 import mongoose from "mongoose";
 import Message from "../models/message";
-const JWT_SECRET = config.get<string>("jwt.secret");
 import {PopulatedSender} from "../Types/user";
+
+const JWT_SECRET = config.get<string>("jwt.secret");
 export const loginUser = async (reqBody: any) => {
     const result = validateLogin(reqBody);
 
     if (!result.success) {
         throw {
             status: 400,
+            message: "Validation failed",   // 👈 add this
             errors: result.error.errors
         };
     }

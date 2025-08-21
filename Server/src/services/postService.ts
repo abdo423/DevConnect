@@ -1,8 +1,6 @@
 import Post, {validatePost, validateUpdatePost} from "../models/post";
 import User from "../models/user";
 import Comment from "../models/comment";
-import {CreatePostDTO} from "../Types/post";
-import {object} from "zod";
 import {Types} from "mongoose";
 
 

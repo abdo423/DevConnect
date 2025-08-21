@@ -1,14 +1,8 @@
 import {Request, Response} from 'express';
-import Post from '../models/post';
-import config from "config";
-import Comment from "../models/comment";
 import * as postService from "../services/postService";
 import {CreatePostDTO} from "../Types/post";
 import {AppError} from "../Types/Error";
 
-// Secret for JWT (should be in .env)
-const JWT_SECRET = config.get<string>("jwt.secret");
-const expiresIn = config.get<string>("jwt.expiresIn");
 
 export const createPost = async (
     req: Request<{}, {}, CreatePostDTO>,
@@ -23,7 +17,6 @@ export const createPost = async (
         const populatedPost = await postService.createPost(userId, req.body);
         res.status(201).json({message: 'Post created successfully', post: populatedPost});
     } catch (err: unknown) {
-        console.error("Error creating message:", err);
         const error = err as AppError;
         return res.status(error.status || 500).json({
             message: error.message || "Internal server error",
@@ -39,7 +32,6 @@ export const getPosts = async (req: Request, res: Response) => {
         const posts = await postService.getAllPosts();
         res.status(200).json(posts);
     } catch (err: unknown) {
-        console.error("Error fetching posts:", err);
         const error = err as AppError;
         return res.status(error.status || 500).json({
             message: error.message || "Internal server error",
@@ -55,7 +47,6 @@ export const deletePost = async (req: Request, res: Response) => {
         const post = await postService.deletePost(postId);
         res.status(200).json({message: "Post deleted successfully", post});
     } catch (err: unknown) {
-        console.error("Error deleting post:", err);
         const error = err as AppError;
         return res.status(error.status || 500).json({
             message: error.message || "Internal server error",
@@ -74,7 +65,6 @@ export const updatePost = async (req: Request, res: Response) => {
             post: updatedPost,
         });
     } catch (err: unknown) {
-        console.error("Error updating post:", err);
         const error = err as AppError;
         return res.status(error.status || 500).json({
             message: error.message || "Internal server error",
@@ -100,7 +90,6 @@ export const likePost = async (req: Request, res: Response) => {
             likes,
         });
     }  catch (err: unknown) {
-        console.error("Error updating post:", err);
         const error = err as AppError;
         return res.status(error.status || 500).json({
             message: error.message || "Internal server error",
@@ -116,7 +105,6 @@ export const getCommentsByPostIdArray = async (req: Request, res: Response) => {
         const comments = await postService.getCommentsByPostId(postId);
         res.status(200).json({ comments });
     }catch (err: unknown) {
-        console.error("Error updating post:", err);
         const error = err as AppError;
         return res.status(error.status || 500).json({
             message: error.message || "Internal server error",

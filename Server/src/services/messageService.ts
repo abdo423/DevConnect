@@ -3,6 +3,7 @@ import User, {UserDocument} from "../models/user";
 import mongoose, { Types } from "mongoose";
 import { validateMessageInput } from "../models/message";
 import Message from "../models/message";
+
 export const createMessageService = async (
     senderId: string,
     receiverId: string,

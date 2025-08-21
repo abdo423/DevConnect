@@ -1,9 +1,34 @@
 // services/commentService.ts
 import { Types } from "mongoose";
-import Comment, { validateComment } from "../models/comment";
+import Comment, {validateComment, validateCommentInput} from "../models/comment";
 import { CommentUpdateInput } from "../Types/comment";
 
 export const createComment = async (userId: string, postId: string, content: string) => {
+    // ✅ FIXED: Validate the input first (before creating full object)
+    const inputValidation = validateCommentInput({ post: postId, content });
+    if (!inputValidation.success) {
+        // Transform Zod errors into user-friendly format
+        const formattedErrors = inputValidation.error.errors.map(err => ({
+            field: err.path.join('.'),
+            message: err.message
+        }));
+
+        throw {
+            status: 400,
+            message: "Validation failed",
+            errors: formattedErrors
+        };
+    }
+
+    // ✅ Validate user ID separately
+    if (!Types.ObjectId.isValid(userId)) {
+        throw {
+            status: 400,
+            message: "Invalid user ID",
+            errors: [{ path: ["user"], message: "Invalid user ID" }]
+        };
+    }
+
     const commentData = {
         user: new Types.ObjectId(userId),
         post: new Types.ObjectId(postId),
@@ -12,6 +37,7 @@ export const createComment = async (userId: string, postId: string, content: str
         createdAt: new Date()
     };
 
+    // ✅ Optional: Validate the complete object (redundant but safe)
     const result = validateComment(commentData);
     if (!result.success) {
         throw { status: 400, message: "Validation failed", errors: result.error.errors };
@@ -42,7 +68,9 @@ export const updateComment = async (commentId: string, body: CommentUpdateInput)
     if (!Types.ObjectId.isValid(commentId)) {
         throw { status: 400, message: "Invalid comment ID", errors: { id: 'Invalid comment ID' } };
     }
-
+     if(!body.content){
+         throw { status: 400, message: "Content is required" };
+     }
     const comment = await Comment.findById(commentId);
     if (!comment) {
         throw { status: 404, message: "Comment not found" };
@@ -81,21 +109,21 @@ export const getCommentsByPost = async (postId: string) => {
 };
 
 export const likeComment = async (commentId: string, userId: string) => {
-    if (!Types.ObjectId.isValid(commentId)) {
-        throw { status: 400, message: "Invalid comment ID", errors: { id: "Invalid comment ID" } };
-    }
+        if (!Types.ObjectId.isValid(commentId)) {
+            throw { status: 400, message: "Invalid comment ID", errors: { id: "Invalid comment ID" } };
+        }
 
-    if (!Types.ObjectId.isValid(userId)) {
-        throw { status: 400, message: "Invalid user ID", errors: { id: "Invalid user ID" } };
-    }
+        if (!Types.ObjectId.isValid(userId)) {
+            throw { status: 400, message: "Invalid user ID", errors: { id: "Invalid user ID" } };
+        }
 
-    const comment = await Comment.findById(commentId);
-    if (!comment) {
-        throw { status: 404, message: "Comment not found" };
-    }
+        const comment = await Comment.findById(commentId);
+        if (!comment) {
+            throw { status: 404, message: "Comment not found" };
+        }
 
-    const alreadyLiked = comment.likes.some(
-        (like) => like.user.toString() === userId.toString()
+        const alreadyLiked = comment.likes.some(
+            (like) => like.user.toString() === userId.toString()
     );
 
     if (alreadyLiked) {
