@@ -41,7 +41,7 @@ const UserMenu = ({user,filteredRoutes}: UserMenuProps) => {
             await dispatch(logout()).unwrap();
             navigate("/");
         } catch (error) {
-            console.error("Logout failed:", error);
+           //todo make error handling
         }
     };
 

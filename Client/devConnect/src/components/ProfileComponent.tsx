@@ -72,7 +72,7 @@ const ProfileComponent = () => {
                 }
             },
             (error) => {
-                console.log("error", error);
+               //todo make error handling
             }
         );
     };

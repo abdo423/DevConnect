@@ -47,12 +47,9 @@ const dbURI = config.get('db.connectionString') as string;
 mongoose
     .connect(dbURI) // Optional timeout setting
     .then(() => {
-        console.log('✅ Connected to MongoDB');
         app.listen(port, () => {
-            console.log(`🚀 Server running at http://localhost:${port}`);
         });
     })
     .catch((err) => {
-        console.error('❌ MongoDB connection error:', err);
         process.exit(1); // Stop app if DB fails
     });

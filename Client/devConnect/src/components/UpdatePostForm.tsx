@@ -80,7 +80,7 @@ const UpdatePostModal = ({post}: UpdatePostModalProps) => {
 
             setOpen(false);
         } catch (err) {
-            console.error("Failed to update post:", err);
+            //todo make error handling
         }
     };
 

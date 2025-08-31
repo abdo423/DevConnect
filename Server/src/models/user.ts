@@ -85,13 +85,11 @@ userSchema.pre('findOneAndDelete', async function(next) {
         const userToDelete = await mongoose.model('User').findOne(filter);
 
         if (userToDelete) {
-            console.log('User deletion middleware triggered for user:', userToDelete._id);
             // Delete all posts associated with this user
             await Post.deleteMany({ author_id: userToDelete._id });
         }
         next();
     } catch (error: unknown) {
-        console.error('Error in user deletion middleware:', error);
         next( error as CallbackError);
     }
 });
@@ -103,12 +101,10 @@ userSchema.pre<Query<unknown, UserDocument>>('deleteOne', async function(next) {
         const userToDelete = await mongoose.model('User').findOne(filter);
 
         if (userToDelete) {
-            console.log('User deleteOne middleware triggered for user:', userToDelete._id);
             await Post.deleteMany({ author_id: userToDelete._id });
         }
         next();
     } catch (error: unknown) {
-        console.error('Error in deleteOne middleware:', error);
         next(error as CallbackError)
     }
 });

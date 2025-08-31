@@ -67,8 +67,6 @@ const RegisterForm = () => {
                 window.location.href = "/login";
             })
             .catch((error) => {
-                console.error("Registration error:", error);
-
                 // Extract the error message from backend response
                 const errorMessage =
                 error || "Registration failed";

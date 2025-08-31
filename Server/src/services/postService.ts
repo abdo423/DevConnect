@@ -24,7 +24,7 @@ export const createPost = async (userId: string, postBody: any) => {
 
 
     if (!result.success) {
-        throw { status: 401, message: result.error.errors };
+        throw { status: 400, message: result.error.errors };
     }
 
     const post = new Post(postData);
@@ -72,6 +72,7 @@ export const updatePost = async (postId: string, postBody: any) => {
     if (!post) {
         throw { status: 404, message: "Post not found" };
     }
+    postBody = postBody ?? {};
 
     const updateData = {
         title: postBody.title ?? post.title,

@@ -12,14 +12,8 @@ export const getFollowings = async (id: string) => {
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error details:", {
-                status: error.response?.status,
-                data: error.response?.data,
-                headers: error.response?.headers,
-            });
             throw error.response?.data || error;
         }
-        console.error("Non-Axios error:", error);
     }
 };
 
@@ -30,13 +24,7 @@ export const getUserMessages = async () => {
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error details:", {
-                status: error.response?.status,
-                data: error.response?.data,
-                headers: error.response?.headers,
-            });
             throw error.response?.data || error;
         }
-        console.error("Non-Axios error:", error);
     }
 };

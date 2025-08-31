@@ -70,13 +70,9 @@ postSchema.post('findOneAndDelete', async function (doc, next) {
         });
 
         // 2. Delete all related comments (MATCHING `post`)
-        const deleteResult = await Comment.deleteMany({ post: doc._id });
-
-        console.log(`- Deleted ${deleteResult.deletedCount} related comments.`);
-
+        await Comment.deleteMany({ post: doc._id });
         next();
     } catch (error: unknown) {
-        console.error('Error in post delete middleware:', error);
         next(error as CallbackError);
     }
 });
@@ -89,7 +85,6 @@ postSchema.pre<Query<any, PostDocument>>('deleteOne', async function (next) {
         const postToDelete = await mongoose.model('Post').findOne(filter);
 
         if (postToDelete) {
-            console.log('Pre deleteOne middleware triggered for post:', postToDelete._id);
             // Update the User document to remove the post reference
             await User.findByIdAndUpdate(
                 postToDelete.author_id,
@@ -98,7 +93,6 @@ postSchema.pre<Query<any, PostDocument>>('deleteOne', async function (next) {
         }
         next();
     } catch (error: unknown) {
-        console.error('Error in deleteOne middleware:', error);
         next(error as CallbackError);
     }
 });

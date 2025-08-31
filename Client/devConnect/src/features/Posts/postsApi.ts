@@ -15,10 +15,6 @@ export const createPost = async (post: { title: string; content: string; image?:
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error details:", {
-                status: error.response?.status,
-                data: error.response?.data,
-            });
             throw error.response?.data || error;
         }
         throw error;
@@ -32,10 +28,6 @@ export const getPosts = async () => {
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error details:", {
-                status: error.response?.status,
-                data: error.response?.data,
-            });
             throw error.response?.data || error;
         }
         throw error;
@@ -49,10 +41,6 @@ export const deletePost = async (id: string) => {
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error details:", {
-                status: error.response?.status,
-                data: error.response?.data,
-            });
             throw error.response?.data || error;
         }
         throw error;
@@ -66,10 +54,6 @@ export const likePost = async (id: string) => {
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error details:", {
-                status: error.response?.status,
-                data: error.response?.data,
-            });
             throw error.response?.data || error;
         }
         throw error;
@@ -87,10 +71,6 @@ export const updatePost = async (id: string, post: { title: string; content: str
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error details:", {
-                status: error.response?.status,
-                data: error.response?.data,
-            });
             throw error.response?.data || error;
         }
         throw error;

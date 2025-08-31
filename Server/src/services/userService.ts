@@ -13,8 +13,8 @@ export const loginUser = async (reqBody: any) => {
     if (!result.success) {
         throw {
             status: 400,
-            message: "Validation failed",   // 👈 add this
-            errors: result.error.errors
+            message: "Validation failed",
+            errors: result.error?.errors || []
         };
     }
 

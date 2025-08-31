@@ -45,7 +45,7 @@ const EditProfile = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const {user} = useSelector((state: RootState) => state.auth);
-    const {profile} = useSelector((state: RootState) => state.profile);
+
 
     const [isLoading, setIsLoading] = useState(false);
     // Step 3: Initialize form
@@ -85,9 +85,7 @@ const EditProfile = () => {
                 dispatch(updateUser(result.user));
             })
             navigate(-1);
-        } catch (error) {
-            console.error("Failed to update profile:", error);
-        } finally {
+        }  finally {
             setIsLoading(false);
         }
     };

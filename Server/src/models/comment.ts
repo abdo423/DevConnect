@@ -77,7 +77,6 @@ commentSchema.pre("deleteOne", async function (next) {
         const filter = this.getFilter();
         const commentToDelete = await mongoose.model('Comment').findOne(filter);
         if (commentToDelete) {
-            console.log('Pre deleteOne middleware triggered for comment:', commentToDelete._id);
             await Post.findByIdAndUpdate(
                 commentToDelete.post,
                 {$pull: {comments: commentToDelete._id}}

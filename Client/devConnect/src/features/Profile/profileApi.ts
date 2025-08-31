@@ -15,10 +15,6 @@ export const getProfile = async () => {
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error details:", {
-                status: error.response?.status,
-                data: error.response?.data,
-            });
             throw error.response?.data || error;
         }
         throw error;
@@ -32,10 +28,6 @@ export const getProfileById = async (id: string) => {
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error details:", {
-                status: error.response?.status,
-                data: error.response?.data,
-            });
             throw error.response?.data || error;
         }
         throw error;
@@ -49,10 +41,6 @@ export const followUser = async (id: string) => {
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error details:", {
-                status: error.response?.status,
-                data: error.response?.data,
-            });
             throw error.response?.data || error;
         }
         throw error;
@@ -69,10 +57,6 @@ export const updateProfile = async (
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error details:", {
-                status: error.response?.status,
-                data: error.response?.data,
-            });
             throw error.response?.data || error;
         }
         throw error;

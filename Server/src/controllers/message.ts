@@ -19,7 +19,6 @@ export const createMessage = async (req: Request, res: Response) => {
         });
 
     } catch (err: unknown) {
-        console.error("Error creating message:", err);
         const error = err as AppError;
         return res.status(error.status || 500).json({
             message: error.message || "Internal server error",
@@ -43,7 +42,6 @@ export const getMessagesBetweenUsers = async (req: Request, res: Response) => {
         });
 
     } catch (err: unknown) {
-        console.error('Error fetching messages:', err);
         const error = err as AppError;
         return res.status(error.status || 500).json({
             message: error.message || 'Error fetching messages',
@@ -69,7 +67,6 @@ export const getSendersForCurrentUser = async (req: Request, res: Response) => {
         });
 
     } catch (err: unknown) {
-        console.error('Error fetching messages:', err);
         const error = err as AppError;
         return res.status(error.status || 500).json({
             message: error.message || 'Error fetching messages',

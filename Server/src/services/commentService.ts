@@ -45,9 +45,19 @@ export const createComment = async (userId: string, postId: string, content: str
 
     const comment = new Comment(commentData);
     await comment.save();
-    await comment.populate('user', 'username avatar');
+    await comment.populate("user", "username avatar");
+    const populatedComment = await comment.populate<{
+        user: { _id: Types.ObjectId; username: string; avatar: string }
+    }>("user", "username avatar");
 
-    return comment;
+    return {
+        _id: populatedComment._id,
+        content: populatedComment.content,
+        createdAt: populatedComment.createdAt,
+        user: populatedComment.user
+    };
+
+
 };
 
 export const deleteComment = async (commentId: string) => {

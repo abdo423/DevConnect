@@ -80,7 +80,7 @@ const MessagePage = () => {
                 dispatch(getMessagesBetweenUsers(selectedUser._id));
             }
         } catch (error) {
-            console.error("Failed to send message:", error);
+            //todo make error handling
             // You might want to show an error message to the user here
         }
     };

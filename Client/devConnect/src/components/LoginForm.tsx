@@ -61,8 +61,6 @@ const LoginForm = () => {
                 form.reset();
             })
             .catch((error: unknown) => {
-                console.error("Login error:", error);
-
                 let errorMessage = "Authentication failed";
 
                 // Narrow type from unknown → ApiError

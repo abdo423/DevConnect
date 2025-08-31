@@ -3,10 +3,10 @@ import {followUser, getProfile, getProfileById, updateProfile} from "../controll
 
 const router = Router();
 // Logging middleware
-router.use((req, res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-    next();
-});
+// router.use((req, res, next) => {
+//     console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+//     next();
+// });
 router.get("/", (req: Request, res: Response) => {
     getProfile(req,res);
 });

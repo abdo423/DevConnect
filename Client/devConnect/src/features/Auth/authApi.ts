@@ -12,14 +12,8 @@ export const loginUser = async (credentials: { email: string; password: string }
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error details:", {
-                status: error.response?.status,
-                data: error.response?.data,
-                headers: error.response?.headers,
-            });
             throw error.response?.data || error;
         }
-        console.error("Non-Axios error:", error);
         throw error;
     }
 };
@@ -30,14 +24,8 @@ export const registerUser = async (credentials: { email: string; password: strin
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error details:", {
-                status: error.response?.status,
-                data: error.response?.data,
-                headers: error.response?.headers,
-            });
             throw error.response?.data || error;
         }
-        console.error("Non-Axios error:", error);
         throw error;
     }
 };
@@ -48,14 +36,8 @@ export const checkLogin = async () => {
         return response.data.user;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error details:", {
-                status: error.response?.status,
-                data: error.response?.data,
-                headers: error.response?.headers,
-            });
             throw error.response?.data || error;
         }
-        console.error("Non-Axios error:", error);
         throw error;
     }
 };
@@ -66,14 +48,8 @@ export const logoutUser = async () => {
         return response;
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error("Axios error details:", {
-                status: error.response?.status,
-                data: error.response?.data,
-                headers: error.response?.headers,
-            });
             throw error.response?.data || error;
         }
-        console.error("Non-Axios error:", error);
         throw error;
     }
 };

@@ -1,7 +1,7 @@
 import User from "../models/user";
 import mongoose from "mongoose";
 import {z} from "zod";
-const profileUpdateSchema = z.object({
+export const   profileUpdateSchema = z.object({
     bio: z.string().max(500).optional(),
     avatar: z.string().optional(),
     username: z.string().min(3).max(30).optional(), // only include if allowed to update
@@ -114,11 +114,6 @@ export const updateProfile = async (id: string, requesterId: string, body: any) 
         throw { status: 403, message: "Forbidden: You cannot edit another user's profile" };
     }
 
-    const user = await User.findById(id);
-    if (!user) {
-        throw { status: 404, message: "User not found" };
-    }
-
     // Validate incoming data
     const parsed = profileUpdateSchema.safeParse(body);
     if (!parsed.success) {
@@ -132,7 +127,11 @@ export const updateProfile = async (id: string, requesterId: string, body: any) 
 
     const updatedUser = await User.findByIdAndUpdate(id, updateData, {
         new: true,
-    }).populate("posts");
+    });
 
-    return updatedUser;
+    if (!updatedUser) {
+        throw { status: 404, message: "User not found" };
+    }
+
+    return updatedUser.populate("posts");
 };

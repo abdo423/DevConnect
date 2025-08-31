@@ -12,10 +12,10 @@ import {getAllFollowings} from "../controllers/user";
 
 const router = Router();
 // Logging middleware
-router.use((req, res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-    next();
-});
+// router.use((req, res, next) => {
+//     console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+//     next();
+// });
 
 
 

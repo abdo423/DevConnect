@@ -11,10 +11,10 @@ import {
 const router = Router();
 
 // Logging middleware
-router.use((req, res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
-    next();
-});
+// router.use((req, res, next) => {
+//     console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+//     next();
+// });
 
 // Public route (no auth)
 router.get("/all", (req: Request, res: Response) => {

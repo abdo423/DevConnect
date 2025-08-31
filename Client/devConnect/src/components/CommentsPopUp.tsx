@@ -93,7 +93,7 @@ export default function CommentsPopUp({
                 setNewComment("");
                 dispatch(fetchComments(postData._id));
             } catch (error) {
-                console.error("Failed to add comment:", error);
+                //todo make error handling
             }
         }
     };
@@ -135,7 +135,7 @@ export default function CommentsPopUp({
                 return newState;
             });
         } catch (error) {
-            console.error("Failed to like comment:", error);
+
             // Revert optimistic update on error
             setOptimisticLikes((prev) => {
                 const newState = { ...prev };

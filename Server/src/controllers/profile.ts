@@ -9,7 +9,6 @@ export const getProfile = async (req: Request, res: Response) => {
         res.status(200).json(user);
     } catch (err: unknown) {
         const error = err as AppError;
-        console.error("Error fetching profile:", error);
         res.status(error.status || 500).json({
             message: error.message || "Server error",
             ...(error.errors && { errors: error.errors }),
@@ -25,7 +24,6 @@ export const getProfileById = async (req: Request, res: Response) => {
         res.status(200).json(user);
     } catch (err: unknown) {
         const error = err as AppError
-        console.error("Error fetching profile:", error);
         res.status(error.status || 500).json({
             message: error.message || "Server error",
             ...(error.errors && { errors: error.errors }),

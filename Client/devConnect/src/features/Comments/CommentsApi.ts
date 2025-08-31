@@ -12,7 +12,6 @@ export const getComments = async (postId: string) => {
         const response = await commentApi.get(`/post/${postId}`);
         return response.data;
     } catch (error) {
-        console.error("❌ getComments failed"); // fail
         handleAxiosError(error);
     }
 };
@@ -34,7 +33,6 @@ export const likeComment = async (id: string) => {
         const response = await commentApi.post(`/like/${id}`);
         return response.data;
     } catch (error) {
-        console.error("❌ likeComment failed");
         handleAxiosError(error);
     }
 };
@@ -42,14 +40,8 @@ export const likeComment = async (id: string) => {
 // Shared error handler
 const handleAxiosError = (error: unknown) => {
     if (axios.isAxiosError(error)) {
-        console.error("❌ Axios error details:", {
-            status: error.response?.status,
-            data: error.response?.data,
-            headers: error.response?.headers,
-        });
         throw error.response?.data || error;
     }
-    console.error("❌ Non-Axios error:", error);
     throw error;
 };
 
