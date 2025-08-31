@@ -19,7 +19,7 @@ Cookie: auth-token=<jwt_token>
 
 ### Authentication Endpoints
 
-#### POST /auth/register
+#### POST /Auth/register
 Register a new user account.
 
 **Request Body:**
@@ -34,7 +34,8 @@ Register a new user account.
 **Response:**
 ```json
 {
-  "message": "User registered successfully",
+  "success": true,
+  "message": "User created successfully",
   "user": {
     "_id": "string",
     "username": "string",
@@ -54,7 +55,7 @@ Register a new user account.
 
 ---
 
-#### POST /auth/login
+#### POST /Auth/login
 Authenticate user and receive JWT token.
 
 **Request Body:**
@@ -68,7 +69,8 @@ Authenticate user and receive JWT token.
 **Response:**
 ```json
 {
-  "message": "Login successful",
+  "success": true,
+  "message": "Successfully logged in",
   "user": {
     "_id": "string",
     "username": "string",
@@ -86,7 +88,7 @@ Authenticate user and receive JWT token.
 
 ---
 
-#### POST /auth/logout
+#### POST /Auth/logout
 Logout user and clear authentication token.
 
 **Request:** No body required
@@ -94,7 +96,9 @@ Logout user and clear authentication token.
 **Response:**
 ```json
 {
-  "message": "Logged out successfully"
+  "success": true,
+  "message": "Logged out successfully",
+  "clientSideCleanup": true
 }
 ```
 
@@ -103,7 +107,7 @@ Logout user and clear authentication token.
 
 ---
 
-#### GET /auth/check
+#### GET /Auth/check
 Check if user is authenticated and return user data.
 
 **Headers:** Cookie with auth-token required
@@ -111,6 +115,7 @@ Check if user is authenticated and return user data.
 **Response:**
 ```json
 {
+  "loggedIn": true,
   "user": {
     "_id": "string",
     "username": "string",
@@ -119,6 +124,7 @@ Check if user is authenticated and return user data.
     "bio": "string"
   }
 }
+```
 ```
 
 **Status Codes:**
@@ -129,7 +135,7 @@ Check if user is authenticated and return user data.
 
 ### Post Endpoints
 
-#### GET /post/all
+#### GET /Post/all
 Get all posts (public endpoint).
 
 **Response:**
@@ -166,7 +172,7 @@ Get all posts (public endpoint).
 
 ---
 
-#### POST /post/create
+#### POST /Post/create
 Create a new post (requires authentication).
 
 **Headers:** Authorization required
@@ -206,7 +212,7 @@ Create a new post (requires authentication).
 
 ---
 
-#### DELETE /post/delete/:id
+#### DELETE /Post/delete/:id
 Delete a post (requires authentication, author only).
 
 **Headers:** Authorization required
@@ -230,7 +236,61 @@ Delete a post (requires authentication, author only).
 
 ---
 
-#### POST /post/like/:id
+#### PATCH /Post/update/:id
+Update an existing post (requires authentication, author only).
+
+**Headers:** Authorization required
+
+**Parameters:**
+- `id` - Post ID
+
+**Request Body:**
+```json
+{
+  "title": "string (optional, 10-50 characters)",
+  "content": "string (optional, minimum 30 characters)",
+  "image": "string (optional, valid URL)"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Post updated successfully",
+  "post": {
+    "_id": "string",
+    "title": "string",
+    "content": "string",
+    "image": "string",
+    "author_id": {
+      "_id": "string",
+      "username": "string",
+      "avatar": "string"
+    },
+    "likes": [
+      {
+        "user": "string",
+        "createdAt": "string"
+      }
+    ],
+    "comments": ["string"],
+    "createdAt": "string",
+    "updatedAt": "string"
+  }
+}
+```
+
+**Status Codes:**
+- `200` - Post updated successfully
+- `400` - Validation error
+- `401` - Not authenticated
+- `403` - Not authorized (not post author)
+- `404` - Post not found
+- `500` - Server error
+
+---
+
+#### POST /Post/like/:id
 Like or unlike a post (requires authentication).
 
 **Headers:** Authorization required
@@ -262,19 +322,58 @@ Like or unlike a post (requires authentication).
 
 ---
 
-### Comment Endpoints
-
-#### POST /comment/create/:postId
-Create a comment on a post (requires authentication).
+#### GET /Post/comments/:id
+Get comments for a specific post (requires authentication).
 
 **Headers:** Authorization required
 
 **Parameters:**
-- `postId` - Post ID
+- `id` - Post ID
+
+**Response:**
+```json
+{
+  "comments": [
+    {
+      "_id": "string",
+      "content": "string",
+      "user": {
+        "_id": "string",
+        "username": "string",
+        "avatar": "string"
+      },
+      "post": "string",
+      "likes": [
+        {
+          "user": "string",
+          "createdAt": "string"
+        }
+      ],
+      "createdAt": "string"
+    }
+  ]
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `401` - Not authenticated
+- `404` - Post not found
+- `500` - Server error
+
+---
+
+### Comment Endpoints
+
+#### POST /Comment/create
+Create a comment on a post (requires authentication).
+
+**Headers:** Authorization required
 
 **Request Body:**
 ```json
 {
+  "post": "string (required, post ID)",
   "content": "string (required)"
 }
 ```
@@ -286,10 +385,14 @@ Create a comment on a post (requires authentication).
   "comment": {
     "_id": "string",
     "content": "string",
-    "author": "string",
+    "user": {
+      "_id": "string",
+      "username": "string",
+      "avatar": "string"
+    },
     "post": "string",
-    "createdAt": "string",
-    "updatedAt": "string"
+    "likes": [],
+    "createdAt": "string"
   }
 }
 ```
@@ -303,20 +406,272 @@ Create a comment on a post (requires authentication).
 
 ---
 
+#### DELETE /Comment/delete/:id
+Delete a comment (requires authentication, author only).
+
+**Headers:** Authorization required
+
+**Parameters:**
+- `id` - Comment ID
+
+**Response:**
+```json
+{
+  "message": "Comment deleted successfully"
+}
+```
+
+**Status Codes:**
+- `200` - Comment deleted successfully
+- `401` - Not authenticated
+- `403` - Not authorized (not comment author)
+- `404` - Comment not found
+- `500` - Server error
+
+---
+
+#### PATCH /Comment/update/:id
+Update a comment (requires authentication, author only).
+
+**Headers:** Authorization required
+
+**Parameters:**
+- `id` - Comment ID
+
+**Request Body:**
+```json
+{
+  "content": "string (required)"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Comment updated successfully",
+  "comment": {
+    "_id": "string",
+    "content": "string",
+    "user": {
+      "_id": "string",
+      "username": "string",
+      "avatar": "string"
+    },
+    "post": "string",
+    "likes": [
+      {
+        "user": "string",
+        "createdAt": "string"
+      }
+    ],
+    "createdAt": "string"
+  }
+}
+```
+
+**Status Codes:**
+- `200` - Comment updated successfully
+- `400` - Validation error
+- `401` - Not authenticated
+- `403` - Not authorized (not comment author)
+- `404` - Comment not found
+- `500` - Server error
+
+---
+
+#### GET /Comment/post/:id
+Get comments for a specific post (requires authentication).
+
+**Headers:** Authorization required
+
+**Parameters:**
+- `id` - Post ID
+
+**Response:**
+```json
+{
+  "comments": [
+    {
+      "_id": "string",
+      "content": "string",
+      "user": {
+        "_id": "string",
+        "username": "string",
+        "avatar": "string"
+      },
+      "post": "string",
+      "likes": [
+        {
+          "user": "string",
+          "createdAt": "string"
+        }
+      ],
+      "createdAt": "string"
+    }
+  ]
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `401` - Not authenticated
+- `404` - Post not found
+- `500` - Server error
+
+---
+
+#### POST /Comment/like/:id
+Like or unlike a comment (requires authentication).
+
+**Headers:** Authorization required
+
+**Parameters:**
+- `id` - Comment ID
+
+**Response:**
+```json
+{
+  "message": "Comment liked/unliked successfully",
+  "likes": [
+    {
+      "user": "string",
+      "createdAt": "string"
+    }
+  ]
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `401` - Not authenticated
+- `404` - Comment not found
+- `500` - Server error
+
+---
+
 ### Profile Endpoints
 
-#### GET /profile/:userId
+#### GET /Profile/
+Get current authenticated user's profile (requires authentication).
+
+**Headers:** Authorization required
+
+**Response:**
+```json
+{
+  "_id": "string",
+  "username": "string",
+  "email": "string",
+  "avatar": "string",
+  "bio": "string",
+  "followers": [
+    {
+      "_id": "string",
+      "username": "string",
+      "avatar": "string"
+    }
+  ],
+  "following": [
+    {
+      "_id": "string",
+      "username": "string",
+      "avatar": "string"
+    }
+  ],
+  "posts": [
+    {
+      "_id": "string",
+      "title": "string",
+      "content": "string",
+      "createdAt": "string"
+    }
+  ],
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `401` - Not authenticated
+- `404` - User not found
+- `500` - Server error
+
+---
+
+#### GET /Profile/:id
 Get user profile by ID (requires authentication).
 
 **Headers:** Authorization required
 
 **Parameters:**
-- `userId` - User ID
+- `id` - User ID
 
 **Response:**
 ```json
 {
-  "profile": {
+  "_id": "string",
+  "username": "string",
+  "email": "string",
+  "avatar": "string",
+  "bio": "string",
+  "followers": [
+    {
+      "_id": "string",
+      "username": "string",
+      "avatar": "string"
+    }
+  ],
+  "following": [
+    {
+      "_id": "string",
+      "username": "string",
+      "avatar": "string"
+    }
+  ],
+  "posts": [
+    {
+      "_id": "string",
+      "title": "string",
+      "content": "string",
+      "createdAt": "string"
+    }
+  ],
+  "createdAt": "string",
+  "updatedAt": "string"
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `401` - Not authenticated
+- `404` - User not found
+- `500` - Server error
+
+---
+
+#### PATCH /Profile/update/:id
+Update user profile (requires authentication).
+
+**Headers:** Authorization required
+
+**Parameters:**
+- `id` - User ID (must match authenticated user)
+
+**Request Body:**
+```json
+{
+  "username": "string (optional)",
+  "bio": "string (optional, max 500 characters)",
+  "avatar": "string (optional, valid URL)"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Profile updated successfully",
+  "user": {
     "_id": "string",
     "username": "string",
     "email": "string",
@@ -332,42 +687,6 @@ Get user profile by ID (requires authentication).
 ```
 
 **Status Codes:**
-- `200` - Success
-- `401` - Not authenticated
-- `404` - User not found
-- `500` - Server error
-
----
-
-#### PUT /profile/update
-Update user profile (requires authentication).
-
-**Headers:** Authorization required
-
-**Request Body:**
-```json
-{
-  "username": "string (optional)",
-  "bio": "string (optional)",
-  "avatar": "string (optional)"
-}
-```
-
-**Response:**
-```json
-{
-  "message": "Profile updated successfully",
-  "profile": {
-    "_id": "string",
-    "username": "string",
-    "email": "string",
-    "avatar": "string",
-    "bio": "string"
-  }
-}
-```
-
-**Status Codes:**
 - `200` - Profile updated successfully
 - `400` - Validation error
 - `401` - Not authenticated
@@ -375,19 +694,27 @@ Update user profile (requires authentication).
 
 ---
 
-#### POST /profile/follow/:userId
+#### POST /Profile/follow/:id
 Follow or unfollow a user (requires authentication).
 
 **Headers:** Authorization required
 
 **Parameters:**
-- `userId` - User ID to follow/unfollow
+- `id` - User ID to follow/unfollow
 
 **Response:**
 ```json
 {
-  "message": "User followed/unfollowed successfully",
-  "isFollowing": "boolean"
+  "user": {
+    "_id": "string",
+    "username": "string",
+    "email": "string",
+    "avatar": "string",
+    "bio": "string",
+    "followers": ["string"],
+    "following": ["string"]
+  },
+  "message": "User followed/unfollowed successfully"
 }
 ```
 
@@ -401,7 +728,7 @@ Follow or unfollow a user (requires authentication).
 
 ### Message Endpoints
 
-#### POST /message/send
+#### POST /Message/send
 Send a direct message (requires authentication).
 
 **Headers:** Authorization required
@@ -418,13 +745,20 @@ Send a direct message (requires authentication).
 ```json
 {
   "message": "Message sent successfully",
-  "messageData": {
+  "data": {
     "_id": "string",
-    "sender": "string",
-    "receiver": "string",
+    "senderId": {
+      "_id": "string",
+      "username": "string",
+      "avatar": "string"
+    },
+    "receiverId": {
+      "_id": "string",
+      "username": "string",
+      "avatar": "string"
+    },
     "content": "string",
-    "createdAt": "string",
-    "updatedAt": "string"
+    "createdAt": "string"
   }
 }
 ```
@@ -438,13 +772,13 @@ Send a direct message (requires authentication).
 
 ---
 
-#### GET /message/messages/:userId
+#### GET /Message/messages/:id
 Get conversation with a specific user (requires authentication).
 
 **Headers:** Authorization required
 
 **Parameters:**
-- `userId` - User ID to get conversation with
+- `id` - User ID to get conversation with
 
 **Response:**
 ```json
@@ -452,21 +786,151 @@ Get conversation with a specific user (requires authentication).
   "messages": [
     {
       "_id": "string",
-      "sender": {
+      "senderId": {
         "_id": "string",
         "username": "string",
         "avatar": "string"
       },
-      "receiver": {
+      "receiverId": {
         "_id": "string",
         "username": "string",
         "avatar": "string"
       },
       "content": "string",
-      "createdAt": "string",
-      "updatedAt": "string"
+      "createdAt": "string"
+    }
+  ],
+  "count": "number"
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `401` - Not authenticated
+- `404` - User not found
+- `500` - Server error
+
+---
+
+### Additional Auth Endpoints
+
+#### GET /Auth/healthcheck
+Health check endpoint to verify API status.
+
+**Response:**
+```json
+{
+  "status": "OK"
+}
+```
+
+**Status Codes:**
+- `200` - API is healthy
+
+---
+
+#### GET /Auth/user/:id
+Get user information by ID (requires authentication).
+
+**Headers:** Authorization required
+
+**Parameters:**
+- `id` - User ID
+
+**Response:**
+```json
+{
+  "user": {
+    "_id": "string",
+    "username": "string",
+    "email": "string",
+    "avatar": "string",
+    "bio": "string",
+    "createdAt": "string",
+    "updatedAt": "string"
+  }
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `401` - Not authenticated
+- `404` - User not found
+- `500` - Server error
+
+---
+
+#### DELETE /Auth/user/:id
+Delete a user account (requires authentication).
+
+**Headers:** Authorization required
+
+**Parameters:**
+- `id` - User ID
+
+**Response:**
+```json
+{
+  "message": "User deleted successfully"
+}
+```
+
+**Status Codes:**
+- `200` - User deleted successfully
+- `401` - Not authenticated
+- `404` - User not found
+- `500` - Server error
+
+---
+
+#### GET /Auth/following/:id
+Get list of users that a specific user is following (requires authentication).
+
+**Headers:** Authorization required
+
+**Parameters:**
+- `id` - User ID
+
+**Response:**
+```json
+{
+  "message": "Following users fetched successfully",
+  "following": [
+    {
+      "_id": "string",
+      "username": "string",
+      "email": "string",
+      "avatar": "string",
+      "bio": "string"
     }
   ]
+}
+```
+
+**Status Codes:**
+- `200` - Success
+- `401` - Not authenticated
+- `404` - User not found
+- `500` - Server error
+
+---
+
+#### GET /Auth/sentMessages
+Get list of users who have sent messages to the authenticated user but are not followed (requires authentication).
+
+**Headers:** Authorization required
+
+**Response:**
+```json
+{
+  "senders": [
+    {
+      "_id": "string",
+      "username": "string",
+      "avatar": "string"
+    }
+  ],
+  "count": "number"
 }
 ```
 
