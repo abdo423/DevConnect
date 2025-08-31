@@ -140,29 +140,35 @@ Get all posts (public endpoint).
 
 **Response:**
 ```json
-{
-  "posts": [
-    {
+[
+  {
+    "_id": "string",
+    "title": "string",
+    "content": "string",
+    "image": "string",
+    "author_id": {
       "_id": "string",
-      "title": "string",
-      "content": "string",
-      "image": "string",
-      "author_id": {
+      "username": "string",
+      "email": "string",
+      "avatar": "string"
+    },
+    "likes": [
+      {
+        "user": "string",
+        "createdAt": "string"
+      }
+    ],
+    "comments": [
+      {
         "_id": "string",
-        "username": "string",
-        "avatar": "string"
-      },
-      "likes": [
-        {
-          "user": "string",
-          "createdAt": "string"
-        }
-      ],
-      "comments": ["string"],
-      "createdAt": "string",
-      "updatedAt": "string"
-    }
-  ]
+        "content": "string",
+        "createdAt": "string"
+      }
+    ],
+    "createdAt": "string",
+    "updatedAt": "string"
+  }
+]
 }
 ```
 
@@ -948,36 +954,64 @@ All endpoints may return these error responses:
 ### 400 Bad Request
 ```json
 {
-  "error": "Validation error message",
-  "details": ["Specific validation errors"]
+  "message": "Validation failed",
+  "errors": [
+    {
+      "code": "invalid_type",
+      "expected": "string",
+      "received": "undefined",
+      "path": ["field_name"],
+      "message": "Required"
+    }
+  ]
 }
 ```
 
 ### 401 Unauthorized
 ```json
 {
-  "error": "Unauthorized access, please try again"
+  "message": "Unauthorized: User not authenticated"
+}
+```
+or for auth endpoints:
+```json
+{
+  "success": false,
+  "message": "Invalid credentials"
 }
 ```
 
 ### 403 Forbidden
 ```json
 {
-  "error": "Forbidden - insufficient permissions"
+  "message": "Forbidden - insufficient permissions"
 }
 ```
 
 ### 404 Not Found
 ```json
 {
-  "error": "Resource not found"
+  "message": "Resource not found"
+}
+```
+or for specific resources:
+```json
+{
+  "message": "User not found"
 }
 ```
 
 ### 500 Internal Server Error
 ```json
 {
-  "error": "Internal server error"
+  "message": "Internal server error"
+}
+```
+or for auth endpoints:
+```json
+{
+  "success": false,
+  "message": "Server error"
 }
 ```
 
