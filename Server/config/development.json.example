@@ -1,0 +1,12 @@
+{
+  "app": {
+    "port": 3000
+  },
+  "db": {
+    "connectionString": "mongodb://localhost:27017/devconnect"
+  },
+  "jwt": {
+    "secret": "your-super-secure-jwt-secret-key-for-development",
+    "expiresIn": "7d"
+  }
+}
