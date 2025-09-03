@@ -54,8 +54,10 @@ describe('RegisterForm', () => {
 
   it('dispatches register action with correct data', async () => {
     const user = userEvent.setup()
-    const mockRegisterThunk = vi.fn().mockResolvedValue({ message: 'Registration successful' })
-    mockRegisterThunk.unwrap = vi.fn().mockResolvedValue({ message: 'Registration successful' })
+    const mockThunkAction = {
+      unwrap: vi.fn().mockResolvedValue({ message: 'Registration successful' })
+    }
+    const mockRegisterThunk = vi.fn().mockReturnValue(mockThunkAction)
     vi.spyOn(authSlice, 'register').mockReturnValue(mockRegisterThunk as any)
     
     renderWithProviders(<RegisterForm />)
@@ -81,8 +83,10 @@ describe('RegisterForm', () => {
 
   it('shows success message on successful registration', async () => {
     const user = userEvent.setup()
-    const mockRegisterThunk = vi.fn().mockResolvedValue({ message: 'Registration successful' })
-    mockRegisterThunk.unwrap = vi.fn().mockResolvedValue({ message: 'Registration successful' })
+    const mockThunkAction = {
+      unwrap: vi.fn().mockResolvedValue({ message: 'Registration successful' })
+    }
+    const mockRegisterThunk = vi.fn().mockReturnValue(mockThunkAction)
     vi.spyOn(authSlice, 'register').mockReturnValue(mockRegisterThunk as any)
     
     renderWithProviders(<RegisterForm />)

@@ -81,8 +81,10 @@ describe('LoginForm', () => {
 
   it('dispatches login action with correct credentials', async () => {
     const user = userEvent.setup()
-    const mockLoginThunk = vi.fn().mockResolvedValue({ message: 'Login successful' })
-    mockLoginThunk.unwrap = vi.fn().mockResolvedValue({ message: 'Login successful' })
+    const mockThunkAction = {
+      unwrap: vi.fn().mockResolvedValue({ message: 'Login successful' })
+    }
+    const mockLoginThunk = vi.fn().mockReturnValue(mockThunkAction)
     vi.spyOn(authSlice, 'login').mockReturnValue(mockLoginThunk as any)
     
     renderWithProviders(<LoginForm />)
@@ -105,8 +107,10 @@ describe('LoginForm', () => {
 
   it('shows success message on successful login', async () => {
     const user = userEvent.setup()
-    const mockLoginThunk = vi.fn().mockResolvedValue({ message: 'Login successful' })
-    mockLoginThunk.unwrap = vi.fn().mockResolvedValue({ message: 'Login successful' })
+    const mockThunkAction = {
+      unwrap: vi.fn().mockResolvedValue({ message: 'Login successful' })
+    }
+    const mockLoginThunk = vi.fn().mockReturnValue(mockThunkAction)
     vi.spyOn(authSlice, 'login').mockReturnValue(mockLoginThunk as any)
     
     renderWithProviders(<LoginForm />)
@@ -126,8 +130,10 @@ describe('LoginForm', () => {
 
   it('shows error message on failed login', async () => {
     const user = userEvent.setup()
-    const mockLoginThunk = vi.fn().mockRejectedValue({ message: 'Invalid credentials' })
-    mockLoginThunk.unwrap = vi.fn().mockRejectedValue({ message: 'Invalid credentials' })
+    const mockThunkAction = {
+      unwrap: vi.fn().mockRejectedValue({ message: 'Invalid credentials' })
+    }
+    const mockLoginThunk = vi.fn().mockReturnValue(mockThunkAction)
     vi.spyOn(authSlice, 'login').mockReturnValue(mockLoginThunk as any)
     
     renderWithProviders(<LoginForm />)

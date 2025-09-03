@@ -116,8 +116,10 @@ describe('UserMenu', () => {
 
   it('calls logout action when logout is clicked', async () => {
     const user = userEvent.setup()
-    const mockLogoutThunk = vi.fn().mockResolvedValue({})
-    mockLogoutThunk.unwrap = vi.fn().mockResolvedValue({})
+    const mockThunkAction = {
+      unwrap: vi.fn().mockResolvedValue({})
+    }
+    const mockLogoutThunk = vi.fn().mockReturnValue(mockThunkAction)
     vi.spyOn(authSlice, 'logout').mockReturnValue(mockLogoutThunk as any)
     
     renderWithProviders(
@@ -138,8 +140,10 @@ describe('UserMenu', () => {
 
   it('handles logout error gracefully', async () => {
     const user = userEvent.setup()
-    const mockLogoutThunk = vi.fn().mockRejectedValue(new Error('Logout failed'))
-    mockLogoutThunk.unwrap = vi.fn().mockRejectedValue(new Error('Logout failed'))
+    const mockThunkAction = {
+      unwrap: vi.fn().mockRejectedValue(new Error('Logout failed'))
+    }
+    const mockLogoutThunk = vi.fn().mockReturnValue(mockThunkAction)
     vi.spyOn(authSlice, 'logout').mockReturnValue(mockLogoutThunk as any)
     
     renderWithProviders(
