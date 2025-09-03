@@ -12,15 +12,26 @@ import messageSlice from '@/features/Message/messageSlice.ts'
 import followingSlice from '@/features/Following/followingSlice.ts'
 import commentsSlice from '@/features/Comments/commentsSlice.ts'
 import { RootState } from '@/app/store'
+import User from '../Types/user.ts'
+
+// Define the complete state shape for better type inference
+type TestRootState = {
+  auth: User
+  post: ReturnType<typeof postsSlice.getInitialState>
+  profile: ReturnType<typeof ProfileSlice.getInitialState>
+  message: ReturnType<typeof messageSlice.getInitialState>
+  following: ReturnType<typeof followingSlice.getInitialState>
+  comments: ReturnType<typeof commentsSlice.getInitialState>
+}
 
 // This type interface extends the default options for render from RTL, as well
 // as allows the user to specify other things such as initialState, store.
 interface ExtendedRenderOptions extends Omit<RenderOptions, 'wrapper'> {
-  preloadedState?: Partial<RootState>
+  preloadedState?: Partial<TestRootState>
   store?: ReturnType<typeof setupStore>
 }
 
-export function setupStore(preloadedState?: Partial<RootState>) {
+export function setupStore(preloadedState?: Partial<TestRootState>) {
   return configureStore({
     reducer: {
       auth: authSlice,
@@ -63,8 +74,8 @@ export function renderWithProviders(
   return { store, ...render(ui, { wrapper: Wrapper, ...renderOptions }) }
 }
 
-// Create mock store states for testing
-export const createMockAuthState = (overrides = {}) => ({
+// Create mock store states for testing with proper typing
+export const createMockAuthState = (overrides: Partial<User> = {}): User => ({
   user: {
     _id: 'test-user-id',
     username: 'testuser',
@@ -81,6 +92,11 @@ export const createMockAuthState = (overrides = {}) => ({
   error: null,
   isLoggedIn: true,
   ...overrides,
+})
+
+// Helper function to create preloaded state with just auth
+export const createAuthPreloadedState = (authOverrides: Partial<User> = {}): Partial<TestRootState> => ({
+  auth: createMockAuthState(authOverrides),
 })
 
 export const createMockProfileState = (overrides = {}) => ({

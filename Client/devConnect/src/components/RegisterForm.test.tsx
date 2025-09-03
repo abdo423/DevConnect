@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { renderWithProviders, createMockAuthState } from '@/test/test-utils'
+import { renderWithProviders, createAuthPreloadedState } from '@/test/test-utils'
 import RegisterForm from '@/components/RegisterForm'
 import * as authSlice from '@/features/Auth/authSlice.ts'
 
@@ -13,11 +13,11 @@ describe('RegisterForm', () => {
   it('renders register form with all elements', () => {
     renderWithProviders(<RegisterForm />)
     
-    expect(screen.getByText('Sign Up')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /register/i })).toBeInTheDocument()
     expect(screen.getByLabelText('Username')).toBeInTheDocument()
     expect(screen.getByLabelText('Email')).toBeInTheDocument()
     expect(screen.getByLabelText('Password')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /register/i })).toBeInTheDocument()
   })
 
   it('allows typing in all form fields', async () => {
@@ -41,7 +41,7 @@ describe('RegisterForm', () => {
     const user = userEvent.setup()
     renderWithProviders(<RegisterForm />)
     
-    const submitButton = screen.getByRole('button', { name: /create account/i })
+    const submitButton = screen.getByRole('button', { name: /register/i })
     
     // Try to submit without filling in fields
     await user.click(submitButton)
@@ -65,7 +65,7 @@ describe('RegisterForm', () => {
     const usernameInput = screen.getByLabelText('Username')
     const emailInput = screen.getByLabelText('Email')
     const passwordInput = screen.getByLabelText('Password')
-    const submitButton = screen.getByRole('button', { name: /create account/i })
+    const submitButton = screen.getByRole('button', { name: /register/i })
     
     await user.type(usernameInput, 'testuser123')
     await user.type(emailInput, 'test@example.com')
@@ -94,7 +94,7 @@ describe('RegisterForm', () => {
     const usernameInput = screen.getByLabelText('Username')
     const emailInput = screen.getByLabelText('Email')
     const passwordInput = screen.getByLabelText('Password')
-    const submitButton = screen.getByRole('button', { name: /create account/i })
+    const submitButton = screen.getByRole('button', { name: /register/i })
     
     await user.type(usernameInput, 'testuser123')
     await user.type(emailInput, 'test@example.com')
@@ -107,16 +107,14 @@ describe('RegisterForm', () => {
   })
 
   it('disables form when loading', () => {
-    const preloadedState = {
-      auth: createMockAuthState({ loading: true }),
-    }
+    const preloadedState = createAuthPreloadedState({ loading: true })
     
     renderWithProviders(<RegisterForm />, { preloadedState })
     
     const usernameInput = screen.getByLabelText('Username')
     const emailInput = screen.getByLabelText('Email')
     const passwordInput = screen.getByLabelText('Password')
-    const submitButton = screen.getByRole('button', { name: /create account/i })
+    const submitButton = screen.getByRole('button', { name: /register/i })
     
     expect(usernameInput).toBeDisabled()
     expect(emailInput).toBeDisabled()
