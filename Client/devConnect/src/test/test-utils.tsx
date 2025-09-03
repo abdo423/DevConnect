@@ -13,15 +13,40 @@ import followingSlice from '@/features/Following/followingSlice.ts'
 import commentsSlice from '@/features/Comments/commentsSlice.ts'
 import { RootState } from '@/app/store'
 import User from '../Types/user.ts'
+import { PostsState } from '../Types/post.ts'
+import ProfileState from '../Types/profile.ts'
+
+// Define state interfaces for message, following, and comments
+interface MessageState {
+  messages: any[]
+  users: any[]
+  loading: boolean
+  success: boolean
+  error: string | null
+}
+
+interface FollowingState {
+  following: any[] | null
+  unfollowedMessageSenders: any[]
+  loading: boolean
+  error: string | null
+  lastFetchedUserId: string | null
+}
+
+interface CommentsState {
+  comments: any[]
+  loading: boolean
+  error: string | null
+}
 
 // Define the complete state shape for better type inference
 type TestRootState = {
   auth: User
-  post: ReturnType<typeof postsSlice.getInitialState>
-  profile: ReturnType<typeof ProfileSlice.getInitialState>
-  message: ReturnType<typeof messageSlice.getInitialState>
-  following: ReturnType<typeof followingSlice.getInitialState>
-  comments: ReturnType<typeof commentsSlice.getInitialState>
+  post: PostsState
+  profile: ProfileState
+  message: MessageState
+  following: FollowingState
+  comments: CommentsState
 }
 
 // This type interface extends the default options for render from RTL, as well
