@@ -74,6 +74,8 @@ export const createMockAuthState = (overrides = {}) => ({
     followers: [],
     following: [],
     posts: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
   loading: false,
   error: null,
