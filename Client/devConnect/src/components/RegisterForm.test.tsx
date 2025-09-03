@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import React from 'react'
 import { renderWithProviders, createAuthPreloadedState } from '@/test/test-utils'
 import RegisterForm from '@/components/RegisterForm'
 import * as authSlice from '@/features/Auth/authSlice.ts'
@@ -13,20 +14,22 @@ describe('RegisterForm', () => {
   it('renders register form with all elements', () => {
     renderWithProviders(<RegisterForm />)
     
-    expect(screen.getByRole('heading', { name: /register/i })).toBeInTheDocument()
-    expect(screen.getByLabelText('Username')).toBeInTheDocument()
-    expect(screen.getByLabelText('Email')).toBeInTheDocument()
-    expect(screen.getByLabelText('Password')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /register/i })).toBeInTheDocument()
+    // Check that both title and button exist with "Register" text
+    const registerElements = screen.getAllByText('Register')
+    expect(registerElements).toHaveLength(2) // Title and button
+    
+    expect(screen.getByPlaceholderText('Enter your username')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Enter your Email')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Enter your password')).toBeInTheDocument()
   })
 
   it('allows typing in all form fields', async () => {
     const user = userEvent.setup()
     renderWithProviders(<RegisterForm />)
     
-    const usernameInput = screen.getByLabelText('Username')
-    const emailInput = screen.getByLabelText('Email')
-    const passwordInput = screen.getByLabelText('Password')
+    const usernameInput = screen.getByPlaceholderText('Enter your username')
+    const emailInput = screen.getByPlaceholderText('Enter your Email')
+    const passwordInput = screen.getByPlaceholderText('Enter your password')
     
     await user.type(usernameInput, 'testuser123')
     await user.type(emailInput, 'test@example.com')
@@ -46,9 +49,9 @@ describe('RegisterForm', () => {
     // Try to submit without filling in fields
     await user.click(submitButton)
     
-    // Should show validation errors
+    // Should show validation errors (multiple fields with same error)
     await waitFor(() => {
-      expect(screen.getByText(/string must contain at least 8 character/i)).toBeInTheDocument()
+      expect(screen.getAllByText(/string must contain at least 8 character/i)).toHaveLength(2)
     })
   })
 
@@ -62,9 +65,9 @@ describe('RegisterForm', () => {
     
     renderWithProviders(<RegisterForm />)
     
-    const usernameInput = screen.getByLabelText('Username')
-    const emailInput = screen.getByLabelText('Email')
-    const passwordInput = screen.getByLabelText('Password')
+    const usernameInput = screen.getByPlaceholderText('Enter your username')
+    const emailInput = screen.getByPlaceholderText('Enter your Email')
+    const passwordInput = screen.getByPlaceholderText('Enter your password')
     const submitButton = screen.getByRole('button', { name: /register/i })
     
     await user.type(usernameInput, 'testuser123')
@@ -91,9 +94,9 @@ describe('RegisterForm', () => {
     
     renderWithProviders(<RegisterForm />)
     
-    const usernameInput = screen.getByLabelText('Username')
-    const emailInput = screen.getByLabelText('Email')
-    const passwordInput = screen.getByLabelText('Password')
+    const usernameInput = screen.getByPlaceholderText('Enter your username')
+    const emailInput = screen.getByPlaceholderText('Enter your Email')
+    const passwordInput = screen.getByPlaceholderText('Enter your password')
     const submitButton = screen.getByRole('button', { name: /register/i })
     
     await user.type(usernameInput, 'testuser123')
@@ -111,9 +114,9 @@ describe('RegisterForm', () => {
     
     renderWithProviders(<RegisterForm />, { preloadedState })
     
-    const usernameInput = screen.getByLabelText('Username')
-    const emailInput = screen.getByLabelText('Email')
-    const passwordInput = screen.getByLabelText('Password')
+    const usernameInput = screen.getByPlaceholderText('Enter your username')
+    const emailInput = screen.getByPlaceholderText('Enter your Email')
+    const passwordInput = screen.getByPlaceholderText('Enter your password')
     const submitButton = screen.getByRole('button', { name: /register/i })
     
     expect(usernameInput).toBeDisabled()
