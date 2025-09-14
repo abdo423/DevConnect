@@ -1,6 +1,17 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { createPost, deletePost, getPosts, likePost, updatePost } from './postsApi';
-import {PostsState} from "Types/post.ts"
+import { Post } from "../../../Types/post.ts";
+
+export interface PostsState {
+    posts: Post[];
+    loading: boolean;
+    error: string | null;
+    postCreated: boolean;
+    postDeleted: boolean;
+    postUpdated: boolean;
+    currentPost: Post | null;
+}
+
 // Error interface
 interface APIError {
     response?: {

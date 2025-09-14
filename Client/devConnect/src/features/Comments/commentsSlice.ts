@@ -6,20 +6,8 @@ import {
     likeComment as likeCommentApi,
 } from "@/features/Comments/CommentsApi.ts";
 
-interface User {
-    _id: string;
-    username: string;
-    avatar: string;
-}
+import { Comment } from "../../../Types/comment.ts";
 
-interface Comment {
-    _id: string;
-    user: User;
-    post: string;
-    content: string;
-    createdAt: string;
-    likes: string[]; // important for like toggling
-}
 
 interface CommentsState {
     comments: Comment[];

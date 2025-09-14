@@ -11,33 +11,28 @@ interface Comment {
     createdAt: string;
 }
 
-
-interface User {
-    user: {
+export interface User {
+    _id: string;
+    username: string;
+    email: string;
+    avatar: string;
+    bio: string;
+    posts: Array<{
         _id: string;
-        username: string;
-        email: string;
-        avatar: string;
-        bio: string;
-        posts: Array<{
-            _id: string;
-            title: string;
-            content: string;
-            author_id: string;
-            image: string;
-            likes: Like[];
-            comments: Comment[];
-            createdAt: string;
-            updatedAt: string;
-        }>;
-        followers: string[];
-        following: string[];
+        title: string;
+        content: string;
+        author_id: string;
+        image: string;
+        likes: Like[];
+        comments: Comment[];
         createdAt: string;
         updatedAt: string;
-    } | null;
-    loading: boolean;
-    error: string | null;
-    isLoggedIn: boolean;
+    }>;
+    followers: string[];
+    following: string[];
+    createdAt: string;
+    updatedAt: string;
 }
+
 
 export default User;

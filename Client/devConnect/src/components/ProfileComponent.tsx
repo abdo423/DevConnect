@@ -34,7 +34,7 @@ const ProfileComponent = () => {
             dispatch(fetchProfile());
         }
     }, [dispatch, id]);
-;
+
 
     if (loading) {
         return (

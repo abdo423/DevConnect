@@ -63,12 +63,20 @@ export const fetchCurrentUser = createAsyncThunk(
 
 
 
-const initialState: User = {
+interface AuthState {
+    user: User | null;   // 👈 the actual user
+    loading: boolean;
+    error: string | null;
+    isLoggedIn: boolean;
+}
+
+const initialState: AuthState = {
     user: null,
     loading: false,
     error: null,
     isLoggedIn: false,
 };
+
 
 const authSlice = createSlice({
         name: 'auth',
