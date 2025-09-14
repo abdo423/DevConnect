@@ -1,18 +1,16 @@
-interface Like {
-    user: string; // user ID
-    createdAt: string;
-}
+import { Comment } from "./comment";
 
 interface Post {
     _id: string;
     title: string;
     content: string;
     author_id: string; // user ID
-    image: string;
-    likes: Like[];
-    comments: string[]; // comment IDs from profile endpoint
+    image?: string;
+    likes?: Array<string | { user: string; createdAt: string }>; // Match global Post likes type
+    comments?: Comment[] | string[]; // Can be populated objects or IDs, matches global interface
     createdAt: string;
     updatedAt: string;
+    __v?: number;
 }
 
 interface UserProfile {
