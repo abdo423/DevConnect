@@ -71,7 +71,7 @@ const ProfileComponent = () => {
                     dispatch(fetchProfile());
                 }
             },
-            (error) => {
+            (_error) => {
                //todo make error handling
             }
         );

@@ -38,7 +38,7 @@ interface CommentsPopUpProps {
         author?: string;
         authorAvatar?: string;
         image?: string;
-        date?: Date;
+        date?: Date | string;
         likes?: number;
         commentCount?: number;
     };

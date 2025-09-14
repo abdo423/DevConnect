@@ -3,14 +3,6 @@ interface Like {
     createdAt: string;
 }
 
-interface Comment {
-    user: string; // user ID
-    post: string; // post ID
-    content: string;
-    likes: Like[];
-    createdAt: string;
-}
-
 interface Post {
     _id: string;
     title: string;
@@ -18,7 +10,7 @@ interface Post {
     author_id: string; // user ID
     image: string;
     likes: Like[];
-    comments: Comment[];
+    comments: string[]; // comment IDs from profile endpoint
     createdAt: string;
     updatedAt: string;
 }
