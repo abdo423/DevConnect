@@ -26,6 +26,7 @@ import {useState} from "react";
 //import axios from 'axios';
 import FormSuccess from "./FormSuccess.tsx";
 import FormError from "./FormError.tsx";
+import {useNavigate} from "react-router-dom";
 
 const formSchema = z.object({
     email: z.string().min(2).max(50),
@@ -49,7 +50,7 @@ const RegisterForm = () => {
             username: ""
         },
     });
-
+    const navigate = useNavigate()
     const handleRegister = (data: z.infer<typeof formSchema>) => {
         dispatch(register({
             email: data.email,
@@ -64,12 +65,25 @@ const RegisterForm = () => {
                     success: result.message || "Registration successful"
                 });
                 form.reset();
-                window.location.href = "/login";
+               navigate("/login");
             })
             .catch((error) => {
-                // Extract the error message from backend response
-                const errorMessage =
-                error || "Registration failed";
+                // Properly extract the error message
+                let errorMessage = "Registration failed";
+
+                if (typeof error === 'string') {
+                    errorMessage = error;
+                } else if (error && typeof error === 'object') {
+                    // Handle different error object structures
+                    if (error.message) {
+                        errorMessage = error.message;
+                    } else if (error.data && error.data.message) {
+                        errorMessage = error.data.message;
+                    } else if (error.error && error.error.message) {
+                        errorMessage = error.error.message;
+                    }
+                }
+
                 setStatus({
                     success: "",
                     error: errorMessage

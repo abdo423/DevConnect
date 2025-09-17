@@ -6,7 +6,7 @@ export interface Post {
     content: string;
     image?: string;
     likes?: Array<string | { user: string; createdAt: string }>;
-    comments?: Comment[];   // ✅ now full objects
+    comments?: Comment[] | string[];   // Can be full objects or just IDs
     author_id:
         | string
         | {
@@ -15,8 +15,8 @@ export interface Post {
         avatar?: string;
         username: string;
     };
-    createdAt: Date;
-    updatedAt?: Date;
+    createdAt: Date | string;
+    updatedAt?: Date | string;
     __v?: number;
 }
 

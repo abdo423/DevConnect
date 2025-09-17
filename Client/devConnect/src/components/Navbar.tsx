@@ -41,6 +41,8 @@ const Navbar = () => {
                             <Link to="/register">Sign up</Link>
                         </Button>
                     </div>
+                    <MobileNav isLoggedIn={false} filteredRoutes={filteredRoutes}/>
+
                 </div>
             </header>
         );

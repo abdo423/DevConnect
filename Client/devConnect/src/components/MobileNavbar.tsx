@@ -84,7 +84,7 @@ const MobileNavbar = ({isLoggedIn, user, filteredRoutes}: MobileNavbarProps) => 
                                         </Button>
                                     ))}
 
-                                    <Button onClick={handleLogout} variant="ghost" asChild
+                                    <Button onClick={handleLogout} variant="ghost"
                                             className="justify-start text-red-500 hover:text-red-600 hover:bg-red-50">
                                             Logout
                                     </Button>
@@ -112,10 +112,10 @@ const MobileNavbar = ({isLoggedIn, user, filteredRoutes}: MobileNavbarProps) => 
                 ) : (
                     <SheetFooter className="w-[90%] mx-auto">
                         <div className="mt-auto flex flex-col gap-2 pt-4">
-                            <Button variant="outline" asChild>
+                            <Button variant="outline" >
                                 <Link to="/login">Log in</Link>
                             </Button>
-                            <Button asChild>
+                            <Button >
                                 <Link to="/register">Sign up</Link>
                             </Button>
                         </div>
