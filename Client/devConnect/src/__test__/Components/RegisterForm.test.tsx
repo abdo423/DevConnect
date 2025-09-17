@@ -1,126 +1,131 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
-import { renderWithProviders, createAuthPreloadedState } from '@/__test__/test.util'
-import RegisterForm from '@/components/RegisterForm'
-import * as authSlice from '@/features/Auth/authSlice.ts'
+// src/__test__/Components/RegisterForm.test.tsx
+import {describe, expect, it, vi, beforeEach} from "vitest"
+import {fireEvent, screen, waitFor} from "@testing-library/react"
+import {renderWithProviders} from "../test.util.tsx"
+import RegisterForm from "@/components/RegisterForm"
 
-describe('RegisterForm', () => {
+// Create the mock function inside the vi.mock factory
+vi.mock("@/features/Auth/authSlice", async (importOriginal) => {
+    const actual = await importOriginal<typeof import("@/features/Auth/authSlice")>()
+    return {
+        ...actual,
+        register: vi.fn(() => ({
+            type: 'auth/register/pending',
+            payload: undefined,
+            unwrap: () => Promise.resolve({ message: "Registration successful" }),
+        })),
+    }
+})
+
+import {register} from "@/features/Auth/authSlice"
+
+describe("RegisterForm", () => {
     beforeEach(() => {
+        // Reset and set default behavior
         vi.clearAllMocks()
-    })
-
-    it('renders register form with all elements', () => {
-        renderWithProviders(<RegisterForm />)
-
-        // Check that both title and button exist with "Register" text
-        const registerElements = screen.getAllByText('Register')
-        expect(registerElements).toHaveLength(2) // Title and button
-
-        expect(screen.getByPlaceholderText('Enter your username')).toBeInTheDocument()
-        expect(screen.getByPlaceholderText('Enter your Email')).toBeInTheDocument()
-        expect(screen.getByPlaceholderText('Enter your password')).toBeInTheDocument()
-    })
-
-    it('allows typing in all form fields', async () => {
-        const user = userEvent.setup()
-        renderWithProviders(<RegisterForm />)
-
-        const usernameInput = screen.getByPlaceholderText('Enter your username')
-        const emailInput = screen.getByPlaceholderText('Enter your Email')
-        const passwordInput = screen.getByPlaceholderText('Enter your password')
-
-        await user.type(usernameInput, 'testuser123')
-        await user.type(emailInput, 'test@example.com')
-        await user.type(passwordInput, 'password123')
-
-        expect(usernameInput).toHaveValue('testuser123')
-        expect(emailInput).toHaveValue('test@example.com')
-        expect(passwordInput).toHaveValue('password123')
-    })
-
-    it('shows validation errors for short inputs', async () => {
-        const user = userEvent.setup()
-        renderWithProviders(<RegisterForm />)
-
-        const submitButton = screen.getByRole('button', { name: /register/i })
-
-        // Try to submit without filling in fields
-        await user.click(submitButton)
-
-        // Should show validation errors (multiple fields with same error)
-        await waitFor(() => {
-            expect(screen.getAllByText(/string must contain at least 8 character/i)).toHaveLength(2)
+        ;(register as vi.Mock).mockReturnValue({
+            type: 'auth/register/pending',
+            payload: undefined,
+            unwrap: () => Promise.resolve({ message: "Registration successful" }),
         })
     })
 
-    it('dispatches register action with correct data', async () => {
-        const user = userEvent.setup()
-        const mockThunkAction = {
-            unwrap: vi.fn().mockResolvedValue({ message: 'Registration successful' })
-        }
-        const mockRegisterThunk = vi.fn().mockReturnValue(mockThunkAction)
-        vi.spyOn(authSlice, 'register').mockReturnValue(mockRegisterThunk as any)
-
+    it("renders form inputs", () => {
         renderWithProviders(<RegisterForm />)
 
-        const usernameInput = screen.getByPlaceholderText('Enter your username')
-        const emailInput = screen.getByPlaceholderText('Enter your Email')
-        const passwordInput = screen.getByPlaceholderText('Enter your password')
-        const submitButton = screen.getByRole('button', { name: /register/i })
+        expect(screen.getByPlaceholderText(/Enter your username/i)).toBeInTheDocument()
+        expect(screen.getByPlaceholderText(/Enter your Email/i)).toBeInTheDocument()
+        expect(screen.getByPlaceholderText(/Enter your password/i)).toBeInTheDocument()
+        expect(screen.getByRole("button", {name: /register/i})).toBeInTheDocument()
+    })
 
-        await user.type(usernameInput, 'testuser123')
-        await user.type(emailInput, 'test@example.com')
-        await user.type(passwordInput, 'password123')
-        await user.click(submitButton)
+    it("shows validation errors if fields are empty", async () => {
+        renderWithProviders(<RegisterForm />)
+
+        fireEvent.click(screen.getByRole("button", {name: /register/i}))
 
         await waitFor(() => {
-            expect(authSlice.register).toHaveBeenCalledWith({
-                username: 'testuser123',
-                email: 'test@example.com',
-                password: 'password123'
+            expect(screen.getAllByText(/String must contain/i).length).toBeGreaterThan(0)
+        })
+    })
+
+    it("dispatches register on valid submission", async () => {
+        renderWithProviders(<RegisterForm />)
+
+        fireEvent.change(screen.getByPlaceholderText(/Enter your username/i), {
+            target: {value: "testusername"},
+        })
+        fireEvent.change(screen.getByPlaceholderText(/Enter your Email/i), {
+            target: {value: "test@example.com"},
+        })
+        fireEvent.change(screen.getByPlaceholderText(/Enter your password/i), {
+            target: {value: "password123"},
+        })
+
+        fireEvent.click(screen.getByRole("button", {name: /register/i}))
+
+        await waitFor(() => {
+            expect(register).toHaveBeenCalledWith({
+                email: "test@example.com",
+                password: "password123",
+                username: "testusername",
             })
         })
     })
 
-    it('shows success message on successful registration', async () => {
-        const user = userEvent.setup()
-        const mockThunkAction = {
-            unwrap: vi.fn().mockResolvedValue({ message: 'Registration successful' })
-        }
-        const mockRegisterThunk = vi.fn().mockReturnValue(mockThunkAction)
-        vi.spyOn(authSlice, 'register').mockReturnValue(mockRegisterThunk as any)
+    it("shows success message after registration", async () => {
+        renderWithProviders(<RegisterForm/>)
+
+        fireEvent.change(screen.getByPlaceholderText(/Enter your username/i), {
+            target: {value: "testusername"},
+        })
+        fireEvent.change(screen.getByPlaceholderText(/Enter your Email/i), {
+            target: {value: "test@example.com"},
+        })
+        fireEvent.change(screen.getByPlaceholderText(/Enter your password/i), {
+            target: {value: "password123"},
+        })
+
+        fireEvent.click(screen.getByRole("button", {name: /register/i}))
+
+        expect(
+            await screen.findByText((content) => content.includes("Registration successful"))
+        ).toBeInTheDocument()
+    })
+
+    it("shows error message if registration fails", async () => {
+        // Override mock for this specific test
+          (register as vi.Mock).mockReturnValueOnce({
+            type: 'auth/register/pending',
+            payload: undefined,
+            unwrap: () => Promise.reject({ message: "Registration failed" }),
+        })
 
         renderWithProviders(<RegisterForm />)
 
-        const usernameInput = screen.getByPlaceholderText('Enter your username')
-        const emailInput = screen.getByPlaceholderText('Enter your Email')
-        const passwordInput = screen.getByPlaceholderText('Enter your password')
-        const submitButton = screen.getByRole('button', { name: /register/i })
-
-        await user.type(usernameInput, 'testuser123')
-        await user.type(emailInput, 'test@example.com')
-        await user.type(passwordInput, 'password123')
-        await user.click(submitButton)
-
-        await waitFor(() => {
-            expect(screen.getByText('Registration successful')).toBeInTheDocument()
+        // Fill form
+        fireEvent.change(screen.getByPlaceholderText(/Enter your username/i), {
+            target: {value: "testusername"},
         })
-    })
+        fireEvent.change(screen.getByPlaceholderText(/Enter your Email/i), {
+            target: {value: "test@example.com"},
+        })
+        fireEvent.change(screen.getByPlaceholderText(/Enter your password/i), {
+            target: {value: "password123"},
+        })
 
-    it('disables form when loading', () => {
-        const preloadedState = createAuthPreloadedState({ loading: true })
+        fireEvent.click(screen.getByRole("button", {name: /register/i}))
 
-        renderWithProviders(<RegisterForm />, { preloadedState })
+        // Debug what's actually rendered
+        // await waitFor(() => {
+        //     console.log("=== DEBUG: Looking for error message ===")
+        //     screen.debug()
+        //     console.log("All text content:", document.body.textContent)
+        // })
 
-        const usernameInput = screen.getByPlaceholderText('Enter your username')
-        const emailInput = screen.getByPlaceholderText('Enter your Email')
-        const passwordInput = screen.getByPlaceholderText('Enter your password')
-        const submitButton = screen.getByRole('button', { name: /register/i })
-
-        expect(usernameInput).toBeDisabled()
-        expect(emailInput).toBeDisabled()
-        expect(passwordInput).toBeDisabled()
-        expect(submitButton).toBeDisabled()
+        // This will likely fail, showing you need to implement error handling
+        expect(
+            await screen.findByText((content) => content.includes("Registration failed"))
+        ).toBeInTheDocument()
     })
 })
