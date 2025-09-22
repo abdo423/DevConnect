@@ -1,9 +1,21 @@
 // src/__test__/Components/UpdatePostForm.test.tsx
+import React from "react"
 import { describe, it, expect, vi } from "vitest"
 import { screen, fireEvent, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { renderWithProviders } from "../test.util.tsx"
 import UpdatePostModal from "@/components/UpdatePostForm"
+
+// Define proper types for mocks
+interface MockFormEvent {
+    preventDefault: () => void
+}
+
+interface MockFormData {
+    title: string
+    content: string
+    image: string
+}
 
 // Mock the dependencies
 vi.mock("@hookform/resolvers/zod", () => ({
@@ -12,7 +24,7 @@ vi.mock("@hookform/resolvers/zod", () => ({
 
 vi.mock("react-hook-form", () => ({
     useForm: vi.fn(() => ({
-        handleSubmit: vi.fn((fn) => (e: any) => {
+        handleSubmit: vi.fn((fn: (data: MockFormData) => void) => (e: MockFormEvent) => {
             e.preventDefault()
             fn({ title: "Updated Title", content: "Updated Content", image: "" })
         }),
@@ -45,35 +57,57 @@ vi.mock("lucide-react", () => ({
     ),
 }))
 
+// Define interfaces for UI component props
+interface DialogProps {
+    open?: boolean
+    onOpenChange?: (open: boolean) => void
+    children: React.ReactNode
+}
+
+interface GenericComponentProps {
+    children: React.ReactNode
+}
+
 // Mock UI components
 vi.mock("@/components/ui/dialog", () => ({
-    Dialog: ({ open, onOpenChange, children }: any) => (
+    Dialog: ({ open, onOpenChange, children }: DialogProps) => (
         <div data-testid="dialog" data-open={open}>
             <div onClick={() => onOpenChange?.(!open)}>{children}</div>
         </div>
     ),
-    DialogTrigger: ({ children }: any) => (
+    DialogTrigger: ({ children }: GenericComponentProps) => (
         <div data-testid="dialog-trigger">{children}</div>
     ),
-    DialogContent: ({ children }: any) => (
+    DialogContent: ({ children }: GenericComponentProps) => (
         <div data-testid="dialog-content">{children}</div>
     ),
-    DialogHeader: ({ children }: any) => (
+    DialogHeader: ({ children }: GenericComponentProps) => (
         <div data-testid="dialog-header">{children}</div>
     ),
-    DialogTitle: ({ children }: any) => (
+    DialogTitle: ({ children }: GenericComponentProps) => (
         <div data-testid="dialog-title">{children}</div>
     ),
-    DialogDescription: ({ children }: any) => (
+    DialogDescription: ({ children }: GenericComponentProps) => (
         <div data-testid="dialog-description">{children}</div>
     ),
-    DialogFooter: ({ children }: any) => (
+    DialogFooter: ({ children }: GenericComponentProps) => (
         <div data-testid="dialog-footer">{children}</div>
     ),
 }))
 
+interface ButtonProps {
+    children: React.ReactNode
+    onClick?: () => void
+    type?: "button" | "submit" | "reset"
+    disabled?: boolean
+    className?: string
+    variant?: string
+    size?: string
+    [key: string]: unknown
+}
+
 vi.mock("@/components/ui/button", () => ({
-    Button: ({ children, onClick, type, disabled, className, variant, size, ...props }: any) => (
+    Button: ({ children, onClick, type, disabled, className, variant, size, ...props }: ButtonProps) => (
         <button
             data-testid="button"
             onClick={onClick}
@@ -89,8 +123,16 @@ vi.mock("@/components/ui/button", () => ({
     ),
 }))
 
+interface InputProps {
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
+    type?: string
+    accept?: string
+    className?: string
+    [key: string]: unknown
+}
+
 vi.mock("@/components/ui/input", () => ({
-    Input: ({ onChange, type, accept, className, ...props }: any) => (
+    Input: ({ onChange, type, accept, className, ...props }: InputProps) => (
         <input
             data-testid="input"
             onChange={onChange}
@@ -102,26 +144,40 @@ vi.mock("@/components/ui/input", () => ({
     ),
 }))
 
+interface LabelProps {
+    children: React.ReactNode
+    htmlFor?: string
+}
+
+interface TextareaProps {
+    [key: string]: unknown
+}
+
+interface FormFieldProps {
+    render: (props: { field: { name: string; onChange: () => void; value: string } }) => React.ReactNode
+    name: string
+}
+
 vi.mock("@/components/ui/label", () => ({
-    Label: ({ children, htmlFor }: any) => (
+    Label: ({ children, htmlFor }: LabelProps) => (
         <label data-testid="label" htmlFor={htmlFor}>{children}</label>
     ),
 }))
 
 vi.mock("@/components/ui/textarea", () => ({
-    Textarea: ({ ...props }: any) => (
+    Textarea: ({ ...props }: TextareaProps) => (
         <textarea data-testid="textarea" {...props} />
     ),
 }))
 
 vi.mock("@/components/ui/form", () => ({
-    Form: ({ children }: any) => <div data-testid="form">{children}</div>,
-    FormField: ({ render, name }: any) => (
+    Form: ({ children }: GenericComponentProps) => <div data-testid="form">{children}</div>,
+    FormField: ({ render, name }: FormFieldProps) => (
         <div data-testid="form-field" data-name={name}>
             {render({ field: { name, onChange: vi.fn(), value: "" } })}
         </div>
     ),
-    FormItem: ({ children }: any) => <div data-testid="form-item">{children}</div>,
+    FormItem: ({ children }: GenericComponentProps) => <div data-testid="form-item">{children}</div>,
 }))
 
 describe("UpdatePostModal", () => {
