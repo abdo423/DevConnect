@@ -99,6 +99,7 @@ const LoginForm = () => {
                                     <FormControl>
                                         <div className="relative">
                                             <Input
+                                                disabled={loading}
                                                 className="pl-10 text-white placeholder-white/60 bg-white/10 border border-white/30 focus:border-white focus:ring-white"
                                                 placeholder="Enter your Email"
                                                 {...field}
@@ -131,6 +132,7 @@ const LoginForm = () => {
                                     <FormControl>
                                         <div className="relative">
                                             <Input
+                                                disabled={loading}
                                                 type="password"
                                                 className="pl-10 text-white placeholder-white/60 bg-white/10 border border-white/30 focus:border-white focus:ring-white"
                                                 placeholder="Enter your password"
