@@ -3,6 +3,10 @@ import app from "../../app";
 import User from "../../models/user";
 import bcrypt from "bcryptjs";
 
+// Mock the entire User model to avoid database connections
+jest.mock("../../models/user");
+const MockedUser = User as jest.Mocked<typeof User>;
+
 describe("User route", () => {
     // Clear all mocks before each test
     beforeEach(() => {
@@ -11,14 +15,14 @@ describe("User route", () => {
 
     describe("POST /login", () => {
         it("should login successfully with valid credentials", async () => {
-            jest.spyOn(User, "findOne").mockResolvedValue({
+            (MockedUser.findOne as jest.Mock).mockResolvedValue({
                 _id: "mockId",
                 username: "testUsername",
                 email: "test@example.com",
                 password: "hashedPassword", // doesn't matter, we mock compare
                 avatar: "",
                 bio: "",
-            } as any);
+            });
 
             const bcryptMock = jest
                 .spyOn(bcrypt, "compare")
@@ -35,7 +39,7 @@ describe("User route", () => {
         });
 
         it("should fail if user does not exist", async () => {
-            jest.spyOn(User, "findOne").mockResolvedValue(null);
+            (MockedUser.findOne as jest.Mock).mockResolvedValue(null);
 
             const res = await request(app)
                 .post("/Auth/login")
@@ -56,12 +60,12 @@ describe("User route", () => {
         });
 
         it("should fail with wrong password", async () => {
-            jest.spyOn(User, "findOne").mockResolvedValue({
+            (MockedUser.findOne as jest.Mock).mockResolvedValue({
                 _id: "mockId",
                 username: "testUsername",
                 email: "test@example.com",
                 password: "hashedPassword",
-            } as any);
+            });
 
             const bcryptMock = jest
                 .spyOn(bcrypt, "compare")
@@ -80,8 +84,8 @@ describe("User route", () => {
 
     describe("POST /register", () => {
         it("should register user successfully with valid credentials", async () => {
-            jest.spyOn(User, "findOne").mockResolvedValue(null); // no duplicates
-            jest.spyOn(User.prototype, "save").mockResolvedValue({} as any);
+            (MockedUser.findOne as jest.Mock).mockResolvedValue(null); // no duplicates
+            (MockedUser.prototype.save as jest.Mock).mockResolvedValue({});
 
             const res = await request(app)
                 .post("/Auth/register")
@@ -92,8 +96,8 @@ describe("User route", () => {
         });
 
         it("should fail if email already exists", async () => {
-            jest.spyOn(User, "findOne")
-                .mockResolvedValueOnce({email: "test@example.com", username: "abc"} as any)
+            (MockedUser.findOne as jest.Mock)
+                .mockResolvedValueOnce({email: "test@example.com", username: "abc"})
                 .mockResolvedValueOnce(null); // next call returns null
 
             const res = await request(app)
@@ -105,8 +109,8 @@ describe("User route", () => {
         });
 
         it("should fail if username already taken", async () => {
-            jest.spyOn(User, "findOne")
-                .mockResolvedValueOnce({email: "test@example.com", username: "takenUsername"} as any)
+            (MockedUser.findOne as jest.Mock)
+                .mockResolvedValueOnce({email: "test@example.com", username: "takenUsername"})
                 .mockResolvedValueOnce(null); // next call returns null
 
             const res = await request(app)
@@ -130,24 +134,6 @@ describe("User route", () => {
 
     describe("GET /check", () => {
         it("should return loggedIn true for valid user", async () => {
-            // Mock JWT verification - this will be called by the controller
-            const jwtMock = jest.spyOn(require('jsonwebtoken'), 'verify')
-                .mockImplementation((token, secret) => {
-                    console.log('JWT verify called with:', token, secret);
-                    return {
-                        id: "mockId",
-                        email: "test@example.com",
-                        username: "testUsername"
-                    };
-                });
-
-            // Mock config.get for JWT secret
-            const configMock = jest.spyOn(require('config'), 'get')
-                .mockImplementation((key) => {
-                    console.log('Config get called with:', key);
-                    return 'test-secret';
-                });
-
             // Mock the User model for the service call
             const mockUser = {
                 _id: "mockId",
@@ -158,9 +144,28 @@ describe("User route", () => {
             };
 
             const mockSelect = jest.fn().mockResolvedValue(mockUser);
-            jest.spyOn(User, "findById").mockReturnValue({
+            (MockedUser.findById as jest.Mock).mockReturnValue({
                 select: mockSelect,
-            } as any);
+            });
+
+            // Mock JWT verification - this is called by checkTokenExpiration middleware
+            const jwtMock = jest.spyOn(require('jsonwebtoken'), 'verify')
+                .mockImplementation((token, secret) => {
+                    console.log('JWT verify called with:', token, secret);
+                    return {
+                        id: "mockId",
+                        email: "test@example.com",
+                        username: "testUsername",
+                        exp: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
+                    };
+                });
+
+            // Mock config.get for JWT secret
+            const configMock = jest.spyOn(require('config'), 'get')
+                .mockImplementation((key) => {
+                    console.log('Config get called with:', key);
+                    return 'test-secret';
+                });
 
             // Make the request with a mock token cookie
             const res = await request(app)
@@ -220,7 +225,8 @@ describe("User route", () => {
                 .mockReturnValue({
                     id: "mockId",
                     email: "test@example.com",
-                    username: "testUsername"
+                    username: "testUsername",
+                    exp: Math.floor(Date.now() / 1000) + 3600
                 });
 
             // Mock config.get for JWT secret
@@ -229,9 +235,9 @@ describe("User route", () => {
 
             // Mock User.findById to return null (user not found)
             const mockSelect = jest.fn().mockResolvedValue(null);
-            jest.spyOn(User, "findById").mockReturnValue({
+            (MockedUser.findById as jest.Mock).mockReturnValue({
                 select: mockSelect,
-            } as any);
+            });
 
             const res = await request(app)
                 .get("/Auth/check")
