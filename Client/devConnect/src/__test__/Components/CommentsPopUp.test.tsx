@@ -1,7 +1,7 @@
 import {beforeEach, describe, expect, it, vi} from "vitest";
 import {renderWithProviders} from "@/__test__/test.util.tsx";
 import CommentsPopUp from "@/components/CommentsPopUp.tsx";
-import {fireEvent, screen} from "@testing-library/react";
+import {fireEvent, screen, waitFor} from "@testing-library/react";
 import {addComment, likeComment} from "@/features/Comments/commentsSlice";
 import User from "../../../Types/user.ts";
 import {act} from "react";
@@ -52,7 +52,7 @@ const mockComments = [
         },
         createdAt: new Date().toISOString(),
         likes: ["u2"],
-        post: "post123",   // ✅ added
+        post: "post123",
     },
     {
         _id: "c2",
@@ -64,7 +64,7 @@ const mockComments = [
         },
         createdAt: new Date().toISOString(),
         likes: [],
-        post: "post123",   // ✅ added
+        post: "post123",
     },
 ];
 
@@ -86,34 +86,46 @@ describe("CommentsPopUp", () => {
         vi.clearAllMocks();
     });
 
-    it("renders correctly and opens dialog",async () => {
-        renderWithProviders(
-            <CommentsPopUp isLoggedIn={true} postData={{_id: "1", commentCount: 0}}/>
-        );
+    it("renders correctly and opens dialog", async () => {
+        await act(async () => {
+            renderWithProviders(
+                <CommentsPopUp isLoggedIn={true} postData={{_id: "1", commentCount: 0}}/>
+            );
+        });
 
         await act(async () => {
             fireEvent.click(screen.getByRole("button"));
         });
-        expect(
-            screen.getByPlaceholderText(/share your thoughts/i)
-        ).toBeInTheDocument();
+
+        await waitFor(() => {
+            expect(
+                screen.getByPlaceholderText(/share your thoughts/i)
+            ).toBeInTheDocument();
+        });
+
         expect(
             screen.getByRole("button", {name: /post comment/i})
         ).toBeInTheDocument();
     });
 
-    it("renders post and comments correctly", async  () => {
-        renderWithProviders(<CommentsPopUp isLoggedIn={true} postData={mockPostData}/>, {
-            preloadedState: {
-                auth: {user: mockUser, loading: false, error: null, isLoggedIn: true},
-                comments: {comments: mockComments, loading: false, error: null},
-            },
+    it("renders post and comments correctly", async () => {
+        await act(async () => {
+            renderWithProviders(<CommentsPopUp isLoggedIn={true} postData={mockPostData}/>, {
+                preloadedState: {
+                    auth: {user: mockUser, loading: false, error: null, isLoggedIn: true},
+                    comments: {comments: mockComments, loading: false, error: null},
+                },
+            });
         });
 
         await act(async () => {
             fireEvent.click(screen.getByRole("button"));
         });
-        expect(screen.getByText("My Test Post")).toBeInTheDocument();
+
+        await waitFor(() => {
+            expect(screen.getByText("My Test Post")).toBeInTheDocument();
+        });
+
         expect(screen.getByText("Jane Doe")).toBeInTheDocument();
         expect(screen.getByText("This is the first comment")).toBeInTheDocument();
         expect(screen.getByText("Second comment here!")).toBeInTheDocument();
@@ -121,43 +133,61 @@ describe("CommentsPopUp", () => {
         expect(screen.getByText("Bob")).toBeInTheDocument();
     });
 
-    it("shows login prompt when not logged in",async () => {
+    it("shows login prompt when not logged in", async () => {
         const onNavigateToLogin = vi.fn();
 
-        renderWithProviders(
-            <CommentsPopUp
-                isLoggedIn={false}
-                onNavigateToLogin={onNavigateToLogin}
-                postData={mockPostData}
-            />
-        );
+        await act(async () => {
+            renderWithProviders(
+                <CommentsPopUp
+                    isLoggedIn={false}
+                    onNavigateToLogin={onNavigateToLogin}
+                    postData={mockPostData}
+                />
+            );
+        });
 
         await act(async () => {
             fireEvent.click(screen.getByRole("button"));
         });
-        expect(
-            screen.getByText(/please log in to leave a comment/i)
-        ).toBeInTheDocument();
 
-        fireEvent.click(screen.getByRole("button", {name: /log in/i}));
+        await waitFor(() => {
+            expect(
+                screen.getByText(/please log in to leave a comment/i)
+            ).toBeInTheDocument();
+        });
+
+        await act(async () => {
+            fireEvent.click(screen.getByRole("button", {name: /log in/i}));
+        });
+
         expect(onNavigateToLogin).toHaveBeenCalled();
     });
 
     it("adds comment when clicking Post Comment", async () => {
-        renderWithProviders(<CommentsPopUp isLoggedIn={true} postData={mockPostData}/>, {
-            preloadedState: {
-                auth: {user: mockUser, loading: false, error: null, isLoggedIn: true},
-                comments: {comments: [], loading: false, error: null},
-            },
+        await act(async () => {
+            renderWithProviders(<CommentsPopUp isLoggedIn={true} postData={mockPostData}/>, {
+                preloadedState: {
+                    auth: {user: mockUser, loading: false, error: null, isLoggedIn: true},
+                    comments: {comments: [], loading: false, error: null},
+                },
+            });
         });
 
         await act(async () => {
             fireEvent.click(screen.getByRole("button"));
         });
-        const textarea = screen.getByPlaceholderText(/share your thoughts/i);
 
-        fireEvent.change(textarea, {target: {value: "New Comment"}});
-        fireEvent.click(screen.getByRole("button", {name: /post comment/i}));
+        const textarea = await waitFor(() =>
+            screen.getByPlaceholderText(/share your thoughts/i)
+        );
+
+        await act(async () => {
+            fireEvent.change(textarea, {target: {value: "New Comment"}});
+        });
+
+        await act(async () => {
+            fireEvent.click(screen.getByRole("button", {name: /post comment/i}));
+        });
 
         expect(addComment).toHaveBeenCalledWith({
             post: mockPostData._id,
@@ -166,20 +196,30 @@ describe("CommentsPopUp", () => {
     });
 
     it("submits comment on Enter key", async () => {
-        renderWithProviders(<CommentsPopUp isLoggedIn={true} postData={mockPostData}/>, {
-            preloadedState: {
-                auth: {user: mockUser, loading: false, error: null, isLoggedIn: true},
-                comments: {comments: [], loading: false, error: null},
-            },
+        await act(async () => {
+            renderWithProviders(<CommentsPopUp isLoggedIn={true} postData={mockPostData}/>, {
+                preloadedState: {
+                    auth: {user: mockUser, loading: false, error: null, isLoggedIn: true},
+                    comments: {comments: [], loading: false, error: null},
+                },
+            });
         });
 
         await act(async () => {
             fireEvent.click(screen.getByRole("button"));
         });
-        const textarea = screen.getByPlaceholderText(/share your thoughts/i);
 
-        fireEvent.change(textarea, {target: {value: "Enter key comment"}});
-        fireEvent.keyPress(textarea, {key: "Enter", code: "Enter", charCode: 13});
+        const textarea = await waitFor(() =>
+            screen.getByPlaceholderText(/share your thoughts/i)
+        );
+
+        await act(async () => {
+            fireEvent.change(textarea, {target: {value: "Enter key comment"}});
+        });
+
+        await act(async () => {
+            fireEvent.keyPress(textarea, {key: "Enter", code: "Enter", charCode: 13});
+        });
 
         expect(addComment).toHaveBeenCalledWith({
             post: mockPostData._id,
@@ -187,61 +227,84 @@ describe("CommentsPopUp", () => {
         });
     });
 
-    it("shows loading state",async () => {
-        renderWithProviders(<CommentsPopUp isLoggedIn={true} postData={mockPostData}/>, {
-            preloadedState: {
-                auth: {user: mockUser, loading: false, error: null, isLoggedIn: true},
-                comments: {comments: [], loading: true, error: null},
-            },
+    it("shows loading state", async () => {
+        await act(async () => {
+            renderWithProviders(<CommentsPopUp isLoggedIn={true} postData={mockPostData}/>, {
+                preloadedState: {
+                    auth: {user: mockUser, loading: false, error: null, isLoggedIn: true},
+                    comments: {comments: [], loading: true, error: null},
+                },
+            });
         });
 
         await act(async () => {
             fireEvent.click(screen.getByRole("button"));
         });
-        expect(screen.getByText(/loading comments/i)).toBeInTheDocument();
+
+        await waitFor(() => {
+            expect(screen.getByText(/loading comments/i)).toBeInTheDocument();
+        });
     });
 
-    it("shows error state",async () => {
-        renderWithProviders(<CommentsPopUp isLoggedIn={true} postData={mockPostData}/>, {
-            preloadedState: {
-                auth: {user: mockUser, loading: false, error: null, isLoggedIn: true},
-                comments: {comments: [], loading: false, error: "Something bad"},
-            },
+    it("shows error state", async () => {
+        await act(async () => {
+            renderWithProviders(<CommentsPopUp isLoggedIn={true} postData={mockPostData}/>, {
+                preloadedState: {
+                    auth: {user: mockUser, loading: false, error: null, isLoggedIn: true},
+                    comments: {comments: [], loading: false, error: "Something bad"},
+                },
+            });
         });
 
         await act(async () => {
             fireEvent.click(screen.getByRole("button"));
         });
-        expect(screen.getByText(/error loading comments/i)).toBeInTheDocument();
+
+        await waitFor(() => {
+            expect(screen.getByText(/error loading comments/i)).toBeInTheDocument();
+        });
     });
 
     it("shows no comments state", async () => {
-        renderWithProviders(<CommentsPopUp isLoggedIn={true} postData={mockPostData}/>, {
-            preloadedState: {
-                auth: {user: mockUser, loading: false, error: null, isLoggedIn: true},
-                comments: {comments: [], loading: false, error: null},
-            },
+        await act(async () => {
+            renderWithProviders(<CommentsPopUp isLoggedIn={true} postData={mockPostData}/>, {
+                preloadedState: {
+                    auth: {user: mockUser, loading: false, error: null, isLoggedIn: true},
+                    comments: {comments: [], loading: false, error: null},
+                },
+            });
         });
 
         await act(async () => {
             fireEvent.click(screen.getByRole("button"));
         });
-        expect(screen.getByText(/no comments yet/i)).toBeInTheDocument();
+
+        await waitFor(() => {
+            expect(screen.getByText(/no comments yet/i)).toBeInTheDocument();
+        });
     });
 
     it("likes a comment optimistically", async () => {
-        renderWithProviders(<CommentsPopUp isLoggedIn={true} postData={mockPostData}/>, {
-            preloadedState: {
-                auth: {user: mockUser, loading: false, error: null, isLoggedIn: true},
-                comments: {comments: mockComments, loading: false, error: null},
-            },
+        await act(async () => {
+            renderWithProviders(<CommentsPopUp isLoggedIn={true} postData={mockPostData}/>, {
+                preloadedState: {
+                    auth: {user: mockUser, loading: false, error: null, isLoggedIn: true},
+                    comments: {comments: mockComments, loading: false, error: null},
+                },
+            });
         });
 
         await act(async () => {
             fireEvent.click(screen.getByRole("button"));
         });
-        const likeButton = screen.getAllByRole("button", {name: /like/i})[0];
-        fireEvent.click(likeButton);
+
+        const likeButton = await waitFor(() =>
+            screen.getAllByRole("button", {name: /like/i})[0]
+        );
+
+        await act(async () => {
+            fireEvent.click(likeButton);
+        });
 
         expect(likeComment).toHaveBeenCalledWith("c1");
     });
