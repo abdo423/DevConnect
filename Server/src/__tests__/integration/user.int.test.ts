@@ -3,10 +3,6 @@ import app from "../../app";
 import User from "../../models/user";
 import bcrypt from "bcryptjs";
 
-// Mock the entire User model to avoid database connections
-jest.mock("../../models/user");
-const MockedUser = User as jest.Mocked<typeof User>;
-
 describe("User route", () => {
     // Clear all mocks before each test
     beforeEach(() => {
@@ -15,14 +11,14 @@ describe("User route", () => {
 
     describe("POST /login", () => {
         it("should login successfully with valid credentials", async () => {
-            (MockedUser.findOne as jest.Mock).mockResolvedValue({
+            jest.spyOn(User, "findOne").mockResolvedValue({
                 _id: "mockId",
                 username: "testUsername",
                 email: "test@example.com",
                 password: "hashedPassword", // doesn't matter, we mock compare
                 avatar: "",
                 bio: "",
-            });
+            } as any);
 
             const bcryptMock = jest
                 .spyOn(bcrypt, "compare")
@@ -39,7 +35,7 @@ describe("User route", () => {
         });
 
         it("should fail if user does not exist", async () => {
-            (MockedUser.findOne as jest.Mock).mockResolvedValue(null);
+            jest.spyOn(User, "findOne").mockResolvedValue(null);
 
             const res = await request(app)
                 .post("/Auth/login")
@@ -60,12 +56,12 @@ describe("User route", () => {
         });
 
         it("should fail with wrong password", async () => {
-            (MockedUser.findOne as jest.Mock).mockResolvedValue({
+            jest.spyOn(User, "findOne").mockResolvedValue({
                 _id: "mockId",
                 username: "testUsername",
                 email: "test@example.com",
                 password: "hashedPassword",
-            });
+            } as any);
 
             const bcryptMock = jest
                 .spyOn(bcrypt, "compare")
@@ -84,8 +80,8 @@ describe("User route", () => {
 
     describe("POST /register", () => {
         it("should register user successfully with valid credentials", async () => {
-            (MockedUser.findOne as jest.Mock).mockResolvedValue(null); // no duplicates
-            (MockedUser.prototype.save as jest.Mock).mockResolvedValue({});
+            jest.spyOn(User, "findOne").mockResolvedValue(null); // no duplicates
+            jest.spyOn(User.prototype, "save").mockResolvedValue({} as any);
 
             const res = await request(app)
                 .post("/Auth/register")
@@ -96,8 +92,8 @@ describe("User route", () => {
         });
 
         it("should fail if email already exists", async () => {
-            (MockedUser.findOne as jest.Mock)
-                .mockResolvedValueOnce({email: "test@example.com", username: "abc"})
+            jest.spyOn(User, "findOne")
+                .mockResolvedValueOnce({email: "test@example.com", username: "abc"} as any)
                 .mockResolvedValueOnce(null); // next call returns null
 
             const res = await request(app)
@@ -109,8 +105,8 @@ describe("User route", () => {
         });
 
         it("should fail if username already taken", async () => {
-            (MockedUser.findOne as jest.Mock)
-                .mockResolvedValueOnce({email: "test@example.com", username: "takenUsername"})
+            jest.spyOn(User, "findOne")
+                .mockResolvedValueOnce({email: "test@example.com", username: "takenUsername"} as any)
                 .mockResolvedValueOnce(null); // next call returns null
 
             const res = await request(app)
@@ -134,21 +130,7 @@ describe("User route", () => {
 
     describe("GET /check", () => {
         it("should return loggedIn true for valid user", async () => {
-            // Mock the User model for the service call
-            const mockUser = {
-                _id: "mockId",
-                username: "testUsername",
-                email: "test@example.com",
-                avatar: "",
-                bio: "",
-            };
-
-            const mockSelect = jest.fn().mockResolvedValue(mockUser);
-            (MockedUser.findById as jest.Mock).mockReturnValue({
-                select: mockSelect,
-            });
-
-            // Mock JWT verification - this is called by checkTokenExpiration middleware
+            // Mock JWT verification - this will be called by the controller
             const jwtMock = jest.spyOn(require('jsonwebtoken'), 'verify')
                 .mockImplementation((token, secret) => {
                     console.log('JWT verify called with:', token, secret);
@@ -166,6 +148,20 @@ describe("User route", () => {
                     console.log('Config get called with:', key);
                     return 'test-secret';
                 });
+
+            // Mock the User model for the service call
+            const mockUser = {
+                _id: "mockId",
+                username: "testUsername",
+                email: "test@example.com",
+                avatar: "",
+                bio: "",
+            };
+
+            const mockSelect = jest.fn().mockResolvedValue(mockUser);
+            jest.spyOn(User, "findById").mockReturnValue({
+                select: mockSelect,
+            } as any);
 
             // Make the request with a mock token cookie
             const res = await request(app)
@@ -226,7 +222,7 @@ describe("User route", () => {
                     id: "mockId",
                     email: "test@example.com",
                     username: "testUsername",
-                    exp: Math.floor(Date.now() / 1000) + 3600
+                    exp: Math.floor(Date.now() / 1000) + 3600 // 1 hour from now
                 });
 
             // Mock config.get for JWT secret
@@ -235,9 +231,9 @@ describe("User route", () => {
 
             // Mock User.findById to return null (user not found)
             const mockSelect = jest.fn().mockResolvedValue(null);
-            (MockedUser.findById as jest.Mock).mockReturnValue({
+            jest.spyOn(User, "findById").mockReturnValue({
                 select: mockSelect,
-            });
+            } as any);
 
             const res = await request(app)
                 .get("/Auth/check")
