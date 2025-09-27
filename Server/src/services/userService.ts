@@ -54,7 +54,7 @@ export const registerUser = async (reqBody: any) => {
     const result = validateUser(reqBody);
 
     if (!result.success) {
-        throw {status: 400, errors: result.error.errors};
+        throw {status: 400, message: "Validation failed", errors: result.error.errors};
     }
 
     const {username, email, password, bio, avatar} = result.data;

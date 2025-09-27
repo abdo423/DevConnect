@@ -9,6 +9,7 @@ import {
 } from '../controllers/user';
 import {Request, Response, Router} from 'express';
 import {getAllFollowings} from "../controllers/user";
+import {checkTokenExpiration} from "../middlewares/auth";
 
 const router = Router();
 // Logging middleware
@@ -29,14 +30,9 @@ router.post("/register", (req: Request, res: Response) => {
 router.post("/logout", (req: Request, res: Response) => {
     logoutUser(req, res);
 })
-router.get("/check", (req: Request, res: Response) => {
+router.get("/check", checkTokenExpiration, (req: Request, res: Response) => {
     loginUserCheck(req, res);
-})
-// Test route
-router.get('/healthcheck', (req: Request, res: Response) => {
-    res.status(200).json({status: 'OK'});
 });
-
 router.get("/user/:id", (req: Request, res: Response) => {
     getUser(req, res);
 });
