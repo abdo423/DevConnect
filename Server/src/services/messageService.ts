@@ -9,28 +9,17 @@ export const createMessageService = async (
     receiverId: string,
     content: string
 ) => {
+    // 1. Basic authentication check
     if (!senderId) {
         throw { status: 401, message: "User not authenticated" };
     }
 
-    const user = await User.findById(senderId);
-    if (!user) {
-        throw { status: 404, message: "User not found" };
-    }
-
+    // 2. Basic input validation FIRST
     if (!receiverId) {
         throw { status: 400, message: "Receiver ID is required" };
     }
 
-    // Check if user follows the receiver
-    const isFollowingUser = user.following?.some((id: Types.ObjectId) =>
-        id.toString() === receiverId
-    );
-    if (!isFollowingUser) {
-        throw { status: 403, message: "Cannot send message to user you are not following" };
-    }
-
-    // Validate message input
+    // 3. Validate message input format
     const messageInputData = {
         senderId,
         receiverId,
@@ -43,6 +32,18 @@ export const createMessageService = async (
         throw { status: 400, message: "Validation failed", errors: result.error.errors };
     }
 
+    // 4. THEN check business rules
+    const user = await User.findById(senderId);
+    if (!user) {
+        throw { status: 404, message: "User not found" };
+    }
+
+    const isFollowingUser = user.following?.some((id: Types.ObjectId) =>
+        id.toString() === receiverId
+    );
+    if (!isFollowingUser) {
+        throw { status: 403, message: "Cannot send message to user you are not following" };
+    }
     // Create and save message
     const messageData = {
         senderId: new Types.ObjectId(senderId),
