@@ -6,19 +6,16 @@
     },
     {
       "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.test.json"
     }
   ],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "components/*": [
-        "components/*"
-      ]
+      "@/*": ["src/*"],
+      "components/*": ["components/*"]
     }
   }
 }
-
-
