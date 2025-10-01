@@ -2,11 +2,12 @@ import {Request, Response} from "express";
 import * as messageController from "../../controllers/message";
 import * as messageService from "../../services/messageService";
 import dotenv from "dotenv";
+import {Types} from "mongoose";
 
 dotenv.config();
 
-const userId = process.env["USER_ID"] as string;
-const receiverId = process.env["RECEIVER_ID"] as string;
+const userId = new Types.ObjectId().toString();
+const receiverId = new Types.ObjectId().toString();
 
 describe("Message Controller", () => {
     let res: Partial<Response>;

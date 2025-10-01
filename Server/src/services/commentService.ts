@@ -154,6 +154,6 @@ export const likeComment = async (commentId: string, userId: string) => {
 
     return {
         alreadyLiked,
-        likes: likesUserIds  // ✅ Now returns ["user1", "user2", "currentUser"]
+        likes: likesUserIds
     };
 };

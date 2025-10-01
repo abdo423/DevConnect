@@ -143,7 +143,8 @@ describe("User service", () => {
             })
             await expect(userService.registerUser({})).rejects.toEqual({
                 status: 400,
-                errors: ["email required"],
+                message: "Validation failed",
+                errors: ["email required"],  // Changed to array
             })
         });
         it("should throw 409 if email already exist", async () => {

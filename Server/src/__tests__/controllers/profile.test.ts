@@ -1,12 +1,11 @@
 import {Request, Response} from "express";
 import * as profileController from "../../controllers/profile";
 import * as profileService from "../../services/profileService";
-import dotenv from "dotenv";
+import {Types} from "mongoose";
 
-dotenv.config();
 jest.mock("../../services/profileService");
-const userId = process.env["USER_ID"] as string;
-const targetUserId =process.env["RECEIVER_ID"] as string;
+const userId = new Types.ObjectId().toString();
+const targetUserId = new Types.ObjectId().toString();
 
 describe("Profile Controller", () => {
     let res: Partial<Response>;

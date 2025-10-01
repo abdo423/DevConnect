@@ -1,13 +1,9 @@
 import {Request, Response} from "express";
 import * as userController from "../../controllers/user";
 import * as userService from "../../services/userService";
-import dotenv from "dotenv";
 import {Types} from "mongoose";
-import {json} from "node:stream/consumers";
-import {UserDocument} from "../../models/user";
 
-dotenv.config();
-const userId = process.env["USER_ID"] as string;
+const userId = new Types.ObjectId().toString();
 
 // Create proper mock types that match your actual interfaces
 interface MockUser {

@@ -1,13 +1,12 @@
 import {Request, Response} from "express";
 import * as CommentController from "../../controllers/comment";
 import * as CommentService from "../../services/commentService";
-import dotenv from "dotenv";
+import {Types} from "mongoose";
 
-dotenv.config();
 
-const userId = process.env["USER_ID"] as string;
-const postId = process.env["POST_ID"] as string;
-const commentId = process.env["COMMENT_ID"] as string;
+const userId = new Types.ObjectId().toString();
+const postId = new Types.ObjectId().toString();
+const commentId = new Types.ObjectId().toString();
 
 describe("CommentController.createComment", () => {
     let res: Partial<Response>;

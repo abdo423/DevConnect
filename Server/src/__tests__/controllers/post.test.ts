@@ -1,12 +1,10 @@
-import {Types} from "mongoose";
+import  {Types} from "mongoose";
 import {Request, Response} from "express";
 import * as postController from "../../controllers/post";
 import * as postService from "../../services/postService";
-import dotenv from "dotenv";
 
-dotenv.config();
 
-const userId = process.env["USER_ID"] as string;
+const userId = new Types.ObjectId().toString();
 
 describe("Post Controller", () => {
     let res: Partial<Response>;
