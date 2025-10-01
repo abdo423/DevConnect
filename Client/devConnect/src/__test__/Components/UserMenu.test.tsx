@@ -1,318 +1,371 @@
 // Complete corrected test file
-import React from "react"
-import {beforeEach, describe, expect, it, vi} from "vitest"
-import {screen, waitFor} from "@testing-library/react"
-import {renderWithProviders} from "../test.util.tsx"
-import UserMenu from "@/components/UserMenu"
-import userEvent from '@testing-library/user-event'
+import React from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { screen, waitFor } from '@testing-library/react';
+import { renderWithProviders } from '../test.util.tsx';
+import UserMenu from '@/components/UserMenu';
+import userEvent from '@testing-library/user-event';
 
 // Mock dependencies
-const mockDispatch = vi.fn()
-const mockNavigate = vi.fn()
+const mockDispatch = vi.fn();
+const mockNavigate = vi.fn();
 
-vi.mock("react-redux", async () => {
-    const actual = await vi.importActual("react-redux")
-    return {
-        ...actual,
-        useDispatch: () => mockDispatch,
-    }
-})
+vi.mock('react-redux', async () => {
+  const actual = await vi.importActual('react-redux');
+  return {
+    ...actual,
+    useDispatch: () => mockDispatch,
+  };
+});
 
-vi.mock("react-router-dom", async () => {
-    const actual = await vi.importActual("react-router-dom")
-    return {
-        ...actual,
-        useNavigate: () => mockNavigate,
-        Link: React.forwardRef<HTMLAnchorElement, { to: string; children: React.ReactNode; className?: string }>(
-            ({ to, children, className }, ref) => (
-                <a href={to} className={className} ref={ref}>{children}</a>
-            )
-        )
-    }
-})
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+    Link: React.forwardRef<
+      HTMLAnchorElement,
+      { to: string; children: React.ReactNode; className?: string }
+    >(({ to, children, className }, ref) => (
+      <a href={to} className={className} ref={ref}>
+        {children}
+      </a>
+    )),
+  };
+});
 
-vi.mock("@/features/Auth/authSlice", async (importOriginal) => {
-    const actual = await importOriginal<typeof import("@/features/Auth/authSlice")>()
-    return {
-        ...actual,
-        logout: vi.fn(() => ({ type: 'auth/logout/pending' })),
-        default: actual.default,
-    }
-})
+vi.mock('@/features/Auth/authSlice', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('@/features/Auth/authSlice')>();
+  return {
+    ...actual,
+    logout: vi.fn(() => ({ type: 'auth/logout/pending' })),
+    default: actual.default,
+  };
+});
 
+describe('UserMenu', () => {
+  const mockUser = {
+    id: 'user123',
+    username: 'testuser',
+    email: 'test@example.com',
+    avatar: 'avatar.jpg',
+    bio: 'Test bio',
+  };
 
-describe("UserMenu", () => {
-    const mockUser = {
-        id: "user123",
-        username: "testuser",
-        email: "test@example.com",
-        avatar: "avatar.jpg",
-        bio: "Test bio"
-    }
+  const mockRoutes = [
+    { path: '/', label: 'Home', icon: <span data-testid="home-icon">🏠</span> },
+    {
+      path: '/profile',
+      label: 'Profile',
+      icon: <span data-testid="profile-icon">👤</span>,
+    },
+    {
+      path: '/messages',
+      label: 'Messages',
+      icon: <span data-testid="messages-icon">💬</span>,
+    },
+  ];
 
-    const mockRoutes = [
-        {path: "/", label: "Home", icon: <span data-testid="home-icon">🏠</span>},
-        {path: "/profile", label: "Profile", icon: <span data-testid="profile-icon">👤</span>},
-        {path: "/messages", label: "Messages", icon: <span data-testid="messages-icon">💬</span>},
-    ]
+  let user: ReturnType<typeof userEvent.setup>;
 
-    let user: ReturnType<typeof userEvent.setup>
+  beforeEach(() => {
+    vi.clearAllMocks();
+    user = userEvent.setup();
 
-    beforeEach(() => {
-        vi.clearAllMocks()
-        user = userEvent.setup()
+    // Mock dispatch to return action with unwrap method
+    const mockUnwrap = vi.fn().mockResolvedValue(undefined);
+    mockDispatch.mockReturnValue({
+      type: 'auth/logout/pending',
+      payload: undefined,
+      unwrap: mockUnwrap,
+    });
+  });
 
-        // Mock dispatch to return action with unwrap method
-        const mockUnwrap = vi.fn().mockResolvedValue(undefined)
-        mockDispatch.mockReturnValue({
-            type: 'auth/logout/pending',
-            payload: undefined,
-            unwrap: mockUnwrap
+  describe('logout functionality', () => {
+    it('dispatches logout action when logout is clicked', async () => {
+      renderWithProviders(
+        <UserMenu user={mockUser} filteredRoutes={mockRoutes} />
+      );
+
+      await user.click(screen.getByRole('button'));
+
+      const logoutItem = await waitFor(
+        () => {
+          return screen.getByRole('menuitem', { name: /logout/i });
+        },
+        { timeout: 3000 }
+      );
+
+      await user.click(logoutItem);
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'auth/logout/pending',
         })
-    })
+      );
+    });
 
-    describe("logout functionality", () => {
-        it("dispatches logout action when logout is clicked", async () => {
-            renderWithProviders(
-                <UserMenu user={mockUser} filteredRoutes={mockRoutes}/>
-            )
+    it('navigates to home page after successful logout', async () => {
+      // Create a specific mock for this test
+      const mockUnwrap = vi.fn().mockResolvedValue(undefined);
+      mockDispatch.mockReturnValue({
+        type: 'auth/logout/pending',
+        payload: undefined,
+        unwrap: mockUnwrap,
+      });
 
-            await user.click(screen.getByRole("button"))
+      renderWithProviders(
+        <UserMenu user={mockUser} filteredRoutes={mockRoutes} />
+      );
 
-            const logoutItem = await waitFor(() => {
-                return screen.getByRole("menuitem", { name: /logout/i })
-            }, {timeout: 3000})
+      await user.click(screen.getByRole('button'));
 
-            await user.click(logoutItem)
+      const logoutItem = await waitFor(
+        () => {
+          return screen.getByRole('menuitem', { name: /logout/i });
+        },
+        { timeout: 3000 }
+      );
 
-            expect(mockDispatch).toHaveBeenCalledWith(expect.objectContaining({
-                type: 'auth/logout/pending'
-            }))
-        })
+      await user.click(logoutItem);
 
-        it("navigates to home page after successful logout", async () => {
-            // Create a specific mock for this test
-            const mockUnwrap = vi.fn().mockResolvedValue(undefined)
-            mockDispatch.mockReturnValue({
-                type: 'auth/logout/pending',
-                payload: undefined,
-                unwrap: mockUnwrap
-            })
+      // Wait for dispatch to be called
+      expect(mockDispatch).toHaveBeenCalled();
 
-            renderWithProviders(
-                <UserMenu user={mockUser} filteredRoutes={mockRoutes}/>
-            )
+      // Wait for unwrap to be called
+      await waitFor(() => {
+        expect(mockUnwrap).toHaveBeenCalled();
+      });
 
-            await user.click(screen.getByRole("button"))
+      // Wait for navigation
+      await waitFor(
+        () => {
+          expect(mockNavigate).toHaveBeenCalledWith('/');
+        },
+        { timeout: 2000 }
+      );
+    });
 
-            const logoutItem = await waitFor(() => {
-                return screen.getByRole("menuitem", { name: /logout/i })
-            }, {timeout: 3000})
+    it('handles logout error gracefully', async () => {
+      // Set up the mock to reject
+      const mockUnwrap = vi.fn().mockRejectedValue(new Error('Logout failed'));
+      mockDispatch.mockReturnValue({
+        type: 'auth/logout/pending',
+        payload: undefined,
+        unwrap: mockUnwrap,
+      });
 
-            await user.click(logoutItem)
+      renderWithProviders(
+        <UserMenu user={mockUser} filteredRoutes={mockRoutes} />
+      );
 
-            // Wait for dispatch to be called
-            expect(mockDispatch).toHaveBeenCalled()
+      await user.click(screen.getByRole('button'));
 
-            // Wait for unwrap to be called
-            await waitFor(() => {
-                expect(mockUnwrap).toHaveBeenCalled()
-            })
+      const logoutItem = await waitFor(
+        () => {
+          return screen.getByRole('menuitem', { name: /logout/i });
+        },
+        { timeout: 3000 }
+      );
 
-            // Wait for navigation
-            await waitFor(() => {
-                expect(mockNavigate).toHaveBeenCalledWith("/")
-            }, { timeout: 2000 })
-        })
+      await user.click(logoutItem);
 
-        it("handles logout error gracefully", async () => {
-            // Set up the mock to reject
-            const mockUnwrap = vi.fn().mockRejectedValue(new Error("Logout failed"))
-            mockDispatch.mockReturnValue({
-                type: 'auth/logout/pending',
-                payload: undefined,
-                unwrap: mockUnwrap
-            })
+      // Should dispatch the logout action
+      expect(mockDispatch).toHaveBeenCalled();
 
-            renderWithProviders(
-                <UserMenu user={mockUser} filteredRoutes={mockRoutes}/>
-            )
+      // Wait for unwrap to be called
+      await waitFor(() => {
+        expect(mockUnwrap).toHaveBeenCalled();
+      });
 
-            await user.click(screen.getByRole("button"))
+      // Wait a bit to ensure navigation doesn't happen
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(mockNavigate).not.toHaveBeenCalled();
+    });
+  });
 
-            const logoutItem = await waitFor(() => {
-                return screen.getByRole("menuitem", { name: /logout/i })
-            }, {timeout: 3000})
+  describe('rendering', () => {
+    it('renders user avatar and dropdown trigger', () => {
+      renderWithProviders(
+        <UserMenu user={mockUser} filteredRoutes={mockRoutes} />
+      );
 
-            await user.click(logoutItem)
+      expect(screen.getByRole('button')).toBeInTheDocument();
+      expect(screen.getByText('t')).toBeInTheDocument();
+    });
 
-            // Should dispatch the logout action
-            expect(mockDispatch).toHaveBeenCalled()
+    it('shows user initial as fallback when no avatar', () => {
+      const userWithoutAvatar = {
+        ...mockUser,
+        avatar: '',
+      };
 
-            // Wait for unwrap to be called
-            await waitFor(() => {
-                expect(mockUnwrap).toHaveBeenCalled()
-            })
+      renderWithProviders(
+        <UserMenu user={userWithoutAvatar} filteredRoutes={mockRoutes} />
+      );
 
-            // Wait a bit to ensure navigation doesn't happen
-            await new Promise(resolve => setTimeout(resolve, 100))
-            expect(mockNavigate).not.toHaveBeenCalled()
-        })
-    })
+      expect(screen.getByText('t')).toBeInTheDocument();
+    });
 
-    describe("rendering", () => {
-        it("renders user avatar and dropdown trigger", () => {
-            renderWithProviders(
-                <UserMenu user={mockUser} filteredRoutes={mockRoutes}/>
-            )
+    it("shows 'U' fallback when username is empty", () => {
+      const userWithoutUsername = {
+        ...mockUser,
+        username: '',
+      };
 
-            expect(screen.getByRole("button")).toBeInTheDocument()
-            expect(screen.getByText("t")).toBeInTheDocument()
-        })
+      renderWithProviders(
+        <UserMenu user={userWithoutUsername} filteredRoutes={mockRoutes} />
+      );
 
-        it("shows user initial as fallback when no avatar", () => {
-            const userWithoutAvatar = {
-                ...mockUser,
-                avatar: ""
-            }
+      expect(screen.getByText('U')).toBeInTheDocument();
+    });
 
-            renderWithProviders(
-                <UserMenu user={userWithoutAvatar} filteredRoutes={mockRoutes}/>
-            )
+    it('returns null when user is not provided', () => {
+      const { container } = renderWithProviders(
+        <UserMenu user={null as any} filteredRoutes={mockRoutes} />
+      );
 
-            expect(screen.getByText("t")).toBeInTheDocument()
-        })
+      expect(container.firstChild).toBeNull();
+    });
+  });
 
-        it("shows 'U' fallback when username is empty", () => {
-            const userWithoutUsername = {
-                ...mockUser,
-                username: ""
-            }
+  describe('dropdown menu', () => {
+    it('opens dropdown when trigger is clicked', async () => {
+      renderWithProviders(
+        <UserMenu user={mockUser} filteredRoutes={mockRoutes} />
+      );
 
-            renderWithProviders(
-                <UserMenu user={userWithoutUsername} filteredRoutes={mockRoutes}/>
-            )
+      const button = screen.getByRole('button');
+      await user.click(button);
 
-            expect(screen.getByText("U")).toBeInTheDocument()
-        })
+      await waitFor(
+        () => {
+          expect(
+            screen.getByRole('link', { name: /home/i })
+          ).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
 
-        it("returns null when user is not provided", () => {
-            const {container} = renderWithProviders(
-                <UserMenu user={null as any} filteredRoutes={mockRoutes}/>
-            )
+      expect(
+        screen.getByRole('link', { name: /profile/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('link', { name: /messages/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('menuitem', { name: /logout/i })
+      ).toBeInTheDocument();
+    });
 
-            expect(container.firstChild).toBeNull()
-        })
-    })
+    it('shows all filtered routes with icons', async () => {
+      renderWithProviders(
+        <UserMenu user={mockUser} filteredRoutes={mockRoutes} />
+      );
 
-    describe("dropdown menu", () => {
-        it("opens dropdown when trigger is clicked", async () => {
-            renderWithProviders(
-                <UserMenu user={mockUser} filteredRoutes={mockRoutes}/>
-            )
+      await user.click(screen.getByRole('button'));
 
-            const button = screen.getByRole("button")
-            await user.click(button)
+      await waitFor(
+        () => {
+          expect(screen.getByTestId('home-icon')).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
 
-            await waitFor(() => {
-                expect(screen.getByRole("link", { name: /home/i })).toBeInTheDocument()
-            }, {timeout: 3000})
+      expect(screen.getByTestId('profile-icon')).toBeInTheDocument();
+      expect(screen.getByTestId('messages-icon')).toBeInTheDocument();
+    });
 
-            expect(screen.getByRole("link", { name: /profile/i })).toBeInTheDocument()
-            expect(screen.getByRole("link", { name: /messages/i })).toBeInTheDocument()
-            expect(screen.getByRole("menuitem", { name: /logout/i })).toBeInTheDocument()
-        })
+    it('creates proper links for each route', async () => {
+      renderWithProviders(
+        <UserMenu user={mockUser} filteredRoutes={mockRoutes} />
+      );
 
-        it("shows all filtered routes with icons", async () => {
-            renderWithProviders(
-                <UserMenu user={mockUser} filteredRoutes={mockRoutes}/>
-            )
+      await user.click(screen.getByRole('button'));
 
-            await user.click(screen.getByRole("button"))
+      await waitFor(
+        () => {
+          const homeLink = screen.getByRole('link', { name: /home/i });
+          expect(homeLink).toHaveAttribute('href', '/');
+        },
+        { timeout: 3000 }
+      );
 
-            await waitFor(() => {
-                expect(screen.getByTestId("home-icon")).toBeInTheDocument()
-            }, {timeout: 3000})
+      expect(screen.getByRole('link', { name: /profile/i })).toHaveAttribute(
+        'href',
+        '/profile'
+      );
+      expect(screen.getByRole('link', { name: /messages/i })).toHaveAttribute(
+        'href',
+        '/messages'
+      );
+    });
+  });
 
-            expect(screen.getByTestId("profile-icon")).toBeInTheDocument()
-            expect(screen.getByTestId("messages-icon")).toBeInTheDocument()
-        })
+  describe('responsive behavior', () => {
+    it('is hidden on mobile (has hidden md:block classes)', () => {
+      renderWithProviders(
+        <UserMenu user={mockUser} filteredRoutes={mockRoutes} />
+      );
 
-        it("creates proper links for each route", async () => {
-            renderWithProviders(
-                <UserMenu user={mockUser} filteredRoutes={mockRoutes}/>
-            )
+      const container = screen.getByRole('button').closest('div');
+      expect(container).toHaveClass('hidden', 'md:block');
+    });
+  });
 
-            await user.click(screen.getByRole("button"))
+  describe('accessibility', () => {
+    it('has proper button role for dropdown trigger', () => {
+      renderWithProviders(
+        <UserMenu user={mockUser} filteredRoutes={mockRoutes} />
+      );
 
-            await waitFor(() => {
-                const homeLink = screen.getByRole("link", {name: /home/i})
-                expect(homeLink).toHaveAttribute('href', '/')
-            }, {timeout: 3000})
+      expect(screen.getByRole('button')).toBeInTheDocument();
+    });
 
-            expect(screen.getByRole("link", {name: /profile/i})).toHaveAttribute('href', '/profile')
-            expect(screen.getByRole("link", {name: /messages/i})).toHaveAttribute('href', '/messages')
-        })
-    })
+    it('shows user avatar fallback correctly', () => {
+      renderWithProviders(
+        <UserMenu user={mockUser} filteredRoutes={mockRoutes} />
+      );
 
-    describe("responsive behavior", () => {
-        it("is hidden on mobile (has hidden md:block classes)", () => {
-            renderWithProviders(
-                <UserMenu user={mockUser} filteredRoutes={mockRoutes}/>
-            )
+      expect(screen.getByText('t')).toBeInTheDocument();
+    });
+  });
 
-            const container = screen.getByRole("button").closest('div')
-            expect(container).toHaveClass("hidden", "md:block")
-        })
-    })
+  describe('edge cases', () => {
+    it('handles empty filteredRoutes array', async () => {
+      renderWithProviders(<UserMenu user={mockUser} filteredRoutes={[]} />);
 
-    describe("accessibility", () => {
-        it("has proper button role for dropdown trigger", () => {
-            renderWithProviders(
-                <UserMenu user={mockUser} filteredRoutes={mockRoutes}/>
-            )
+      await user.click(screen.getByRole('button'));
 
-            expect(screen.getByRole("button")).toBeInTheDocument()
-        })
+      await waitFor(
+        () => {
+          expect(
+            screen.getByRole('menuitem', { name: /logout/i })
+          ).toBeInTheDocument();
+          expect(
+            screen.queryByRole('link', { name: /home/i })
+          ).not.toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
+    });
 
-        it("shows user avatar fallback correctly", () => {
-            renderWithProviders(
-                <UserMenu user={mockUser} filteredRoutes={mockRoutes}/>
-            )
+    it('handles user with minimal fields', () => {
+      const minimalUser = {
+        id: 'user123',
+        username: 'testuser',
+        email: 'test@example.com',
+        avatar: '',
+        bio: '',
+      };
 
-            expect(screen.getByText("t")).toBeInTheDocument()
-        })
-    })
+      renderWithProviders(
+        <UserMenu user={minimalUser} filteredRoutes={mockRoutes} />
+      );
 
-    describe("edge cases", () => {
-        it("handles empty filteredRoutes array", async () => {
-            renderWithProviders(
-                <UserMenu user={mockUser} filteredRoutes={[]}/>
-            )
-
-            await user.click(screen.getByRole("button"))
-
-            await waitFor(() => {
-                expect(screen.getByRole("menuitem", { name: /logout/i })).toBeInTheDocument()
-                expect(screen.queryByRole("link", { name: /home/i })).not.toBeInTheDocument()
-            }, {timeout: 3000})
-        })
-
-        it("handles user with minimal fields", () => {
-            const minimalUser = {
-                id: "user123",
-                username: "testuser",
-                email: "test@example.com",
-                avatar: "",
-                bio: ""
-            }
-
-            renderWithProviders(
-                <UserMenu user={minimalUser} filteredRoutes={mockRoutes}/>
-            )
-
-            expect(screen.getByRole("button")).toBeInTheDocument()
-            expect(screen.getByText("t")).toBeInTheDocument()
-        })
-    })
-})
+      expect(screen.getByRole('button')).toBeInTheDocument();
+      expect(screen.getByText('t')).toBeInTheDocument();
+    });
+  });
+});

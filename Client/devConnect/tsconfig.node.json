@@ -23,9 +23,5 @@
     /* 👇 add Vitest + Node globals */
     "types": ["vitest", "node"]
   },
-  "include": [
-    "vite.config.ts",
-    "src/**/*.test.ts",
-    "src/**/*.test.tsx"
-  ]
+  "include": ["vite.config.ts", "src/**/*.test.ts", "src/**/*.test.tsx"]
 }
