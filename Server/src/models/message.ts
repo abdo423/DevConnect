@@ -16,7 +16,7 @@ const messageValidation = z.object({
     receiverId: z.string().refine((val) => isValidObjectId(val), {
         message: 'Invalid receiver ObjectId',
     }),
-    content: z.string().min(1, 'Content is required').max(1000),
+    content: z.string().min(1, 'Content is required'),
     createdAt: z.date().optional()
 });
 
