@@ -6,7 +6,7 @@ A social platform built for developers to connect, share knowledge, and collabor
 
 - **User Authentication** - Secure JWT-based authentication with cookie support
 - **Social Posts** - Create, share, and engage with developer content
-- **Real-time Messaging** - Direct messaging between users 
+- **Real-time Messaging** - Direct messaging between users
 - **User Profiles** - Customizable developer profiles with bio and avatar
 - **Follow System** - Follow other developers and build your network
 - **Comments & Likes** - Engage with posts through comments and likes
@@ -15,6 +15,7 @@ A social platform built for developers to connect, share knowledge, and collabor
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **React 19** - Modern React with TypeScript
 - **Vite** - Fast build tool and development server
 - **Tailwind CSS** - Utility-first CSS framework
@@ -24,6 +25,7 @@ A social platform built for developers to connect, share knowledge, and collabor
 - **Zod** - Type-safe schema validation
 
 ### Backend
+
 - **Node.js** - JavaScript runtime
 - **Express.js** - Web application framework
 - **TypeScript** - Type-safe JavaScript
@@ -55,7 +57,9 @@ cd DevConnect
 Create environment files for both client and server:
 
 #### Server Environment
+
 Create `Server/.env`:
+
 ```env
 NODE_ENV=development
 PORT=3000
@@ -65,7 +69,9 @@ JWT_EXPIRES_IN=7d
 ```
 
 #### Server Configuration
+
 Create `Server/config/development.json`:
+
 ```json
 {
   "app": {
@@ -84,12 +90,14 @@ Create `Server/config/development.json`:
 ### 3. Install Dependencies
 
 #### Install Server Dependencies
+
 ```bash
 cd Server
 npm install
 ```
 
 #### Install Client Dependencies
+
 ```bash
 cd ../Client/devConnect
 npm install react-router-dom react-redux @reduxjs/toolkit date-fns
@@ -101,6 +109,7 @@ npm install
 Ensure MongoDB is running on your system:
 
 #### Local MongoDB
+
 ```bash
 # On macOS with Homebrew
 brew services start mongodb-community
@@ -113,6 +122,7 @@ net start MongoDB
 ```
 
 #### MongoDB Atlas (Cloud)
+
 1. Create account at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 2. Create a new cluster
 3. Get connection string and update your environment files
@@ -120,17 +130,21 @@ net start MongoDB
 ### 5. Run the Application
 
 #### Start the Backend Server
+
 ```bash
 cd Server
 npm run dev
 ```
+
 The server will run on `http://localhost:3000`
 
 #### Start the Frontend Client
+
 ```bash
 cd Client/devConnect
 npm run dev
 ```
+
 The client will run on `http://localhost:5173`
 
 ### 6. Access the Application
@@ -148,12 +162,14 @@ Open your browser and navigate to `http://localhost:5173` to start using DevConn
 ## 🧪 Testing
 
 ### Backend Tests
+
 ```bash
 cd Server
 npm test
 ```
 
 ### Frontend Tests
+
 ```bash
 cd Client/devConnect
 npm test

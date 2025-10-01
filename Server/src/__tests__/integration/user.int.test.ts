@@ -83,13 +83,11 @@ describe('User route', () => {
       jest.spyOn(User, 'findOne').mockResolvedValue(null); // no duplicates
       jest.spyOn(User.prototype, 'save').mockResolvedValue({} as any);
 
-      const res = await request(app)
-        .post('/Auth/register')
-        .send({
-          email: 'test1@example.com',
-          password: 'password123',
-          username: 'newUser',
-        });
+      const res = await request(app).post('/Auth/register').send({
+        email: 'test1@example.com',
+        password: 'password123',
+        username: 'newUser',
+      });
 
       expect(res.status).toBe(201);
       expect(res.body.message).toBe('User created successfully');
@@ -104,13 +102,11 @@ describe('User route', () => {
         } as any)
         .mockResolvedValueOnce(null); // next call returns null
 
-      const res = await request(app)
-        .post('/Auth/register')
-        .send({
-          email: 'test@example.com',
-          password: 'password123',
-          username: 'newUser',
-        });
+      const res = await request(app).post('/Auth/register').send({
+        email: 'test@example.com',
+        password: 'password123',
+        username: 'newUser',
+      });
 
       expect(res.status).toBe(409);
       expect(res.body.message).toBe('Email already in use');
@@ -125,13 +121,11 @@ describe('User route', () => {
         } as any)
         .mockResolvedValueOnce(null); // next call returns null
 
-      const res = await request(app)
-        .post('/Auth/register')
-        .send({
-          email: 'unique@example.com',
-          password: 'password123',
-          username: 'takenUsername',
-        });
+      const res = await request(app).post('/Auth/register').send({
+        email: 'unique@example.com',
+        password: 'password123',
+        username: 'takenUsername',
+      });
 
       expect(res.status).toBe(409);
       expect(res.body.message).toBe('Username already taken');

@@ -7,12 +7,14 @@
 #### Platform Recommendations
 
 **Frontend Deployment:**
+
 - **Vercel** (Recommended) - Seamless React/Vite deployment
 - **Netlify** - Great for static sites with form handling
 - **AWS S3 + CloudFront** - Scalable with global CDN
 - **GitHub Pages** - Free option for open source projects
 
 **Backend Deployment:**
+
 - **Railway** (Recommended) - Simple Node.js deployment
 - **Render** - Free tier with automatic deployments
 - **Heroku** - Classic platform with easy MongoDB add-ons
@@ -20,6 +22,7 @@
 - **AWS Elastic Beanstalk** - Enterprise-grade scaling
 
 **Database Options:**
+
 - **MongoDB Atlas** (Recommended) - Managed MongoDB service
 - **DigitalOcean Managed MongoDB** - Alternative managed service
 - **Self-hosted MongoDB** - For advanced users
@@ -31,23 +34,26 @@
 ### Vercel Deployment (Recommended)
 
 1. **Prepare the build:**
+
 ```bash
 cd Client/devConnect
 npm run build
 ```
 
 2. **Install Vercel CLI:**
+
 ```bash
 npm i -g vercel
 ```
 
 3. **Deploy:**
+
 ```bash
 vercel
 # Follow the prompts:
 # - Set up and deploy? Yes
 # - Which scope? Your account
-# - Link to existing project? No  
+# - Link to existing project? No
 # - Project name: devconnect-frontend
 # - Directory: ./
 # - Override settings? No
@@ -55,6 +61,7 @@ vercel
 
 4. **Environment Variables:**
    Add in Vercel dashboard or via CLI:
+
 ```bash
 vercel env add VITE_API_URL production
 # Enter: https://your-backend-url.com
@@ -67,6 +74,7 @@ vercel env add VITE_API_URL production
 
 1. **Build configuration:**
    Create `Client/devConnect/netlify.toml`:
+
 ```toml
 [build]
   base = "Client/devConnect"
@@ -83,6 +91,7 @@ vercel env add VITE_API_URL production
 ```
 
 2. **Deploy via Git:**
+
 - Connect repository to Netlify
 - Set build directory: `Client/devConnect`
 - Set publish directory: `dist`
@@ -91,6 +100,7 @@ vercel env add VITE_API_URL production
 ### Manual Static Hosting
 
 1. **Build the project:**
+
 ```bash
 cd Client/devConnect
 npm run build
@@ -100,6 +110,7 @@ npm run build
 
 3. **Configure web server:**
    **Nginx configuration:**
+
 ```nginx
 server {
     listen 80;
@@ -126,11 +137,13 @@ server {
 ### Railway Deployment (Recommended)
 
 1. **Install Railway CLI:**
+
 ```bash
 npm install -g @railway/cli
 ```
 
 2. **Login and initialize:**
+
 ```bash
 railway login
 cd Server
@@ -138,6 +151,7 @@ railway init
 ```
 
 3. **Environment Variables:**
+
 ```bash
 railway variables set NODE_ENV=production
 railway variables set PORT=3000
@@ -146,11 +160,13 @@ railway variables set MONGODB_URI=mongodb+srv://username:password@cluster.mongod
 ```
 
 4. **Deploy:**
+
 ```bash
 railway up
 ```
 
 5. **Custom Domain (Optional):**
+
 ```bash
 railway domain
 ```
@@ -158,6 +174,7 @@ railway domain
 ### Render Deployment
 
 1. **Create `Server/render.yaml`:**
+
 ```yaml
 services:
   - type: web
@@ -176,6 +193,7 @@ services:
 ```
 
 2. **Connect repository to Render:**
+
 - Import your GitHub repository
 - Set root directory: `Server`
 - Environment variables will be set from render.yaml
@@ -183,17 +201,20 @@ services:
 ### Heroku Deployment
 
 1. **Install Heroku CLI and login:**
+
 ```bash
 heroku login
 ```
 
 2. **Create app:**
+
 ```bash
 cd Server
 heroku create your-app-name
 ```
 
 3. **Set environment variables:**
+
 ```bash
 heroku config:set NODE_ENV=production
 heroku config:set JWT_SECRET=your-production-jwt-secret
@@ -201,11 +222,13 @@ heroku config:set MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.ne
 ```
 
 4. **Create Procfile:**
+
 ```
 web: npm start
 ```
 
 5. **Deploy:**
+
 ```bash
 git add .
 git commit -m "Deploy to Heroku"
@@ -215,6 +238,7 @@ git push heroku main
 ### DigitalOcean App Platform
 
 1. **Create `Server/.do/app.yaml`:**
+
 ```
 name: devconnect-backend
 services:
@@ -242,6 +266,7 @@ services:
 ```
 
 2. **Deploy via DigitalOcean Dashboard:**
+
 - Create new App
 - Connect GitHub repository
 - Import app spec from `.do/app.yaml`
@@ -253,32 +278,34 @@ services:
 ### MongoDB Atlas (Recommended)
 
 1. **Create Atlas Account:**
-    - Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-    - Sign up for free account
+   - Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+   - Sign up for free account
 
 2. **Create Cluster:**
-    - Choose cloud provider and region
-    - Select M0 (Free) cluster for development
-    - Name your cluster
+   - Choose cloud provider and region
+   - Select M0 (Free) cluster for development
+   - Name your cluster
 
 3. **Configure Access:**
-    - **Database Access:** Create user with read/write permissions
-    - **Network Access:** Add IP addresses (0.0.0.0/0 for all - not recommended for production)
+   - **Database Access:** Create user with read/write permissions
+   - **Network Access:** Add IP addresses (0.0.0.0/0 for all - not recommended for production)
 
 4. **Get Connection String:**
+
    ```
    mongodb+srv://username:password@cluster.mongodb.net/devconnect?retryWrites=true&w=majority
    ```
 
 5. **Security Best Practices:**
-    - Use strong passwords
-    - Limit IP access to your servers only
-    - Enable authentication
-    - Regular security updates
+   - Use strong passwords
+   - Limit IP access to your servers only
+   - Enable authentication
+   - Regular security updates
 
 ### Self-Hosted MongoDB
 
 **Ubuntu/Debian Installation:**
+
 ```bash
 # Import public key
 wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
@@ -296,6 +323,7 @@ sudo systemctl enable mongod
 ```
 
 **Security Configuration:**
+
 ```bash
 # Create admin user
 mongo
@@ -318,6 +346,7 @@ security:
 ### Production Environment Variables
 
 **Backend (.env.production):**
+
 ```env
 NODE_ENV=production
 PORT=3000
@@ -329,6 +358,7 @@ RATE_LIMIT_MAX_REQUESTS=100
 ```
 
 **Frontend (production build):**
+
 ```env
 VITE_API_URL=https://your-backend-url.com
 VITE_ENVIRONMENT=production
@@ -337,6 +367,7 @@ VITE_ENVIRONMENT=production
 ### Configuration Files
 
 **Server Production Config (`Server/config/production.json`):**
+
 ```json
 {
   "app": {
@@ -367,28 +398,31 @@ VITE_ENVIRONMENT=production
 ### Let's Encrypt with Nginx
 
 1. **Install Certbot:**
+
 ```bash
 sudo apt install certbot python3-certbot-nginx
 ```
 
 2. **Obtain Certificate:**
+
 ```bash
 sudo certbot --nginx -d your-domain.com
 ```
 
 3. **Nginx SSL Configuration:**
+
 ```nginx
 server {
     listen 443 ssl http2;
     server_name your-domain.com;
-    
+
     ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
-    
+
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512;
     ssl_prefer_server_ciphers off;
-    
+
     location / {
         proxy_pass http://localhost:3000;
         proxy_set_header Host $host;
@@ -406,11 +440,13 @@ server {
 ### Backend Optimization
 
 **Production Dependencies:**
+
 ```bash
 npm install compression helmet morgan
 ```
 
 **Server optimizations (`Server/src/index.ts`):**
+
 ```typescript
 import compression from 'compression';
 import helmet from 'helmet';
@@ -431,6 +467,7 @@ if (process.env.NODE_ENV === 'production') {
 ```
 
 **Database Connection Pooling:**
+
 ```typescript
 mongoose.connect(mongoURI, {
   maxPoolSize: 10,
@@ -438,13 +475,14 @@ mongoose.connect(mongoURI, {
   socketTimeoutMS: 45000,
   family: 4,
   bufferCommands: false,
-  bufferMaxEntries: 0
+  bufferMaxEntries: 0,
 });
 ```
 
 ### Frontend Optimization
 
 **Build Optimization (`Client/devConnect/vite.config.ts`):**
+
 ```typescript
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -456,8 +494,8 @@ export default defineConfig({
     visualizer({
       filename: 'dist/stats.html',
       open: true,
-      gzipSize: true
-    })
+      gzipSize: true,
+    }),
   ],
   build: {
     rollupOptions: {
@@ -465,12 +503,12 @@ export default defineConfig({
         manualChunks: {
           vendor: ['react', 'react-dom'],
           ui: ['@radix-ui/react-avatar', '@radix-ui/react-dialog'],
-          utils: ['axios', 'js-cookie', 'date-fns']
-        }
-      }
+          utils: ['axios', 'js-cookie', 'date-fns'],
+        },
+      },
     },
-    chunkSizeWarningLimit: 1000
-  }
+    chunkSizeWarningLimit: 1000,
+  },
 });
 ```
 
@@ -481,11 +519,13 @@ export default defineConfig({
 ### Application Monitoring
 
 **Error Tracking with Sentry:**
+
 ```bash
 npm install @sentry/node @sentry/react
 ```
 
 **Backend Integration:**
+
 ```typescript
 import * as Sentry from '@sentry/node';
 
@@ -499,6 +539,7 @@ app.use(Sentry.Handlers.errorHandler());
 ```
 
 **Frontend Integration:**
+
 ```typescript
 import * as Sentry from '@sentry/react';
 
@@ -511,13 +552,14 @@ Sentry.init({
 ### Health Check Endpoints
 
 **Backend Health Check:**
+
 ```typescript
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV,
   });
 });
 
@@ -538,11 +580,13 @@ app.get('/health/db', async (req, res) => {
 ### Database Backups
 
 **MongoDB Atlas Backups:**
+
 - Automatic backups included in paid tiers
 - Point-in-time recovery available
 - Cross-region backup replication
 
 **Manual Backups:**
+
 ```bash
 # Create backup
 mongodump --uri="mongodb+srv://user:pass@cluster.mongodb.net/devconnect" --out=./backup
@@ -552,6 +596,7 @@ mongorestore --uri="mongodb+srv://user:pass@cluster.mongodb.net/devconnect" ./ba
 ```
 
 **Automated Backup Script:**
+
 ```bash
 #!/bin/bash
 DATE=$(date +%Y%m%d_%H%M%S)
@@ -573,6 +618,7 @@ find /backups -name "devconnect_*" -type d -mtime +7 -exec rm -rf {} +
 ### Horizontal Scaling
 
 **Load Balancing with Nginx:**
+
 ```nginx
 upstream backend {
     server backend1.example.com:3000;
@@ -588,6 +634,7 @@ server {
 ```
 
 **Database Scaling:**
+
 - MongoDB Sharding for horizontal scaling
 - Read replicas for read-heavy workloads
 - Connection pooling and optimization
@@ -595,6 +642,7 @@ server {
 ### Vertical Scaling
 
 **Server Resources:**
+
 - Monitor CPU and memory usage
 - Scale server instances as needed
 - Use CDN for static assets
@@ -632,6 +680,7 @@ server {
 ### CI/CD with GitHub Actions
 
 **Frontend Deploy (`.github/workflows/deploy-frontend.yml`):**
+
 ```yaml
 name: Deploy Frontend
 
@@ -645,24 +694,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '18'
-          
+
       - name: Install dependencies
         run: |
           cd Client/devConnect
           npm ci
-          
+
       - name: Build
         run: |
           cd Client/devConnect
           npm run build
         env:
           VITE_API_URL: ${{ secrets.API_URL }}
-          
+
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v20
         with:
@@ -671,6 +720,7 @@ jobs:
 ```
 
 **Backend Deploy (`.github/workflows/deploy-backend.yml`):**
+
 ```yaml
 name: Deploy Backend
 
@@ -684,15 +734,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '18'
-          
+
       - name: Install Railway CLI
         run: npm install -g @railway/cli
-        
+
       - name: Deploy to Railway
         run: |
           cd Server
@@ -701,4 +751,3 @@ jobs:
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 ```
-

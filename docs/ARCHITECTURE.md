@@ -70,52 +70,63 @@ DevConnect follows a modern full-stack architecture with clear separation of con
 ### Frontend Architecture
 
 #### Core Technologies
+
 - **React 19**: Latest React with concurrent features and improved TypeScript support
 - **TypeScript**: Type-safe development with strict compilation
 - **Vite**: Lightning-fast build tool with HMR (Hot Module Replacement)
 
 #### State Management
+
 - **Redux Toolkit**: Modern Redux with simplified boilerplate
 - **RTK Query** (Recommended): For API state management and caching
 
 #### UI & Styling
+
 - **Tailwind CSS**: Utility-first CSS framework for rapid UI development
 - **Radix UI**: Headless component library for accessible, composable UI primitives
 - **Lucide React**: Beautiful & consistent icon library
 
 #### Form Handling
+
 - **React Hook Form**: Performant forms with minimal re-renders
 - **Zod**: Runtime type validation and schema definition
 
 #### Routing
+
 - **React Router DOM**: Declarative routing for React applications
 
 #### HTTP Client
+
 - **Axios**: Promise-based HTTP client with interceptors and request/response transformation
 
 ### Backend Architecture
 
 #### Core Technologies
+
 - **Node.js**: JavaScript runtime built on Chrome's V8 engine
 - **Express.js**: Fast, minimalist web framework for Node.js
 - **TypeScript**: Type-safe JavaScript development
 
 #### Database & ODM
+
 - **MongoDB**: Document-oriented NoSQL database
 - **Mongoose**: Elegant MongoDB object modeling for Node.js
 
 #### Authentication & Security
+
 - **JSON Web Tokens (JWT)**: Stateless authentication mechanism
 - **bcryptjs**: Password hashing and comparison
 - **Cookie Parser**: Parse and handle HTTP cookies
 - **CORS**: Cross-Origin Resource Sharing configuration
 
 #### Validation
+
 - **Zod**: TypeScript-first schema validation library
 
 ## Data Flow Architecture
 
 ### Authentication Flow
+
 ```
 1. User Login Request → Server validates credentials
 2. Server generates JWT → Stores in HTTP-only cookie + returns token
@@ -125,6 +136,7 @@ DevConnect follows a modern full-stack architecture with clear separation of con
 ```
 
 ### Post Creation Flow
+
 ```
 1. User creates post → Client validates with Zod schema
 2. Client sends POST request → Server authenticates user
@@ -134,6 +146,7 @@ DevConnect follows a modern full-stack architecture with clear separation of con
 ```
 
 ### Messaging Flow
+
 ```
 1. User sends message → Client validates recipient
 2. Server stores message → Emits to recipient if online
@@ -143,6 +156,7 @@ DevConnect follows a modern full-stack architecture with clear separation of con
 ## Database Schema Design
 
 ### Users Collection
+
 ```
 {
   _id: ObjectId,
@@ -160,6 +174,7 @@ DevConnect follows a modern full-stack architecture with clear separation of con
 ```
 
 ### Posts Collection
+
 ```
 {
   _id: ObjectId,
@@ -178,6 +193,7 @@ DevConnect follows a modern full-stack architecture with clear separation of con
 ```
 
 ### Comments Collection
+
 ```
 {
   _id: ObjectId,
@@ -190,6 +206,7 @@ DevConnect follows a modern full-stack architecture with clear separation of con
 ```
 
 ### Messages Collection
+
 ```
 {
   _id: ObjectId,
@@ -205,15 +222,18 @@ DevConnect follows a modern full-stack architecture with clear separation of con
 ## Security Architecture
 
 ### Authentication Strategy
+
 - **JWT Tokens**: Stateless authentication with configurable expiration
 - **HTTP-only Cookies**: Secure token storage preventing XSS attacks
 - **Password Security**: bcrypt hashing with salt rounds
 
 ### Authorization Patterns
+
 - **Route Protection**: Middleware-based route authentication
 - **Resource Ownership**: Users can only modify their own content
 
 ### Data Validation
+
 - **Client-side**: Zod schemas for immediate user feedback
 - **Server-side**: Double validation ensuring data integrity
 - **Database**: Mongoose schema validation as final safeguard
@@ -221,12 +241,14 @@ DevConnect follows a modern full-stack architecture with clear separation of con
 ## API Design Patterns
 
 ### RESTful Architecture
+
 - **Resource-based URLs**: `/api/posts`, `/api/users/:id`
 - **HTTP Verbs**: GET, POST, PUT, DELETE for CRUD operations
 - **Status Codes**: Appropriate HTTP status codes for responses
 - **JSON Communication**: Consistent JSON request/response format
 
 ### Error Handling
+
 - **Centralized Error Handling**: Express error middleware
 - **Consistent Error Format**: Standardized error response structure
 - **Validation Errors**: Detailed field-level error messages
@@ -235,21 +257,23 @@ DevConnect follows a modern full-stack architecture with clear separation of con
 ## Performance Considerations
 
 ### Frontend Optimizations
+
 - **Code Splitting**: Lazy loading of route components
 - **Bundle Analysis**: Webpack bundle analyzer for optimization
 - **Image Optimization**: Lazy loading and responsive images
 - **Caching Strategy**: Redux state persistence and API response caching
 
 ### Backend Optimizations
+
 - **Database Indexing**: MongoDB indexes on frequently queried fields
 - **Query Optimization**: Mongoose populate() for efficient joins
 - **Connection Pooling**: MongoDB connection pool management
 - **Caching Layer**: Redis integration for session and data caching (future)
 
-
 ## Deployment Architecture
 
 ### Development Environment
+
 ```
 Frontend: http://localhost:5173 (Vite dev server)
 Backend: http://localhost:3000 (Express server)
@@ -257,6 +281,7 @@ Database: localhost:27017 (Local MongoDB)
 ```
 
 ### Production Environment
+
 ```
 Frontend: Static files served via CDN/nginx
 Backend: Node.js server with PM2 process manager
@@ -267,11 +292,13 @@ Load Balancer: nginx for request distribution
 ## Scalability Patterns
 
 ### Horizontal Scaling
+
 - **Stateless Design**: JWT-based authentication enables multiple server instances
 - **Database Sharding**: MongoDB sharding for user data distribution
 - **Microservices**: Potential split into messaging, posts, and user services
 
 ### Vertical Scaling
+
 - **Resource Optimization**: Memory and CPU usage optimization
 - **Database Optimization**: Query performance and indexing strategies
 - **Caching Implementation**: Redis for session management and frequently accessed data
@@ -279,12 +306,14 @@ Load Balancer: nginx for request distribution
 ## Security Best Practices
 
 ### Data Protection
+
 - **Input Sanitization**: XSS prevention through data validation
 - **SQL Injection**: MongoDB injection prevention through parameterized queries
 - **CORS Configuration**: Strict origin controls for API access
 - **Rate Limiting**: API rate limiting to prevent abuse
 
 ### Privacy Considerations
+
 - **Data Minimization**: Only collect necessary user information
 - **Secure Communication**: HTTPS encryption for all client-server communication
 - **Cookie Security**: Secure, SameSite cookie attributes
@@ -293,12 +322,14 @@ Load Balancer: nginx for request distribution
 ## Testing Strategy
 
 ### Frontend Testing
+
 - **Unit Tests**: Jest + React Testing Library
 - **Component Tests**: Isolated component testing
 - **Integration Tests**: API integration testing
 - **E2E Tests**: Cypress for user flow testing
 
 ### Backend Testing
+
 - **Unit Tests**: Jest for individual function testing
 - **Integration Tests**: API endpoint testing
 - **Database Tests**: MongoDB test database for isolated testing
@@ -306,12 +337,14 @@ Load Balancer: nginx for request distribution
 ## Monitoring & Observability(future work)
 
 ### Application Monitoring
+
 - **Error Tracking**: Sentry integration for error monitoring
 - **Performance Monitoring**: Application performance metrics
 - **User Analytics**: User behavior tracking and analysis
 - **Health Checks**: Endpoint monitoring and alerting
 
 ### Infrastructure Monitoring
+
 - **Server Metrics**: CPU, memory, disk usage monitoring
 - **Database Monitoring**: MongoDB performance metrics
 - **Network Monitoring**: Request/response time tracking

@@ -220,12 +220,10 @@ describe('Comment routes', () => {
     it('should handle database save errors', async () => {
       const postId = new Types.ObjectId().toString();
 
-      jest
-        .spyOn(commentModule, 'validateCommentInput')
-        .mockReturnValue({
-          success: true,
-          data: { post: postId, content: 'test' },
-        });
+      jest.spyOn(commentModule, 'validateCommentInput').mockReturnValue({
+        success: true,
+        data: { post: postId, content: 'test' },
+      });
 
       jest
         .spyOn(commentModule, 'validateComment')

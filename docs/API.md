@@ -1,6 +1,7 @@
 # DevConnect API Documentation
 
 ## Base URL
+
 ```
 http://localhost:3000
 ```
@@ -10,6 +11,7 @@ http://localhost:3000
 DevConnect uses JWT (JSON Web Token) authentication. Tokens are stored in HTTP-only cookies.
 
 ### Authentication Headers
+
 ```
 Cookie: auth-token=<jwt_token>
 ```
@@ -19,9 +21,11 @@ Cookie: auth-token=<jwt_token>
 ### Authentication Endpoints
 
 #### POST /Auth/register
+
 Register a new user account.
 
 **Request Body:**
+
 ```json
 {
   "username": "string (required)",
@@ -31,6 +35,7 @@ Register a new user account.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -48,6 +53,7 @@ Register a new user account.
 ```
 
 **Status Codes:**
+
 - `201` - User created successfully
 - `400` - Validation error or user already exists
 - `500` - Server error
@@ -55,9 +61,11 @@ Register a new user account.
 ---
 
 #### POST /Auth/login
+
 Authenticate user and receive JWT token.
 
 **Request Body:**
+
 ```json
 {
   "email": "string (required)",
@@ -66,6 +74,7 @@ Authenticate user and receive JWT token.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -81,6 +90,7 @@ Authenticate user and receive JWT token.
 ```
 
 **Status Codes:**
+
 - `200` - Login successful
 - `409` - Username already taken or email is in use
 - `400` - Invalid credentials
@@ -89,11 +99,13 @@ Authenticate user and receive JWT token.
 ---
 
 #### POST /Auth/logout
+
 Logout user and clear authentication token.
 
 **Request:** No body required
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -102,16 +114,19 @@ Logout user and clear authentication token.
 ```
 
 **Status Codes:**
+
 - `200` - Logout successful
 
 ---
 
 #### GET /Auth/check
+
 Check if user is authenticated and return user data.
 
 **Headers:** Cookie with auth-token required
 
 **Response:**
+
 ```json
 {
   "loggedIn": true,
@@ -125,8 +140,8 @@ Check if user is authenticated and return user data.
 }
 ```
 
-
 **Status Codes:**
+
 - `200` - User authenticated
 - `401` - Not authenticated
 
@@ -135,9 +150,11 @@ Check if user is authenticated and return user data.
 ### Post Endpoints
 
 #### GET /Post/all
+
 Get all posts (public endpoint).
 
 **Response:**
+
 ```json
 [
   {
@@ -168,20 +185,21 @@ Get all posts (public endpoint).
     "updatedAt": "string"
   }
 ]
-
 ```
 
 **Status Codes:**
+
 - `200` - Success
 - `500` - Server error
 
 ---
 
 #### POST /Post/create
+
 Create a new post (requires authentication).
 
-
 **Request Body:**
+
 ```json
 {
   "title": "string (required, 10-50 characters)",
@@ -191,6 +209,7 @@ Create a new post (requires authentication).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Post created successfully",
@@ -209,6 +228,7 @@ Create a new post (requires authentication).
 ```
 
 **Status Codes:**
+
 - `201` - Post created successfully
 - `400` - Validation error
 - `401` - Not authenticated
@@ -217,12 +237,15 @@ Create a new post (requires authentication).
 ---
 
 #### DELETE /Post/delete/:id
+
 Delete a post (requires authentication, author only).
 
 **Parameters:**
+
 - `id` - Post ID
 
 **Response:**
+
 ```json
 {
   "message": "Post deleted successfully"
@@ -230,6 +253,7 @@ Delete a post (requires authentication, author only).
 ```
 
 **Status Codes:**
+
 - `200` - Post deleted successfully
 - `401` - Not authenticated
 - `403` - Not authorized (not post author)
@@ -239,12 +263,15 @@ Delete a post (requires authentication, author only).
 ---
 
 #### PATCH /Post/update/:id
+
 Update an existing post (requires authentication, author only).
 
 **Parameters:**
+
 - `id` - Post ID
 
 **Request Body:**
+
 ```json
 {
   "title": "string (optional, 10-50 characters)",
@@ -254,6 +281,7 @@ Update an existing post (requires authentication, author only).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Post updated successfully",
@@ -281,6 +309,7 @@ Update an existing post (requires authentication, author only).
 ```
 
 **Status Codes:**
+
 - `200` - Post updated successfully
 - `400` - Validation error
 - `401` - Not authenticated
@@ -291,12 +320,15 @@ Update an existing post (requires authentication, author only).
 ---
 
 #### POST /Post/like/:id
+
 Like or unlike a post (requires authentication).
 
 **Parameters:**
+
 - `id` - Post ID
 
 **Response:**
+
 ```json
 {
   "message": "Post liked/unliked successfully",
@@ -313,6 +345,7 @@ Like or unlike a post (requires authentication).
 ```
 
 **Status Codes:**
+
 - `200` - Success
 - `401` - Not authenticated
 - `404` - Post not found
@@ -321,14 +354,17 @@ Like or unlike a post (requires authentication).
 ---
 
 #### GET /Post/comments/:id
+
 Get comments for a specific post (requires authentication).
 
 **Headers:** Authorization required
 
 **Parameters:**
+
 - `id` - Post ID
 
 **Response:**
+
 ```json
 {
   "comments": [
@@ -354,6 +390,7 @@ Get comments for a specific post (requires authentication).
 ```
 
 **Status Codes:**
+
 - `200` - Success
 - `401` - Not authenticated
 - `404` - Post not found
@@ -364,9 +401,11 @@ Get comments for a specific post (requires authentication).
 ### Comment Endpoints
 
 #### POST /Comment/create
+
 Create a comment on a post (requires authentication).
 
 **Request Body:**
+
 ```json
 {
   "post": "string (required, post ID)",
@@ -375,6 +414,7 @@ Create a comment on a post (requires authentication).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Comment created successfully",
@@ -394,6 +434,7 @@ Create a comment on a post (requires authentication).
 ```
 
 **Status Codes:**
+
 - `201` - Comment created successfully
 - `400` - Validation error
 - `401` - Not authenticated
@@ -403,12 +444,15 @@ Create a comment on a post (requires authentication).
 ---
 
 #### DELETE /Comment/delete/:id
+
 Delete a comment (requires authentication, author only).
 
 **Parameters:**
+
 - `id` - Comment ID
 
 **Response:**
+
 ```json
 {
   "message": "Comment deleted successfully"
@@ -416,6 +460,7 @@ Delete a comment (requires authentication, author only).
 ```
 
 **Status Codes:**
+
 - `200` - Comment deleted successfully
 - `401` - Not authenticated
 - `403` - Not authorized (not comment author)
@@ -425,12 +470,15 @@ Delete a comment (requires authentication, author only).
 ---
 
 #### PATCH /Comment/update/:id
+
 Update a comment (requires authentication, author only).
 
 **Parameters:**
+
 - `id` - Comment ID
 
 **Request Body:**
+
 ```json
 {
   "content": "string (required)"
@@ -438,6 +486,7 @@ Update a comment (requires authentication, author only).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Comment updated successfully",
@@ -462,6 +511,7 @@ Update a comment (requires authentication, author only).
 ```
 
 **Status Codes:**
+
 - `200` - Comment updated successfully
 - `400` - Validation error
 - `401` - Not authenticated
@@ -472,12 +522,15 @@ Update a comment (requires authentication, author only).
 ---
 
 #### GET /Comment/post/:id
+
 Get comments for a specific post (requires authentication).
 
 **Parameters:**
+
 - `id` - Post ID
 
 **Response:**
+
 ```json
 {
   "comments": [
@@ -503,6 +556,7 @@ Get comments for a specific post (requires authentication).
 ```
 
 **Status Codes:**
+
 - `200` - Success
 - `401` - Not authenticated
 - `404` - Post not found
@@ -511,12 +565,15 @@ Get comments for a specific post (requires authentication).
 ---
 
 #### POST /Comment/like/:id
+
 Like or unlike a comment (requires authentication).
 
 **Parameters:**
+
 - `id` - Comment ID
 
 **Response:**
+
 ```json
 {
   "message": "Comment liked/unliked successfully",
@@ -530,6 +587,7 @@ Like or unlike a comment (requires authentication).
 ```
 
 **Status Codes:**
+
 - `200` - Success
 - `401` - Not authenticated
 - `404` - Comment not found
@@ -540,9 +598,11 @@ Like or unlike a comment (requires authentication).
 ### Profile Endpoints
 
 #### GET /Profile/
+
 Get current authenticated user's profile (requires authentication).
 
 **Response:**
+
 ```json
 {
   "_id": "string",
@@ -578,6 +638,7 @@ Get current authenticated user's profile (requires authentication).
 ```
 
 **Status Codes:**
+
 - `200` - Success
 - `401` - Not authenticated
 - `404` - User not found
@@ -586,12 +647,15 @@ Get current authenticated user's profile (requires authentication).
 ---
 
 #### GET /Profile/:id
+
 Get user profile by ID (requires authentication).
 
 **Parameters:**
+
 - `id` - User ID
 
 **Response:**
+
 ```json
 {
   "_id": "string",
@@ -627,6 +691,7 @@ Get user profile by ID (requires authentication).
 ```
 
 **Status Codes:**
+
 - `200` - Success
 - `401` - Not authenticated
 - `404` - User not found
@@ -635,12 +700,15 @@ Get user profile by ID (requires authentication).
 ---
 
 #### PATCH /Profile/update/:id
+
 Update user profile (requires authentication).
 
 **Parameters:**
+
 - `id` - User ID (must match authenticated user)
 
 **Request Body:**
+
 ```json
 {
   "username": "string (optional)",
@@ -650,6 +718,7 @@ Update user profile (requires authentication).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Profile updated successfully",
@@ -669,6 +738,7 @@ Update user profile (requires authentication).
 ```
 
 **Status Codes:**
+
 - `200` - Profile updated successfully
 - `400` - Validation error
 - `401` - Not authenticated
@@ -677,12 +747,15 @@ Update user profile (requires authentication).
 ---
 
 #### POST /Profile/follow/:id
+
 Follow or unfollow a user (requires authentication).
 
 **Parameters:**
+
 - `id` - User ID to follow/unfollow
 
 **Response:**
+
 ```json
 {
   "user": {
@@ -699,6 +772,7 @@ Follow or unfollow a user (requires authentication).
 ```
 
 **Status Codes:**
+
 - `200` - Success
 - `401` - Not authenticated
 - `404` - User not found
@@ -709,9 +783,11 @@ Follow or unfollow a user (requires authentication).
 ### Message Endpoints
 
 #### POST /Message/send
+
 Send a direct message (requires authentication).
 
 **Request Body:**
+
 ```json
 {
   "receiverId": "string (required)",
@@ -720,6 +796,7 @@ Send a direct message (requires authentication).
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Message sent successfully",
@@ -742,6 +819,7 @@ Send a direct message (requires authentication).
 ```
 
 **Status Codes:**
+
 - `201` - Message sent successfully
 - `400` - Validation error
 - `401` - Not authenticated
@@ -751,12 +829,15 @@ Send a direct message (requires authentication).
 ---
 
 #### GET /Message/messages/:id
+
 Get conversation with a specific user (requires authentication).
 
 **Parameters:**
+
 - `id` - User ID to get conversation with
 
 **Response:**
+
 ```json
 {
   "messages": [
@@ -781,6 +862,7 @@ Get conversation with a specific user (requires authentication).
 ```
 
 **Status Codes:**
+
 - `200` - Success
 - `401` - Not authenticated
 - `404` - User not found
@@ -791,9 +873,11 @@ Get conversation with a specific user (requires authentication).
 ### Additional Auth Endpoints
 
 #### GET /Auth/healthcheck
+
 Health check endpoint to verify API status.
 
 **Response:**
+
 ```json
 {
   "status": "OK"
@@ -801,19 +885,23 @@ Health check endpoint to verify API status.
 ```
 
 **Status Codes:**
+
 - `200` - API is healthy
 
 ---
 
 #### GET /Auth/user/:id
+
 Get user information by ID (requires authentication).
 
 **Headers:** Authorization required
 
 **Parameters:**
+
 - `id` - User ID
 
 **Response:**
+
 ```json
 {
   "user": {
@@ -829,6 +917,7 @@ Get user information by ID (requires authentication).
 ```
 
 **Status Codes:**
+
 - `200` - Success
 - `401` - Not authenticated
 - `404` - User not found
@@ -837,14 +926,17 @@ Get user information by ID (requires authentication).
 ---
 
 #### DELETE /Auth/user/:id
+
 Delete a user account (requires authentication).
 
 **Headers:** Authorization required
 
 **Parameters:**
+
 - `id` - User ID
 
 **Response:**
+
 ```json
 {
   "message": "User deleted successfully"
@@ -852,6 +944,7 @@ Delete a user account (requires authentication).
 ```
 
 **Status Codes:**
+
 - `200` - User deleted successfully
 - `401` - Not authenticated
 - `404` - User not found
@@ -860,14 +953,17 @@ Delete a user account (requires authentication).
 ---
 
 #### GET /Auth/following/:id
+
 Get list of users that a specific user is following (requires authentication).
 
 **Headers:** Authorization required
 
 **Parameters:**
+
 - `id` - User ID
 
 **Response:**
+
 ```json
 {
   "message": "Following users fetched successfully",
@@ -884,6 +980,7 @@ Get list of users that a specific user is following (requires authentication).
 ```
 
 **Status Codes:**
+
 - `200` - Success
 - `401` - Not authenticated
 - `404` - User not found
@@ -892,11 +989,13 @@ Get list of users that a specific user is following (requires authentication).
 ---
 
 #### GET /Auth/sentMessages
+
 Get list of users who have sent messages to the authenticated user but are not followed (requires authentication).
 
 **Headers:** Authorization required
 
 **Response:**
+
 ```json
 {
   "senders": [
@@ -911,6 +1010,7 @@ Get list of users who have sent messages to the authenticated user but are not f
 ```
 
 **Status Codes:**
+
 - `200` - Success
 - `401` - Not authenticated
 - `500` - Server error
@@ -922,6 +1022,7 @@ Get list of users who have sent messages to the authenticated user but are not f
 All endpoints may return these error responses:
 
 ### 400 Bad Request
+
 ```json
 {
   "message": "Validation failed",
@@ -938,12 +1039,15 @@ All endpoints may return these error responses:
 ```
 
 ### 401 Unauthorized
+
 ```json
 {
   "message": "Unauthorized: User not authenticated"
 }
 ```
+
 or for auth endpoints:
+
 ```json
 {
   "success": false,
@@ -952,6 +1056,7 @@ or for auth endpoints:
 ```
 
 ### 403 Forbidden
+
 ```json
 {
   "message": "Forbidden - insufficient permissions"
@@ -959,12 +1064,15 @@ or for auth endpoints:
 ```
 
 ### 404 Not Found
+
 ```json
 {
   "message": "Resource not found"
 }
 ```
+
 or for specific resources:
+
 ```json
 {
   "message": "User not found"
@@ -972,12 +1080,15 @@ or for specific resources:
 ```
 
 ### 500 Internal Server Error
+
 ```json
 {
   "message": "Internal server error"
 }
 ```
+
 or for auth endpoints:
+
 ```json
 {
   "success": false,
@@ -992,7 +1103,7 @@ Currently, no rate limiting is implemented. Consider implementing rate limiting 
 ## CORS Configuration
 
 The API is configured to accept requests from:
+
 - `http://localhost:5173` (development frontend)
 
 Update CORS configuration for production deployment.
-

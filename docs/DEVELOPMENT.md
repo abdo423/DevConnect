@@ -3,20 +3,22 @@
 ## Development Environment Setup
 
 ### Prerequisites
+
 - Node.js v18+
 - npm or yarn
 - MongoDB (local or Atlas)
 - Git
 - VS Code (recommended) with extensions:
-    - TypeScript and JavaScript Language Features
-    - ES7+ React/Redux/React-Native snippets
-    - Tailwind CSS IntelliSense
-    - Auto Rename Tag
-    - Bracket Pair Colorizer
+  - TypeScript and JavaScript Language Features
+  - ES7+ React/Redux/React-Native snippets
+  - Tailwind CSS IntelliSense
+  - Auto Rename Tag
+  - Bracket Pair Colorizer
 
 ### Initial Setup
 
 1. **Clone and install dependencies:**
+
 ```bash
 git clone https://github.com/abdo423/DevConnect.git
 cd DevConnect
@@ -24,7 +26,7 @@ cd DevConnect
 # Install server dependencies
 cd Server && npm install
 
-# Install client dependencies  
+# Install client dependencies
 cd ../Client/devConnect
 npm install react-router-dom react-redux @reduxjs/toolkit date-fns
 npm install
@@ -34,6 +36,7 @@ npm install
 
 **Server TypeScript Config Fix:**
 Edit `Server/tsconfig.json`:
+
 ```json
 {
   "compilerOptions": {
@@ -55,6 +58,7 @@ Edit `Server/tsconfig.json`:
 3. **Environment Configuration:**
 
 Create `Server/.env`:
+
 ```env
 NODE_ENV=development
 PORT=3000
@@ -63,6 +67,7 @@ JWT_SECRET=your-super-secure-jwt-secret-key-for-development
 ```
 
 Create `Server/config/development.json`:
+
 ```json
 {
   "app": {
@@ -83,20 +88,25 @@ Create `Server/config/development.json`:
 ### Running the Application
 
 **Terminal 1 - Backend:**
+
 ```bash
 cd Server
 npm run dev
 ```
+
 Server runs on `http://localhost:3000`
 
 **Terminal 2 - Frontend:**
+
 ```bash
-cd Client/devConnect  
+cd Client/devConnect
 npm run dev
 ```
+
 Client runs on `http://localhost:5173`
 
 **Terminal 3 - Database (if running locally):**
+
 ```bash
 mongod
 ```
@@ -104,6 +114,7 @@ mongod
 ### Code Structure
 
 #### Backend Structure (`/Server/src/`)
+
 ```
 ├── controllers/          # Business logic
 │   ├── user.ts          # User management
@@ -120,7 +131,7 @@ mongod
 │   └── Message.ts      # Message model
 ├── routes/             # API routes
 │   ├── auth.ts         # Auth endpoints
-│   ├── Post.ts         # Post endpoints  
+│   ├── Post.ts         # Post endpoints
 │   ├── comment.ts      # Comment endpoints
 │   ├── Profile.ts      # Profile endpoints
 │   ├── Message.ts      # Message endpoints
@@ -132,6 +143,7 @@ mongod
 ```
 
 #### Frontend Structure (`/Client/devConnect/src/`)
+
 ```
 ├── components/         # Reusable UI components
 │   ├── LoginForm.tsx   # Login component
@@ -140,7 +152,7 @@ mongod
 │   └── MobileNavbar.tsx # Mobile navigation
 ├── features/          # Feature modules
 │   ├── Auth/          # Authentication logic
-│   ├── Posts/         # Post management  
+│   ├── Posts/         # Post management
 │   ├── Profile/       # User profiles
 │   ├── Message/       # Direct messaging
 │   └── Comments/      # Comment system
@@ -161,6 +173,7 @@ mongod
 ### Code Style
 
 **TypeScript Guidelines:**
+
 - Use strict TypeScript configuration
 - Define interfaces for all data structures
 - Use type assertions sparingly
@@ -168,6 +181,7 @@ mongod
 - Use `const assertions` for readonly data
 
 **React Guidelines:**
+
 - Use functional components with hooks
 - Implement proper error boundaries
 - Use React.memo for performance optimization
@@ -175,6 +189,7 @@ mongod
 - Keep components focused and single-purpose
 
 **Naming Conventions:**
+
 - Components: PascalCase (`UserProfile.tsx`)
 - Files: camelCase or kebab-case consistently
 - Variables: camelCase (`userName`)
@@ -184,6 +199,7 @@ mongod
 ### Git Workflow
 
 **Branch Naming:**
+
 - `feature/feature-name` - New features
 - `bugfix/bug-description` - Bug fixes
 - `hotfix/urgent-fix` - Critical fixes
@@ -192,16 +208,18 @@ mongod
 
 **Commit Messages:**
 Follow conventional commits format:
+
 ```
 type(scope): description
 
 feat(auth): add JWT token refresh functionality
-fix(posts): resolve image upload validation issue  
+fix(posts): resolve image upload validation issue
 docs(api): update endpoint documentation
 refactor(components): optimize post rendering performance
 ```
 
 **Pull Request Process:**
+
 1. Create feature branch from `main`
 2. Implement changes with tests
 3. Update documentation if needed
@@ -212,6 +230,7 @@ refactor(components): optimize post rendering performance
 ### Testing Guidelines
 
 **Backend Testing:**
+
 ```bash
 cd Server
 npm test                    # Run all tests
@@ -220,6 +239,7 @@ npm run test:coverage      # Coverage report
 ```
 
 **Test Structure:**
+
 ```typescript
 describe('POST /api/posts/create', () => {
   beforeEach(async () => {
@@ -235,7 +255,7 @@ describe('POST /api/posts/create', () => {
       .post('/api/posts/create')
       .set('Authorization', `Bearer ${validToken}`)
       .send(validPostData);
-      
+
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty('post');
   });
@@ -243,13 +263,15 @@ describe('POST /api/posts/create', () => {
 ```
 
 **Frontend Testing:**
+
 ```bash
-cd Client/devConnect  
+cd Client/devConnect
 npm test                   # Run tests
 npm run test:coverage     # Coverage report
 ```
 
 **Component Testing:**
+
 ```typescript
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
@@ -267,7 +289,7 @@ describe('LoginForm', () => {
 
   it('renders login form correctly', () => {
     renderWithRedux(<LoginForm />);
-    
+
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
@@ -280,6 +302,7 @@ describe('LoginForm', () => {
 ### Adding New Endpoints
 
 1. **Create Model (if needed):**
+
 ```typescript
 // Server/src/models/NewModel.ts
 import mongoose, { Schema, Document } from 'mongoose';
@@ -292,15 +315,19 @@ export interface NewModelDocument extends Document {
   updatedAt: Date;
 }
 
-const newModelSchema = new Schema<NewModelDocument>({
-  field1: { type: String, required: true },
-  field2: { type: Number, required: true }
-}, { timestamps: true });
+const newModelSchema = new Schema<NewModelDocument>(
+  {
+    field1: { type: String, required: true },
+    field2: { type: Number, required: true },
+  },
+  { timestamps: true },
+);
 
 export default mongoose.model<NewModelDocument>('NewModel', newModelSchema);
 ```
 
 2. **Create Controller:**
+
 ```typescript
 // Server/src/controllers/newController.ts
 import { Request, Response } from 'express';
@@ -311,10 +338,10 @@ export const createNew = async (req: Request, res: Response) => {
     const data = req.body;
     const newItem = new NewModel(data);
     await newItem.save();
-    
+
     res.status(201).json({
       message: 'Created successfully',
-      item: newItem
+      item: newItem,
     });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
@@ -323,6 +350,7 @@ export const createNew = async (req: Request, res: Response) => {
 ```
 
 3. **Create Routes:**
+
 ```typescript
 // Server/src/routes/newRoutes.ts
 import { Router } from 'express';
@@ -337,6 +365,7 @@ export default router;
 ```
 
 4. **Register Routes:**
+
 ```typescript
 // Server/src/index.ts
 import newRoutes from './routes/newRoutes';
@@ -347,6 +376,7 @@ app.use('/api/new', newRoutes);
 ### Frontend API Integration
 
 1. **Create API Service:**
+
 ```typescript
 // Client/devConnect/src/features/New/newApi.ts
 import axios from 'axios';
@@ -359,15 +389,11 @@ export const createNew = async (data: NewData) => {
     const token = Cookies.get('auth-token');
     if (!token) throw new Error('Not authenticated');
 
-    const response = await axios.post(
-      `${BASE_URL}/create`,
-      data,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true
-      }
-    );
-    
+    const response = await axios.post(`${BASE_URL}/create`, data, {
+      headers: { Authorization: `Bearer ${token}` },
+      withCredentials: true,
+    });
+
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -379,6 +405,7 @@ export const createNew = async (data: NewData) => {
 ```
 
 2. **Redux Integration:**
+
 ```typescript
 // Client/devConnect/src/features/New/newSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
@@ -393,7 +420,7 @@ export const createNewThunk = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error);
     }
-  }
+  },
 );
 
 const newSlice = createSlice({
@@ -401,7 +428,7 @@ const newSlice = createSlice({
   initialState: {
     items: [],
     loading: false,
-    error: null
+    error: null,
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -417,7 +444,7 @@ const newSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       });
-  }
+  },
 });
 
 export default newSlice.reducer;
@@ -428,12 +455,14 @@ export default newSlice.reducer;
 ### MongoDB Best Practices
 
 **Schema Design:**
+
 - Use appropriate data types
 - Implement proper indexing
 - Define validation rules
 - Use references vs. embedding strategically
 
 **Indexing Strategy:**
+
 ```typescript
 // Add indexes for frequently queried fields
 userSchema.index({ email: 1 });
@@ -443,6 +472,7 @@ messageSchema.index({ sender: 1, receiver: 1, createdAt: -1 });
 ```
 
 **Connection Management:**
+
 ```typescript
 // Server/src/config/database.ts
 import mongoose from 'mongoose';
@@ -451,14 +481,14 @@ import config from 'config';
 const connectDB = async (): Promise<void> => {
   try {
     const mongoURI = config.get<string>('db.connectionString');
-    
+
     await mongoose.connect(mongoURI, {
-      maxPoolSize: 10,        // Maintain up to 10 socket connections
-      serverSelectionTimeoutMS: 5000,  // Keep trying to send operations for 5 seconds
-      socketTimeoutMS: 45000,  // Close sockets after 45 seconds of inactivity
-      family: 4               // Use IPv4, skip trying IPv6
+      maxPoolSize: 10, // Maintain up to 10 socket connections
+      serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
+      family: 4, // Use IPv4, skip trying IPv6
     });
-    
+
     console.log('MongoDB connected successfully');
   } catch (error) {
     console.error('MongoDB connection error:', error);
@@ -474,12 +504,13 @@ export default connectDB;
 ### Frontend Performance
 
 **Bundle Optimization:**
+
 ```typescript
 // Lazy load components
 const Profile = lazy(() => import('./Pages/Profile'));
 const Messages = lazy(() => import('./Pages/Messages'));
 
-// Code splitting in routes  
+// Code splitting in routes
 <Route path="/profile" element={
   <Suspense fallback={<LoadingSpinner />}>
     <Profile />
@@ -488,11 +519,12 @@ const Messages = lazy(() => import('./Pages/Messages'));
 ```
 
 **State Management:**
+
 ```typescript
 // Memoize selectors
 export const selectPostsByUser = createSelector(
   [selectAllPosts, (state, userId) => userId],
-  (posts, userId) => posts.filter(post => post.author_id === userId)
+  (posts, userId) => posts.filter((post) => post.author_id === userId),
 );
 
 // Optimize component re-renders
@@ -504,11 +536,12 @@ const PostItem = React.memo(({ post }: { post: Post }) => {
 ### Backend Performance
 
 **Database Optimization:**
+
 ```typescript
 // Use lean queries for read-only data
 const posts = await Post.find().lean();
 
-// Populate only required fields  
+// Populate only required fields
 const posts = await Post.find()
   .populate('author_id', 'username avatar')
   .populate('comments', 'content author createdAt');
@@ -519,18 +552,18 @@ const userStats = await User.aggregate([
   {
     $lookup: {
       from: 'posts',
-      localField: '_id', 
+      localField: '_id',
       foreignField: 'author_id',
-      as: 'posts'
-    }
+      as: 'posts',
+    },
   },
   {
     $project: {
       username: 1,
       postsCount: { $size: '$posts' },
-      followersCount: { $size: '$followers' }
-    }
-  }
+      followersCount: { $size: '$followers' },
+    },
+  },
 ]);
 ```
 
@@ -540,6 +573,7 @@ const userStats = await User.aggregate([
 
 **VS Code Debug Configuration:**
 Create `.vscode/launch.json`:
+
 ```json
 {
   "version": "0.2.0",
@@ -560,6 +594,7 @@ Create `.vscode/launch.json`:
 ```
 
 **Logging Strategy:**
+
 ```typescript
 // Create logger utility
 import config from 'config';
@@ -577,26 +612,28 @@ export const logger = {
     if (config.get('NODE_ENV') === 'development') {
       console.debug(`[DEBUG] ${message}`, meta || '');
     }
-  }
+  },
 };
 ```
 
 ### Frontend Debugging
 
 **Redux DevTools:**
+
 ```typescript
 // app/store.ts - Redux DevTools integration
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     posts: postsReducer,
-    profile: profileReducer
+    profile: profileReducer,
   },
-  devTools: process.env.NODE_ENV !== 'production'
+  devTools: process.env.NODE_ENV !== 'production',
 });
 ```
 
 **React DevTools:**
+
 - Install React Developer Tools browser extension
 - Use Profiler tab for performance analysis
 - Inspect component props and state
@@ -606,16 +643,21 @@ export const store = configureStore({
 ### Backend Security
 
 **Input Validation:**
+
 ```typescript
 import { z } from 'zod';
 
 const createPostSchema = z.object({
   title: z.string().min(10).max(50),
   content: z.string().min(30),
-  image: z.string().url().optional()
+  image: z.string().url().optional(),
 });
 
-export const validateCreatePost = (req: Request, res: Response, next: NextFunction) => {
+export const validateCreatePost = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     createPostSchema.parse(req.body);
     next();
@@ -626,13 +668,14 @@ export const validateCreatePost = (req: Request, res: Response, next: NextFuncti
 ```
 
 **Rate Limiting:**
+
 ```typescript
 import rateLimit from 'express-rate-limit';
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // limit each IP to 5 requests per windowMs
-  message: 'Too many authentication attempts, please try again later.'
+  message: 'Too many authentication attempts, please try again later.',
 });
 
 app.use('/auth/login', authLimiter);
@@ -641,6 +684,7 @@ app.use('/auth/login', authLimiter);
 ### Frontend Security
 
 **XSS Prevention:**
+
 ```typescript
 // Sanitize user input
 import DOMPurify from 'dompurify';
@@ -649,6 +693,7 @@ const sanitizedContent = DOMPurify.sanitize(userInput);
 ```
 
 **Secure API Calls:**
+
 ```typescript
 // Always validate data before sending
 const createPost = async (postData: PostData) => {
@@ -662,6 +707,7 @@ const createPost = async (postData: PostData) => {
 ### TypeScript Issues
 
 **Module Resolution:**
+
 ```json
 // tsconfig.json
 {
@@ -679,6 +725,7 @@ const createPost = async (postData: PostData) => {
 ### MongoDB Connection Issues
 
 **Connection Timeout:**
+
 ```typescript
 // Increase timeout values
 mongoose.connect(uri, {
@@ -690,14 +737,17 @@ mongoose.connect(uri, {
 ### CORS Issues
 
 **Frontend calling Backend:**
+
 ```typescript
 // Server CORS configuration
-app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:3000"],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(
+  cors({
+    origin: ['http://localhost:5173', 'http://localhost:3000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }),
+);
 ```
 
 ## Contributing Guidelines
