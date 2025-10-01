@@ -1,11 +1,11 @@
 import { Request, Response, Router } from 'express';
 import {
-    createPost,
-    getPosts,
-    deletePost,
-    updatePost,
-    likePost,
-    getCommentsByPostIdArray
+  createPost,
+  getPosts,
+  deletePost,
+  updatePost,
+  likePost,
+  getCommentsByPostIdArray,
 } from '../controllers/post';
 
 const router = Router();
@@ -17,8 +17,7 @@ const router = Router();
 // });
 
 // Public route (no auth)
-router.get("/all", (req: Request, res: Response) => {
-    getPosts(req, res);
+router.get('/all', (req: Request, res: Response) => {
+  getPosts(req, res);
 });
 export default router;
-
